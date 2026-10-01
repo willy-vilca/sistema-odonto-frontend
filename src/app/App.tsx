@@ -1,3 +1,8 @@
+import { useEffect } from 'react'
+import { AuthProvider } from '../features/auth/AuthProvider'
+import { useAuth } from '../features/auth/hooks/useAuth'
+import { AccessPage } from '../features/auth/AccessPage'
+import { ConfigurationPage } from '../features/configuration/ConfigurationPage'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import { HomePage } from '../features/home/HomePage'
 import { ModulePreviewPage } from '../features/home/ModulePreviewPage'
@@ -5,14 +10,48 @@ import { useInstallation } from '../features/installation/hooks/useInstallation'
 import { AppShell } from './layout/AppShell'
 import { modules } from './navigation'
 export function App() {
+  return (
+    <AuthProvider>
+      <Application />
+    </AuthProvider>
+  )
+}
+function Application() {
+  const auth = useAuth()
   const { state, reload } = useInstallation()
+  useEffect(() => {
+    if (state.status !== 'ready') return
+    const style = document.documentElement.style
+    const brand = state.data.brandColor
+    style.setProperty('--color-brand-700', brand)
+    style.setProperty('--color-brand-600', brand)
+    style.setProperty('--color-brand-800', 'color-mix(in srgb, ' + brand + ' 80%, black)')
+    style.setProperty('--color-brand-50', 'color-mix(in srgb, ' + brand + ' 5%, white)')
+    style.setProperty('--color-brand-100', 'color-mix(in srgb, ' + brand + ' 12%, white)')
+    style.setProperty('--clinic-accent', state.data.accentColor)
+  }, [state])
+  if (!auth.session?.user) return <AccessPage />
   return (
     <BrowserRouter>
       <AppShell state={state}>
         <Routes>
           <Route path="/" element={<HomePage state={state} reload={reload} />} />
+          <Route
+            path="/configuracion/*"
+            element={
+              <ConfigurationPage
+                onChanged={() => {
+                  reload()
+                  void auth.refresh()
+                }}
+                dateFormat={state.status === 'ready' ? state.data.dateFormat : 'DMY'}
+                currency={state.status === 'ready' ? state.data.currency : 'PEN'}
+                timeZone={state.status === 'ready' ? state.data.timeZone : 'America/Lima'}
+              />
+            }
+          />
           {modules
-            .filter((module) => module.phase !== 0)
+            .filter((module) => module.phase !== 0 && module.phase !== 1)
             .map((module) => (
               <Route
                 key={module.path}

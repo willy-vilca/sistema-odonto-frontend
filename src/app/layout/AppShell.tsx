@@ -1,19 +1,31 @@
-import { Menu, X } from 'lucide-react'
+import { LogOut, Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { InstallationState } from '../../features/installation/model/installation'
 import { BrandMark } from '../../shared/ui/BrandMark'
 import { Button } from '../../shared/ui/Button'
+import { useAuth } from '../../features/auth/hooks/useAuth'
+import { errorMessage } from '../../shared/api/http'
 import { modules } from '../navigation'
 import { SideNavigation } from './SideNavigation'
 
-function Brand() {
+function Brand({ state }: { state: InstallationState }) {
   return (
     <div className="flex items-center gap-3">
-      <BrandMark className="size-10 shrink-0 text-brand-700" />
-      <div>
-        <p className="font-display text-lg font-bold tracking-tight">OdontoCare</p>
+      {state.status === 'ready' && state.data.hasLogo ? (
+        <img
+          src={'/api/v1/system/logo?v=' + state.data.logoRevision}
+          alt=""
+          className="size-10 shrink-0 object-contain"
+        />
+      ) : (
+        <BrandMark className="size-10 shrink-0 text-brand-700" />
+      )}
+      <div className="min-w-0">
+        <p className="truncate font-display text-lg font-bold tracking-tight">
+          {state.status === 'ready' ? state.data.displayName : 'OdontoCare'}
+        </p>
         <p className="text-[11px] tracking-wide text-muted">GESTIÓN ODONTOLÓGICA</p>
       </div>
     </div>
@@ -21,13 +33,19 @@ function Brand() {
 }
 
 export function AppShell({ state, children }: { state: InstallationState; children: ReactNode }) {
+  const auth = useAuth(),
+    [logoutError, setLogoutError] = useState(''),
+    [loggingOut, setLoggingOut] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
   const mainRef = useRef<HTMLElement>(null)
   const { pathname } = useLocation()
   const previousPath = useRef(pathname)
   const section =
-    modules.find((module) => module.path === pathname)?.label ?? 'Página no encontrada'
+    modules.find(
+      (module) =>
+        module.path === pathname || (module.path !== '/' && pathname.startsWith(module.path + '/')),
+    )?.label ?? 'Página no encontrada'
   const clinicName = state.status === 'ready' ? state.data.displayName : 'Mi consultorio'
   const statusLabel =
     state.status === 'ready'
@@ -58,13 +76,13 @@ export function AppShell({ state, children }: { state: InstallationState; childr
       </a>
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col border-r border-line bg-white lg:flex">
         <div className="px-7 py-8">
-          <Brand />
+          <Brand state={state} />
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto pb-6">
           <SideNavigation />
         </div>
         <div className="mx-5 mb-5 rounded-xl border border-line bg-canvas p-4">
-          <p className="text-xs font-semibold text-ink">Una base para crecer</p>
+          <p className="text-xs font-semibold text-ink">Tu equipo, conectado</p>
           <p className="mt-1 text-xs leading-5 text-muted">
             Primera entrega en desarrollo.
             <br />
@@ -97,7 +115,7 @@ export function AppShell({ state, children }: { state: InstallationState; childr
         className="fixed inset-y-0 left-0 m-0 h-dvh max-h-dvh w-[min(320px,calc(100vw-32px))] max-w-none border-0 bg-white p-0 shadow-xl"
       >
         <div className="flex items-center justify-between gap-2 px-5 py-6">
-          <Brand />
+          <Brand state={state} />
           <Button
             variant="quiet"
             aria-label="Cerrar menú"
@@ -130,7 +148,7 @@ export function AppShell({ state, children }: { state: InstallationState; childr
           <div className="flex shrink-0 items-center gap-3 sm:gap-5">
             <div role="status" className="flex items-center gap-2 text-xs font-medium text-muted">
               <span
-                className={`size-2 rounded-full ${state.status === 'ready' ? 'bg-brand-600' : state.status === 'error' ? 'bg-amber-600' : 'animate-pulse bg-slate-400'}`}
+                className={`size-2 rounded-full ${state.status === 'ready' ? 'bg-emerald-600' : state.status === 'error' ? 'bg-amber-600' : 'animate-pulse bg-slate-400'}`}
               />
               <span className="hidden sm:inline">{statusLabel}</span>
               <span className="sr-only sm:hidden">{statusLabel}</span>
@@ -138,10 +156,33 @@ export function AppShell({ state, children }: { state: InstallationState; childr
             <span className="hidden h-7 w-px bg-line sm:block" />
             <span
               className="flex size-10 items-center justify-center rounded-full border border-brand-100 bg-brand-50 text-xs font-bold text-brand-700"
-              aria-label="Instalación local"
+              aria-label={auth.session?.user?.displayName}
             >
-              MC
+              {auth.session?.user?.displayName
+                .split(' ')
+                .slice(0, 2)
+                .map((n) => n[0])
+                .join('')}
             </span>
+            <Button
+              variant="quiet"
+              aria-label="Cerrar sesión"
+              disabled={loggingOut}
+              className="px-3"
+              onClick={async () => {
+                setLoggingOut(true)
+                try {
+                  await auth.logout()
+                } catch (e) {
+                  setLogoutError(errorMessage(e))
+                } finally {
+                  setLoggingOut(false)
+                }
+              }}
+            >
+              <LogOut size={19} />
+              <span className="hidden xl:inline">Salir</span>
+            </Button>
           </div>
         </header>
         <main
@@ -150,11 +191,16 @@ export function AppShell({ state, children }: { state: InstallationState; childr
           tabIndex={-1}
           className="mx-auto max-w-7xl px-5 py-7 focus-visible:outline-none sm:px-8 sm:py-9 xl:px-10"
         >
+          {logoutError && (
+            <p role="alert" className="error-box mb-4">
+              {logoutError}
+            </p>
+          )}
           {children}
         </main>
         <footer className="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-5 pb-7 text-xs text-muted sm:flex-row sm:px-8 xl:px-10">
           <span>OdontoCare · Cuidado y gestión en un solo lugar</span>
-          <span>Versión inicial 0.1 · Fase 0</span>
+          <span>Versión 0.2 · Fase 1</span>
         </footer>
       </div>
     </>

@@ -45,12 +45,12 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
           </h1>
         </div>
         <span className="rounded-full border border-line bg-white px-3.5 py-2 text-xs font-medium text-muted">
-          Base inicial · Fase 0
+          Configuración disponible · Fase 1
         </span>
       </div>
       <section
         aria-labelledby="welcome-title"
-        className="relative overflow-hidden rounded-[20px] border border-[#dce6da] bg-[#edf2e9] p-6 sm:p-9 lg:p-10"
+        className="relative overflow-hidden rounded-[20px] border border-[#dce6da] bg-[var(--clinic-accent,#edf2e9)] p-6 sm:p-9 lg:p-10"
       >
         <div className="relative z-1 max-w-xl">
           <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.08em] text-brand-700 uppercase">
@@ -72,10 +72,12 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
             to="/configuracion"
             className="mt-6 inline-flex min-h-11 items-center gap-3 rounded-xl bg-brand-700 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-800"
           >
-            Conocer la configuración
+            Configurar mi consultorio
             <ArrowRight size={17} aria-hidden="true" />
           </Link>
-          <p className="mt-3 text-xs text-[#53664f]">Personalización disponible en la fase 1.</p>
+          <p className="mt-3 text-xs text-[#53664f]">
+            Identidad, equipo y reglas de atención en un solo lugar.
+          </p>
         </div>
         <div
           aria-hidden="true"
@@ -125,13 +127,13 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
         >
           <div className="flex items-center gap-2 text-xs font-medium text-muted">
             <Settings2 size={16} aria-hidden="true" />
-            EL SIGUIENTE PASO
+            TU CONSULTORIO
           </div>
           <h2 id="next-title" className="mt-3 text-lg font-semibold">
             Darle identidad a tu consultorio
           </h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            La próxima fase permitirá definir cómo trabaja tu equipo.
+            Configura cómo trabaja tu equipo antes de organizar las primeras citas.
           </p>
           <ul className="mt-4 space-y-3 text-sm">
             {[

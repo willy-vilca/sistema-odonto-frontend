@@ -54,3 +54,24 @@
     scroll-behavior: auto !important;
   }
 }
+
+@layer components {
+  .field-label {
+    @apply flex flex-col gap-2 text-sm font-medium text-ink;
+  }
+  .field {
+    @apply min-h-11 w-full min-w-0 rounded-xl border border-[#cbd5ce] bg-white px-3 py-2 text-sm font-normal text-ink disabled:bg-canvas disabled:text-muted;
+  }
+  .field-help {
+    @apply text-xs font-normal leading-5 text-muted;
+  }
+  .error-box {
+    @apply rounded-xl border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-800;
+  }
+  .status-active {
+    @apply inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800;
+  }
+  .status-inactive {
+    @apply inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700;
+  }
+}
