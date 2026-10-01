@@ -4,7 +4,7 @@ $env:PGPASSWORD = 'admin'
 $actualDatabase = & $psqlExecutable -h localhost -U postgres -d sistema_odontologo_test -Atc 'select current_database()'
 if ($LASTEXITCODE -ne 0 -or $actualDatabase.Trim() -ne 'sistema_odontologo_test') { throw 'La preparación solo está autorizada en sistema_odontologo_test.' }
 $sql = @'
-TRUNCATE document_consent,document_content,patient_document,document_category,encounter_revision,clinical_encounter,clinical_state,clinical_template,appointment_history,appointment,patient_contact,patient,installation_logo,audit_event,user_role,dentist_service,weekly_period,schedule_exception,dentist,dental_service,service_category,user_account;
+TRUNCATE charge_entry,treatment_session,treatment_operation,treatment_item,treatment_plan,document_consent,document_content,patient_document,document_category,encounter_revision,clinical_encounter,clinical_state,clinical_template,appointment_history,appointment,patient_contact,patient,installation_logo,audit_event,user_role,dentist_service,weekly_period,schedule_exception,dentist,dental_service,service_category,user_account;
 UPDATE installation_profile SET display_name='Mi consultorio',time_zone='America/Lima',currency='PEN',patient_next_number=1,receipt_next_number=1,budget_next_number=1,version=0,logo_revision=0,brand_color='#215e4d',accent_color='#edf2e9',minimum_lead_minutes=0,appointment_gap_minutes=0;
 UPDATE document_policy SET max_file_mi_b=20,version=0;
 UPDATE role_definition SET name=code,version=0;
@@ -15,6 +15,14 @@ INSERT INTO role_permission(role_code,permission) SELECT r.code,p.permission FRO
 INSERT INTO role_permission(role_code,permission) VALUES ('RECEPTION','PATIENTS_WRITE'),('RECEPTION','APPOINTMENTS_WRITE');
 INSERT INTO role_permission(role_code,permission) SELECT role_code,permission FROM unnest(ARRAY['ADMIN','DENTIST']) role_code CROSS JOIN unnest(ARRAY['CLINICAL_READ','CLINICAL_WRITE','DOCUMENTS_READ','DOCUMENTS_WRITE','CLINICAL_CONFIG_READ']) permission ON CONFLICT DO NOTHING;
 INSERT INTO role_permission(role_code,permission)VALUES('ADMIN','CLINICAL_CONFIG_WRITE') ON CONFLICT DO NOTHING;
+INSERT INTO role_permission(role_code,permission)
+ SELECT role_code,permission FROM unnest(ARRAY['ADMIN','DENTIST','RECEPTION','CASHIER']) role_code CROSS JOIN unnest(ARRAY['PLANS_READ']) permission ON CONFLICT DO NOTHING;
+INSERT INTO role_permission(role_code,permission)
+ SELECT role_code,permission FROM unnest(ARRAY['ADMIN','DENTIST','RECEPTION']) role_code CROSS JOIN unnest(ARRAY['PLANS_WRITE']) permission ON CONFLICT DO NOTHING;
+INSERT INTO role_permission(role_code,permission)
+ SELECT role_code,permission FROM unnest(ARRAY['ADMIN','DENTIST','CASHIER']) role_code CROSS JOIN unnest(ARRAY['FINANCES_READ']) permission ON CONFLICT DO NOTHING;
+INSERT INTO role_permission(role_code,permission) VALUES('ADMIN','FINANCES_ADJUST') ON CONFLICT DO NOTHING;
+
 '@
 & $psqlExecutable -h localhost -U postgres -d sistema_odontologo_test -v ON_ERROR_STOP=1 -c $sql
 if ($LASTEXITCODE -ne 0) { throw 'Falló la preparación de la base de pruebas.' }

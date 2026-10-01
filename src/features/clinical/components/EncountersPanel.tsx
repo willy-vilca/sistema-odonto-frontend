@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
@@ -12,11 +12,13 @@ import { getEncounter, finalizeEncounter } from '../services/clinicalService'
 import type { Encounter, EncounterRevision } from '../model/clinical'
 import { EncounterEditor } from './EncounterEditor'
 export function EncountersPanel({
+  initialEncounterId,
   patientId,
   dentist,
   dateFormat,
   timeZone,
 }: {
+  initialEncounterId?: string
   patientId: string
   dentist?: PickedEntity
   dateFormat: string
@@ -33,6 +35,20 @@ export function EncountersPanel({
     [editor, setEditor] = useState<'new' | 'edit' | 'correction'>(),
     [error, setError] = useState(''),
     form = useSaveForm()
+  useEffect(() => {
+    if (!initialEncounterId) return
+    let active = true
+    void getEncounter(initialEncounterId)
+      .then((record) => {
+        if (active && record.patientId === patientId) setSelected(record)
+      })
+      .catch((e) => {
+        if (active) setError(errorMessage(e))
+      })
+    return () => {
+      active = false
+    }
+  }, [initialEncounterId, patientId])
   function saved() {
     setEditor(undefined)
     setSelected(undefined)

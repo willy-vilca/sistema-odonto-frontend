@@ -25,6 +25,7 @@ export function DocumentUpload({
     policy = useQueryData<DocumentPolicy>('/api/v1/documents/policy'),
     [file, setFile] = useState<File>(),
     [category, setCategory] = useState<PickedEntity[]>([]),
+    [plan, setPlan] = useState<PickedEntity[]>([]),
     [encounter, setEncounter] = useState<PickedEntity[]>([]),
     [date, setDate] = useState(clinicToday(timeZone)),
     [description, setDescription] = useState(''),
@@ -51,6 +52,7 @@ export function DocumentUpload({
                 patientId,
                 categoryId: category[0].id,
                 encounterId: encounter[0]?.id ?? null,
+                planId: plan[0]?.id ?? null,
                 tooth: tooth ? Number(tooth) : null,
                 recordedOn: date,
                 description,
@@ -102,6 +104,14 @@ export function DocumentUpload({
           value={tooth}
           onChange={(e) => setTooth(e.target.value)}
         />
+        {auth.can('PLANS_READ') && (
+          <EntityPicker
+            label="Tratamiento (opcional)"
+            source={{ endpoint: '/api/v1/plans', labelKey: 'title', filters: { patientId } }}
+            selected={plan}
+            onChange={setPlan}
+          />
+        )}
         {auth.can('CLINICAL_READ') && (
           <EntityPicker
             label="Atención vinculada (opcional)"

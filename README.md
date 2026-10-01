@@ -1,6 +1,6 @@
 # OdontoCare — frontend
 
-React + Vite + TypeScript + TailwindCSS. Fases 0 a 3: configuración, pacientes, agenda manual, historia clínica, odontograma y documentación. Adaptación para computadora, tablet y celular.
+React + Vite + TypeScript + TailwindCSS. Fases 0 a 4: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes y deuda. Adaptación para computadora, tablet y celular.
 
 ## Iniciar
 
@@ -71,3 +71,13 @@ Antecedentes: registrar información referida, guardar un nuevo estado y consult
 Archivos: adjuntar en categoría y fecha, con descripción y pieza/atención opcionales. Elegir dos fotografías para compararlas. Ver archivo abre el original de imagen o una vista paginada del PDF renderizada por el servidor; Descargar original recupera el archivo almacenado. Los PDF se visualizan como páginas de imagen para funcionar sin un plugin de PDF en el dispositivo.
 
 Consentimientos: adjuntar primero su copia, luego registrar nombre, responsable, relación y fecha; seleccionar exclusivamente una copia del mismo paciente. Configuración permite editar plantillas, categorías y límite de archivos. No hay firma electrónica.
+
+## Presupuestos, planes y deuda
+
+Presupuestos y planes permite seleccionar paciente, crear conceptos con precio, unidades, sesiones y pieza, presentar la oferta y registrar aceptación explícita. Editar una propuesta la devuelve a borrador. Los adicionales y ajustes conservan el acuerdo original; cancelar puede mantener deuda o liberar lo pendiente con permiso de ajustes. Finalizar requiere completar sesiones.
+
+En la atención clínica, seleccionar un concepto del plan vincula el avance sin otro cargo. Servicio y pieza se conservan desde ese concepto; la cantidad indica sesiones realizadas. Un procedimiento individual utiliza precio acordado o de catálogo y genera un cargo al finalizar. Las correcciones clínicas conservan los movimientos financieros; una diferencia económica necesita un ajuste.
+
+Finanzas muestra deuda por paciente y moneda, cargos, ajustes, motivos y responsables. Ver origen consulta cargo y movimientos relacionados; los enlaces clínicos recuperan la atención específica. La ficha del paciente enlaza planes y deuda según permisos. Los documentos pueden asociarse con el tratamiento del mismo paciente.
+
+Esta fase no registra pagos ni dinero recibido. Las atenciones finalizadas antes de fase 4 conservan su historia sin cargos retroactivos. Consultar las guías y el cierre de fase 4 en ../docs. Capturas sintéticas de computadora, tablet y celular: docs/verification/phase4.

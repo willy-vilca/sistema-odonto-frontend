@@ -47,6 +47,7 @@ export function ClinicalPage({ dateFormat, timeZone }: { dateFormat: string; tim
       {selected[0] || linked ? (
         <ClinicalWorkspace
           key={selected[0]?.id ?? linked}
+          encounterId={params.get('encounterId') ?? undefined}
           patientId={selected[0]?.id ?? linked!}
           onPatientChange={(items) => {
             setSelected(items)
@@ -74,6 +75,7 @@ export function ClinicalPage({ dateFormat, timeZone }: { dateFormat: string; tim
   )
 }
 function ClinicalWorkspace({
+  encounterId,
   onPatientChange,
   patientId,
   tab,
@@ -81,6 +83,7 @@ function ClinicalWorkspace({
   dateFormat,
   timeZone,
 }: {
+  encounterId?: string
   onPatientChange: (items: PickedEntity[]) => void
   patientId: string
   tab: string
@@ -174,6 +177,7 @@ function ClinicalWorkspace({
       </nav>
       {current === 'atenciones' && (
         <EncountersPanel
+          initialEncounterId={encounterId}
           patientId={patientId}
           dentist={dentists[0]}
           dateFormat={dateFormat}

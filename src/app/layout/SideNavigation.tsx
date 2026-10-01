@@ -20,7 +20,9 @@ export function SideNavigation({ onNavigate }: { onNavigate?: () => void }) {
       (module.phase === 2 &&
         auth.can(module.path === '/agenda' ? 'APPOINTMENTS_READ' : 'PATIENTS_READ')) ||
       (module.phase === 3 && ['CLINICAL_READ', 'DOCUMENTS_READ'].some(auth.can)) ||
-      (module.phase > 3 && auth.session?.user?.roles.includes('ADMIN')),
+      (module.phase === 4 &&
+        auth.can(module.path === '/finanzas' ? 'FINANCES_READ' : 'PLANS_READ')) ||
+      (module.phase > 4 && auth.session?.user?.roles.includes('ADMIN')),
   )
   return (
     <nav aria-label="Navegación principal" className="space-y-6 px-4">

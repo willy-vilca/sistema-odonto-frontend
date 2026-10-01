@@ -89,6 +89,24 @@ export function PatientDetail({
             Abrir expediente clínico
           </Link>
         )}
+        {auth.can('PLANS_READ') && (
+          <Link
+            className="inline-flex min-h-11 items-center px-3 text-sm font-semibold text-brand-700"
+            onClick={onClose}
+            to={'/tratamientos?patientId=' + patient.id}
+          >
+            Ver presupuestos y planes
+          </Link>
+        )}
+        {auth.can('FINANCES_READ') && (
+          <Link
+            className="inline-flex min-h-11 items-center px-3 text-sm font-semibold text-brand-700"
+            onClick={onClose}
+            to={'/finanzas?patientId=' + patient.id}
+          >
+            Ver deuda del paciente
+          </Link>
+        )}
         {auth.can('APPOINTMENTS_READ') && (
           <section className="space-y-3">
             <h2 className="font-semibold">Citas del paciente</h2>

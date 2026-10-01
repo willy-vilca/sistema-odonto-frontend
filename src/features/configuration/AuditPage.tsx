@@ -88,6 +88,8 @@ export function AuditPage({ timeZone, dateFormat }: { timeZone: string; dateForm
                   'EXCEPTION',
                   'PATIENT',
                   'APPOINTMENT',
+                  'PLAN',
+                  'CHARGE',
                   'ENCOUNTER',
                   'CLINICAL_STATE',
                   'CLINICAL_TEMPLATE',

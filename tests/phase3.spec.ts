@@ -314,7 +314,9 @@ for (const width of [1440, 768, 390]) {
       .selectOption('CARIES')
     await page.getByLabel('Motivo del nuevo estado').fill('Revisión en ' + width)
     await page.getByRole('button', { name: 'Guardar odontograma' }).click()
-    await expect(page.getByText('Revisión en ' + width, { exact: true }).first()).toBeVisible()
+    await expect(
+      page.getByText('Revisión en ' + width, { exact: true }).filter({ visible: true }),
+    ).toBeVisible()
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBeTruthy()

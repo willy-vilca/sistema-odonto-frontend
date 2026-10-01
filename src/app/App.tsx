@@ -1,3 +1,5 @@
+import { PlansPage } from '../features/treatments/PlansPage'
+import { DebtsPage } from '../features/finance/DebtsPage'
 import { ClinicalPage } from '../features/clinical/ClinicalPage'
 import { useEffect } from 'react'
 import { AuthProvider } from '../features/auth/AuthProvider'
@@ -84,13 +86,34 @@ function Application() {
               )
             }
           />
+          <Route
+            path="/tratamientos"
+            element={
+              state.status === 'ready' ? (
+                <PlansPage />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
+          <Route
+            path="/finanzas"
+            element={
+              state.status === 'ready' ? (
+                <DebtsPage timeZone={state.data.timeZone} />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
           {modules
             .filter(
               (module) =>
                 module.phase !== 0 &&
                 module.phase !== 1 &&
                 module.phase !== 2 &&
-                module.phase !== 3,
+                module.phase !== 3 &&
+                module.phase !== 4,
             )
             .map((module) => (
               <Route

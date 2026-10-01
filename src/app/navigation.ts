@@ -51,11 +51,21 @@ export const modules = [
       'Las atenciones, el odontograma y los documentos se integrarán a la ficha del paciente, conservando el historial de cambios.',
   },
   {
+    path: '/tratamientos',
+    label: 'Presupuestos y planes',
+    icon: ClipboardPlus,
+    group: 'Gestión',
+    phase: 4,
+    description: 'Acuerdos y avance de tratamientos.',
+    empty: 'Acuerdos claros',
+    detail: 'Presupuestos, planes y sesiones con importes conservados.',
+  },
+  {
     path: '/finanzas',
     label: 'Finanzas',
     icon: WalletCards,
     group: 'Gestión',
-    phase: 5,
+    phase: 4,
     description: 'Cobros, cuotas y saldos con claridad.',
     empty: 'Cuentas claras, mejor seguimiento',
     detail:

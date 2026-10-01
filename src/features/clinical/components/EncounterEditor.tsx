@@ -130,6 +130,9 @@ export function EncounterEditor({
           />
         )}
         <ProcedureEditor
+          patientId={patientId}
+          dentistId={professionalId ?? ''}
+          correcting={correcting}
           value={content.procedures}
           onChange={(procedures) => setContent({ ...content, procedures })}
         />

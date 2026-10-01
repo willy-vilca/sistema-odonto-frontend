@@ -30,6 +30,8 @@ export interface ClinicalState {
   createdAt: string
 }
 export interface Procedure {
+  planItemId?: string | null
+  unitPrice?: string | null
   serviceId: string | null
   description: string
   quantity: number
