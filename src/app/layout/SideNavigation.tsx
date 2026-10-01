@@ -16,7 +16,9 @@ export function SideNavigation({ onNavigate }: { onNavigate?: () => void }) {
           'SCHEDULES_READ',
           'AUDIT_READ',
         ].some(auth.can)) ||
-      (module.phase > 1 && auth.session?.user?.roles.includes('ADMIN')),
+      (module.phase === 2 &&
+        auth.can(module.path === '/agenda' ? 'APPOINTMENTS_READ' : 'PATIENTS_READ')) ||
+      (module.phase > 2 && auth.session?.user?.roles.includes('ADMIN')),
   )
   return (
     <nav aria-label="Navegación principal" className="space-y-6 px-4">

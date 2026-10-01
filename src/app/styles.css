@@ -11,7 +11,7 @@
   --color-brand-700: #215e4d;
   --color-brand-800: #1d4c3f;
   --color-ink: #263b35;
-  --color-muted: #65726d;
+  --color-muted: #55625c;
   --color-line: #e4e9e5;
   --color-canvas: #f8faf8;
 }
@@ -56,6 +56,9 @@
 }
 
 @layer components {
+  .section-eyebrow {
+    @apply text-xs font-medium tracking-[0.1em] text-muted uppercase;
+  }
   .field-label {
     @apply flex flex-col gap-2 text-sm font-medium text-ink;
   }

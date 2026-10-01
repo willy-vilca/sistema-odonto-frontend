@@ -41,10 +41,7 @@ for (const viewport of viewports) {
     } else {
       await page.getByRole('navigation').getByRole('link', { name: 'Agenda', exact: true }).click()
     }
-    await expect(page.getByRole('heading', { name: 'Tu agenda comienza aquí' })).toBeVisible()
-    await expect(
-      page.getByText('Este módulo aún no está implementado.', { exact: false }),
-    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Agenda de citas' })).toBeVisible()
     await expect(page.getByRole('main')).toBeFocused()
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),

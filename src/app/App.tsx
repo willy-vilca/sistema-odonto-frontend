@@ -2,10 +2,13 @@ import { useEffect } from 'react'
 import { AuthProvider } from '../features/auth/AuthProvider'
 import { useAuth } from '../features/auth/hooks/useAuth'
 import { AccessPage } from '../features/auth/AccessPage'
+import { AgendaPage } from '../features/appointments/AgendaPage'
+import { PatientsPage } from '../features/patients/PatientsPage'
 import { ConfigurationPage } from '../features/configuration/ConfigurationPage'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
 import { HomePage } from '../features/home/HomePage'
 import { ModulePreviewPage } from '../features/home/ModulePreviewPage'
+import { ConnectionCard } from '../features/installation/components/ConnectionCard'
 import { useInstallation } from '../features/installation/hooks/useInstallation'
 import { AppShell } from './layout/AppShell'
 import { modules } from './navigation'
@@ -50,8 +53,28 @@ function Application() {
               />
             }
           />
+          <Route
+            path="/agenda"
+            element={
+              state.status === 'ready' ? (
+                <AgendaPage dateFormat={state.data.dateFormat} timeZone={state.data.timeZone} />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
+          <Route
+            path="/pacientes"
+            element={
+              state.status === 'ready' ? (
+                <PatientsPage dateFormat={state.data.dateFormat} timeZone={state.data.timeZone} />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
           {modules
-            .filter((module) => module.phase !== 0 && module.phase !== 1)
+            .filter((module) => module.phase !== 0 && module.phase !== 1 && module.phase !== 2)
             .map((module) => (
               <Route
                 key={module.path}

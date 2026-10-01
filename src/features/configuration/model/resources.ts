@@ -67,6 +67,10 @@ export const permissionLabels: Record<string, string> = {
   SCHEDULES_READ: 'Consultar horarios y bloqueos',
   SCHEDULES_WRITE: 'Administrar horarios y bloqueos',
   AUDIT_READ: 'Consultar auditoría',
+  PATIENTS_READ: 'Consultar pacientes',
+  PATIENTS_WRITE: 'Administrar pacientes',
+  APPOINTMENTS_READ: 'Consultar agenda',
+  APPOINTMENTS_WRITE: 'Administrar citas',
 }
 export const dentistSource: PickerSource = {
   endpoint: '/api/v1/dentists',

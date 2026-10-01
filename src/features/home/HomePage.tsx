@@ -45,7 +45,7 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
           </h1>
         </div>
         <span className="rounded-full border border-line bg-white px-3.5 py-2 text-xs font-medium text-muted">
-          Configuración disponible · Fase 1
+          Pacientes y agenda disponibles
         </span>
       </div>
       <section
@@ -113,7 +113,7 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
               <h3 className="mt-4 text-[15px] font-semibold">{title}</h3>
               <p className="mt-2 flex-1 text-sm leading-6 text-muted">{text}</p>
               <p className="mt-4 text-xs font-medium text-brand-700">
-                Previsto para la fase {phase}
+                {phase === 2 ? 'Abrir módulo' : 'Previsto para la fase ' + phase}
               </p>
             </Link>
           ))}
@@ -150,8 +150,8 @@ export function HomePage({ state, reload }: { state: InstallationState; reload: 
             ))}
           </ul>
           <p className="mt-5 border-t border-line pt-4 text-xs leading-5 text-muted">
-            Esta vista presenta la base del sistema. Aún no registra pacientes, citas ni movimientos
-            financieros.
+            Pacientes y agenda manual ya están disponibles. Puedes registrar fichas, consultar
+            disponibilidad y organizar citas desde los módulos del consultorio.
           </p>
         </section>
       </div>
