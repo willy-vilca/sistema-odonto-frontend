@@ -54,6 +54,12 @@ export const roleOptions = [
   { value: 'CASHIER', label: 'Caja' },
 ]
 export const permissionLabels: Record<string, string> = {
+  CLINICAL_READ: 'Consultar expediente clínico',
+  CLINICAL_WRITE: 'Registrar atenciones y odontograma',
+  DOCUMENTS_READ: 'Consultar y descargar archivos clínicos',
+  DOCUMENTS_WRITE: 'Adjuntar archivos y consentimientos',
+  CLINICAL_CONFIG_READ: 'Consultar plantillas y configuración clínica',
+  CLINICAL_CONFIG_WRITE: 'Editar plantillas y configuración clínica',
   SETTINGS_READ: 'Consultar el consultorio',
   SETTINGS_WRITE: 'Editar el consultorio',
   USERS_READ: 'Consultar usuarios',

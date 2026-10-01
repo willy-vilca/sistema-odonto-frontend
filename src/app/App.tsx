@@ -1,3 +1,4 @@
+import { ClinicalPage } from '../features/clinical/ClinicalPage'
 import { useEffect } from 'react'
 import { AuthProvider } from '../features/auth/AuthProvider'
 import { useAuth } from '../features/auth/hooks/useAuth'
@@ -73,8 +74,24 @@ function Application() {
               )
             }
           />
+          <Route
+            path="/clinica"
+            element={
+              state.status === 'ready' ? (
+                <ClinicalPage dateFormat={state.data.dateFormat} timeZone={state.data.timeZone} />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
           {modules
-            .filter((module) => module.phase !== 0 && module.phase !== 1 && module.phase !== 2)
+            .filter(
+              (module) =>
+                module.phase !== 0 &&
+                module.phase !== 1 &&
+                module.phase !== 2 &&
+                module.phase !== 3,
+            )
             .map((module) => (
               <Route
                 key={module.path}

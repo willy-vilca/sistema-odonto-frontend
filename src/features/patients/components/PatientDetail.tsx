@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { StatusBadge } from '../../../shared/ui/PagedTable'
@@ -78,6 +79,15 @@ export function PatientDetail({
           <Button variant="secondary" onClick={onEdit}>
             Editar ficha
           </Button>
+        )}
+        {(auth.can('CLINICAL_READ') || auth.can('DOCUMENTS_READ')) && (
+          <Link
+            onClick={onClose}
+            to={'/clinica?patientId=' + patient.id}
+            className="inline-flex min-h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white"
+          >
+            Abrir expediente clínico
+          </Link>
         )}
         {auth.can('APPOINTMENTS_READ') && (
           <section className="space-y-3">

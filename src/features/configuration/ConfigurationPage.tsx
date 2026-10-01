@@ -1,3 +1,5 @@
+import { clinicalTemplatesResource, documentCategoriesResource } from './resources/clinical'
+import { DocumentPolicyPage } from './DocumentPolicyPage'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
 import { SettingsPage } from './SettingsPage'
@@ -67,6 +69,24 @@ export function ConfigurationPage({
         label: 'Bloqueos',
         permission: 'SCHEDULES_READ',
         element: <ResourcePage resource={exceptionsResource(dateFormat)} />,
+      },
+      {
+        path: 'plantillas',
+        label: 'Plantillas clínicas',
+        permission: 'CLINICAL_CONFIG_READ',
+        element: <ResourcePage resource={clinicalTemplatesResource} />,
+      },
+      {
+        path: 'categorias-documentales',
+        label: 'Categorías documentales',
+        permission: 'CLINICAL_CONFIG_READ',
+        element: <ResourcePage resource={documentCategoriesResource} />,
+      },
+      {
+        path: 'almacenamiento',
+        label: 'Archivos',
+        permission: 'CLINICAL_CONFIG_READ',
+        element: <DocumentPolicyPage />,
       },
       {
         path: 'auditoria',

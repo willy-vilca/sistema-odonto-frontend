@@ -88,6 +88,13 @@ export function AuditPage({ timeZone, dateFormat }: { timeZone: string; dateForm
                   'EXCEPTION',
                   'PATIENT',
                   'APPOINTMENT',
+                  'ENCOUNTER',
+                  'CLINICAL_STATE',
+                  'CLINICAL_TEMPLATE',
+                  'DOCUMENT',
+                  'CONSENT',
+                  'DOCUMENT_CATEGORY',
+                  'DOCUMENT_POLICY',
                 ].map((v) => (
                   <option key={v}>{v}</option>
                 ))}

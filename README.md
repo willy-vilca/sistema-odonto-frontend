@@ -1,6 +1,6 @@
 # OdontoCare — frontend
 
-React + Vite + TypeScript + TailwindCSS. Fases 0 a 2: configuración, pacientes y agenda manual con formularios, disponibilidad e historial. Adaptación para computadora, tablet y celular.
+React + Vite + TypeScript + TailwindCSS. Fases 0 a 3: configuración, pacientes, agenda manual, historia clínica, odontograma y documentación. Adaptación para computadora, tablet y celular.
 
 ## Iniciar
 
@@ -48,7 +48,7 @@ npm.cmd run test:e2e
 
 Preparar la base antes de la batería completa. El script verifica su nombre exacto. Backend en 8081; Playwright inicia Vite en 5174 y usa Chrome instalado. Se crea el primer administrador desde la interfaz; cada prueba usa una sesión independiente. Credenciales aleatorias en .runtime, sin versionar. No preparar la base mientras otra verificación la utiliza.
 
-Se comprueban flujos completos, teclado, Axe, permisos, errores y solicitudes paginadas. Tamaños: 1440×900, 1280×800, 1024×768, 768×1024, 390×844 y 360×800. Trazas fallidas en test-results; capturas revisadas en docs/verification/phase1 y phase2.
+Se comprueban flujos completos, teclado, Axe, permisos, errores y solicitudes paginadas. Tamaños: 1440×900, 1280×800, 1024×768, 768×1024, 390×844 y 360×800. Trazas fallidas en test-results; capturas revisadas en docs/verification/phase1, phase2 y phase3.
 
 Guías vigentes: alcance y plan en ../docs, más ../AGENTS.md. Instantáneas versionadas y cierres de fase: backend/docs/project.
 
@@ -59,3 +59,15 @@ En Pacientes, crear una ficha por persona. Registrar teléfonos internacionales 
 Agenda permite Día, Semana, Mes y Lista; en celular se abre Lista. Filtrar por odontólogo; la lista incluye fechas, estado, búsqueda y paginación remotas. Nueva cita solicita paciente, profesional y servicio asignado, o un motivo administrativo con duración. El inicio y fin utilizan la zona del consultorio, incluso si el navegador tiene otra zona. Consultar Detalle para confirmar, cambiar estado, reprogramar y cancelar. Los cambios registran motivo e historial; una reprogramación rechazada conserva la reserva original.
 
 En reprogramación, la duración anterior se conserva salvo que se marque Usar la duración actual del catálogo. La cancelación libera el intervalo. Los estados de asistencia se habilitan cuando ha llegado la hora de la cita. WhatsApp y la reserva mediante IA se incorporarán en la fase 6.
+
+## Uso del expediente clínico
+
+Abrir Historia clínica o el enlace Abrir expediente clínico de la ficha. Seleccionar paciente y odontólogo responsable. Cada sección conserva permisos y sus listados se consultan con búsqueda, filtros y paginación remotos.
+
+Atenciones: guardar borrador, consultar, finalizar y registrar una corrección con motivo. Consultar versión 1 recupera el original; las versiones siguientes muestran la corrección, responsable y fecha. Evolución y diagnóstico se requieren al finalizar. No se genera deuda en fase 3.
+
+Antecedentes: registrar información referida, guardar un nuevo estado y consultar los anteriores. Odontograma: elegir dentición y pieza, registrar hallazgos de superficies o pieza completa, indicar fecha y motivo y guardar. Las superficies vacías permanecen Sin registrar. Las plantillas configuradas añaden texto revisable por el profesional.
+
+Archivos: adjuntar en categoría y fecha, con descripción y pieza/atención opcionales. Elegir dos fotografías para compararlas. Ver archivo abre el original de imagen o una vista paginada del PDF renderizada por el servidor; Descargar original recupera el archivo almacenado. Los PDF se visualizan como páginas de imagen para funcionar sin un plugin de PDF en el dispositivo.
+
+Consentimientos: adjuntar primero su copia, luego registrar nombre, responsable, relación y fecha; seleccionar exclusivamente una copia del mismo paciente. Configuración permite editar plantillas, categorías y límite de archivos. No hay firma electrónica.

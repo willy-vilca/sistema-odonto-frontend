@@ -19,9 +19,9 @@ let csrf: { headerName: string; token: string } | undefined
 export function resetCsrf() {
   csrf = undefined
 }
-export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function fetchResponse(path: string, options: RequestInit = {}): Promise<Response> {
   const headers = new Headers(options.headers)
-  headers.set('Accept', 'application/json')
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json')
   if (options.method && !['GET', 'HEAD'].includes(options.method)) {
     csrf ??= await request('/api/v1/auth/csrf')
     headers.set(csrf!.headerName, csrf!.token)
@@ -56,6 +56,10 @@ export async function request<T>(path: string, options: RequestInit = {}): Promi
       problem.fields ?? Object.fromEntries(problem.errors?.map((e) => [e.field, e.message]) ?? []),
     )
   }
+  return response
+}
+export async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const response = await fetchResponse(path, options)
   const content = await response.text()
   return content ? (JSON.parse(content) as T) : (undefined as T)
 }
@@ -71,4 +75,12 @@ export function saveJson<T>(path: string, body: unknown, method = 'POST') {
 }
 export function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No pudimos completar la operación.'
+}
+
+export async function requestBlob(path: string, signal: AbortSignal) {
+  const response = await fetchResponse(path, { signal, headers: { Accept: 'image/png' } })
+  return {
+    blob: await response.blob(),
+    pages: Number(response.headers.get('X-Document-Pages') ?? 1),
+  }
 }
