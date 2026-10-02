@@ -1,6 +1,6 @@
 # OdontoCare — frontend
 
-React + Vite + TypeScript + TailwindCSS. Fases 0 a 4: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes y deuda. Adaptación para computadora, tablet y celular.
+React + Vite + TypeScript + TailwindCSS. Fases 0 a 5: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes, deuda, pagos, cuotas, egresos y caja. Adaptación para computadora, tablet y celular.
 
 ## Iniciar
 
@@ -81,3 +81,13 @@ En la atención clínica, seleccionar un concepto del plan vincula el avance sin
 Finanzas muestra deuda por paciente y moneda, cargos, ajustes, motivos y responsables. Ver origen consulta cargo y movimientos relacionados; los enlaces clínicos recuperan la atención específica. La ficha del paciente enlaza planes y deuda según permisos. Los documentos pueden asociarse con el tratamiento del mismo paciente.
 
 Esta fase no registra pagos ni dinero recibido. Las atenciones finalizadas antes de fase 4 conservan su historia sin cargos retroactivos. Consultar las guías y el cierre de fase 4 en ../docs. Capturas sintéticas de computadora, tablet y celular: docs/verification/phase4.
+
+## Finanzas · Fase 5
+
+Finanzas permite elegir paciente y consultar deuda generada, recibido neto, aplicado, pendiente y anticipo. Cuenta del paciente separa Cargos, Pagos, Cuotas y Archivos. Registrar abono permite elegir varios cargos mediante búsqueda paginada; dejarlo sin aplicación conserva un anticipo. Ver movimiento muestra aplicaciones, constancia y sustentos. Administración puede liberar, devolver o revertir con motivo, conceder descuentos y anular cargos conservando originales.
+
+Programar cuotas desde un cargo distribuye su total neto; el dinero ya aplicado cubre los primeros vencimientos. Un cambio de cargo marca el calendario para revisión. Egresos conserva categoría, proveedor opcional, medio y sustento. Caja muestra fondo inicial, efectivo esperado y otros medios aparte; cierre exige contado y motivo y genera un arqueo PDF histórico.
+
+Los documentos se recuperan a demanda, admiten vista por página y zoom de 100 % a 400 %, y se descargan con permisos. Los formularios, listados y cajas se usan con teclado y controles táctiles, en 1440×900, 768×1024 y 390×844. Las listas siguen paginadas/filtradas/buscadas desde el servidor.
+
+Comprobación: tests/phase5.spec.ts incluye 11 escenarios nuevos; la regresión conjunta suma 48 escenarios. Capturas en docs/verification/phase5. Requisitos y resultados en las guías maestras de la raíz y sus instantáneas backend/docs/project. WhatsApp real permanece pendiente de fase 6.
