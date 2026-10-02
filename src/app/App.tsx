@@ -1,5 +1,5 @@
 import { PlansPage } from '../features/treatments/PlansPage'
-import { DebtsPage } from '../features/finance/DebtsPage'
+import { FinancePage } from '../features/finance/FinancePage'
 import { ClinicalPage } from '../features/clinical/ClinicalPage'
 import { useEffect } from 'react'
 import { AuthProvider } from '../features/auth/AuthProvider'
@@ -100,7 +100,11 @@ function Application() {
             path="/finanzas"
             element={
               state.status === 'ready' ? (
-                <DebtsPage timeZone={state.data.timeZone} />
+                <FinancePage
+                  timeZone={state.data.timeZone}
+                  currency={state.data.currency}
+                  dateFormat={state.data.dateFormat}
+                />
               ) : (
                 <ConnectionCard state={state} reload={reload} />
               )

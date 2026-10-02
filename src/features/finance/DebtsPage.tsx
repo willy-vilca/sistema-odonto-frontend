@@ -1,54 +1,25 @@
 import { useState } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
-import { PatientPicker } from '../patients/components/PatientPicker'
 import { usePagedList } from '../../shared/data/usePagedList'
 import { useQueryData } from '../../shared/data/useQueryData'
 import { PagedTable } from '../../shared/ui/PagedTable'
 import { Button } from '../../shared/ui/Button'
 import { chargeKinds, type Charge, type DebtSummary } from './model/finance'
 import { money } from '../treatments/model/treatments'
+import { ChargeFinanceForm } from './components/ChargeFinanceForm'
 import { ChargeAdjustment } from './components/ChargeAdjustment'
-export function DebtsPage({ timeZone }: { timeZone: string }) {
-  const auth = useAuth(),
-    [params, setParams] = useSearchParams(),
-    patientId = params.get('patientId') ?? ''
-  if (!auth.can('FINANCES_READ'))
-    return (
-      <p role="alert" className="error-box">
-        No tienes permiso para consultar la deuda.
-      </p>
-    )
-  return (
-    <div className="space-y-6">
-      <header>
-        <p className="section-eyebrow">Gestión · Obligaciones de pago</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">Deuda por paciente</h1>
-        <p className="mt-2 text-sm text-muted">
-          Cargos por servicios y planes aceptados, con sus ajustes y orígenes.
-        </p>
-      </header>
-      <p className="rounded-xl border border-line bg-brand-50 p-4 text-sm">
-        Esta vista muestra deuda generada. El registro de pagos, cuotas y dinero recibido se
-        incorporará en la fase de cobros.
-      </p>
-      <section className="rounded-2xl border border-line bg-white p-5">
-        <PatientPicker
-          patientId={patientId}
-          onChange={(items) => setParams(items[0] ? { patientId: items[0].id } : {})}
-        />
-      </section>
-      {patientId ? (
-        <DebtWorkspace key={patientId} patientId={patientId} timeZone={timeZone} />
-      ) : (
-        <p className="rounded-xl border border-line p-6 text-sm text-muted">
-          Selecciona un paciente para consultar sus movimientos.
-        </p>
-      )}
-    </div>
-  )
-}
-function DebtWorkspace({ patientId, timeZone }: { patientId: string; timeZone: string }) {
+export function DebtWorkspace({
+  patientId,
+  timeZone,
+  today,
+  onChanged,
+}: {
+  patientId: string
+  timeZone: string
+  today: string
+  onChanged: () => void
+}) {
   const auth = useAuth(),
     [kind, setKind] = useState(''),
     [origin, setOrigin] = useState(''),
@@ -59,9 +30,15 @@ function DebtWorkspace({ patientId, timeZone }: { patientId: string; timeZone: s
       'createdAt',
     ),
     summary = useQueryData<DebtSummary[]>('/api/v1/charges/summary?patientId=' + patientId),
-    [selected, setSelected] = useState<Charge>()
+    [selected, setSelected] = useState<Charge>(),
+    [operation, setOperation] = useState<{
+      id: string
+      action: 'installments' | 'discount' | 'void'
+    }>()
   function saved() {
     setSelected(undefined)
+    setOperation(undefined)
+    onChanged()
     list.reload()
     summary.reload()
   }
@@ -77,17 +54,6 @@ function DebtWorkspace({ patientId, timeZone }: { patientId: string; timeZone: s
           Este paciente aún no tiene cargos registrados.
         </p>
       )}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {summary.data?.map((s) => (
-          <section key={s.currency} className="rounded-2xl border border-line bg-white p-5">
-            <p className="text-sm text-muted">Deuda generada · {s.currency}</p>
-            <p className="mt-2 text-2xl font-semibold">{money(s.netDebt, s.currency)}</p>
-            <p className="mt-3 text-xs text-muted">
-              Cargos: {money(s.charges, s.currency)} · Ajustes: {money(s.adjustments, s.currency)}
-            </p>
-          </section>
-        ))}
-      </div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         {origin ? (
           <Button variant="secondary" onClick={() => setOrigin('')}>
@@ -197,6 +163,27 @@ function DebtWorkspace({ patientId, timeZone }: { patientId: string; timeZone: s
             >
               Ver origen
             </Button>
+            {!c.originalId && auth.can('PAYMENTS_WRITE') && (
+              <Button
+                variant="quiet"
+                onClick={() => setOperation({ id: c.id, action: 'installments' })}
+              >
+                Programar cuotas
+              </Button>
+            )}
+            {!c.originalId && auth.can('FINANCES_ADJUST') && (
+              <>
+                <Button
+                  variant="quiet"
+                  onClick={() => setOperation({ id: c.id, action: 'discount' })}
+                >
+                  Descuento
+                </Button>
+                <Button variant="quiet" onClick={() => setOperation({ id: c.id, action: 'void' })}>
+                  Anular cargo
+                </Button>
+              </>
+            )}
             {!c.originalId && auth.can('FINANCES_ADJUST') && (
               <Button variant="quiet" onClick={() => setSelected(c)}>
                 Ajustar cargo
@@ -205,6 +192,15 @@ function DebtWorkspace({ patientId, timeZone }: { patientId: string; timeZone: s
           </div>
         )}
       />
+      {operation && (
+        <ChargeFinanceForm
+          chargeId={operation.id}
+          action={operation.action}
+          today={today}
+          onClose={() => setOperation(undefined)}
+          onSaved={saved}
+        />
+      )}
       {selected && (
         <ChargeAdjustment
           charge={selected}

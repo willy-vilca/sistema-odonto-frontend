@@ -200,7 +200,7 @@ export function AppShell({ state, children }: { state: InstallationState; childr
         </main>
         <footer className="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-5 pb-7 text-xs text-muted sm:flex-row sm:px-8 xl:px-10">
           <span>OdontoCare · Cuidado y gestión en un solo lugar</span>
-          <span>Versión 0.5 · Fase 4</span>
+          <span>Versión 0.6 · Fase 5</span>
         </footer>
       </div>
     </>
