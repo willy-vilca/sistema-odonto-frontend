@@ -1,4 +1,5 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useRef, useId, type ReactNode } from 'react'
+import { registerNotificationDialog } from '../notifications/notifications'
 import { X } from 'lucide-react'
 import { Button } from './Button'
 export function Modal({
@@ -13,12 +14,15 @@ export function Modal({
   busy?: boolean
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
   const opener = useRef(document.activeElement as HTMLElement | null)
   useEffect(() => {
     ref.current?.showModal()
     const dialog = ref.current
+    const unregister = dialog ? registerNotificationDialog(dialog) : undefined
     const previousFocus = opener.current
     return () => {
+      unregister?.()
       dialog?.close()
       queueMicrotask(() => {
         if (previousFocus?.isConnected) previousFocus.focus()
@@ -28,7 +32,7 @@ export function Modal({
   return (
     <dialog
       ref={ref}
-      aria-labelledby="editor-title"
+      aria-labelledby={titleId}
       onCancel={(e) => {
         e.preventDefault()
         if (!busy) onClose()
@@ -53,7 +57,7 @@ export function Modal({
       className="fixed inset-0 m-auto max-h-[calc(100dvh-32px)] w-[min(720px,calc(100vw-24px))] max-w-none overflow-y-auto rounded-2xl border border-line bg-white p-0 shadow-xl"
     >
       <header className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-line bg-white px-5 py-4 sm:px-7">
-        <h2 id="editor-title" className="text-lg font-semibold">
+        <h2 id={titleId} className="text-lg font-semibold">
           {title}
         </h2>
         <Button

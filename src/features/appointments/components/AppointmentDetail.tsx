@@ -283,11 +283,6 @@ export function AppointmentDetail({
                 onChange={(e) => setReason(e.target.value)}
               />
             </fieldset>
-            {form.error && (
-              <p role="alert" className="error-box">
-                {form.error}
-              </p>
-            )}
             <div className="flex flex-wrap justify-end gap-3">
               <Button
                 type="button"

@@ -15,10 +15,12 @@ import { ConnectionCard } from '../features/installation/components/ConnectionCa
 import { useInstallation } from '../features/installation/hooks/useInstallation'
 import { AppShell } from './layout/AppShell'
 import { modules } from './navigation'
+import { NotificationViewport } from '../shared/ui/NotificationViewport'
 export function App() {
   return (
     <AuthProvider>
       <Application />
+      <NotificationViewport />
     </AuthProvider>
   )
 }

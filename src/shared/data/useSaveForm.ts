@@ -1,23 +1,24 @@
 import { useState } from 'react'
 import { ApiError } from '../api/http'
+import { notify } from '../notifications/notifications'
 export function useSaveForm() {
   const [busy, setBusy] = useState(false)
-  const [error, setError] = useState('')
   async function submit(operation: () => Promise<unknown>, onSaved: () => void) {
     setBusy(true)
-    setError('')
     try {
       await operation()
+      notify('Cambios guardados correctamente.')
       onSaved()
     } catch (e) {
-      setError(
+      notify(
         e instanceof ApiError
           ? e.message
           : 'No se pudo guardar. Revisa la conexión e intenta nuevamente.',
+        'error',
       )
     } finally {
       setBusy(false)
     }
   }
-  return { busy, error, submit }
+  return { busy, submit }
 }

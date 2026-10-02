@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
@@ -23,6 +24,7 @@ export function PlanEditor({
   onSaved: () => void
 }) {
   const form = useSaveForm(),
+    [pendingServices, setPendingServices] = useState<Record<number, boolean>>({}),
     [key] = useState(() => crypto.randomUUID()),
     [title, setTitle] = useState(plan?.title ?? ''),
     [conditions, setConditions] = useState(plan?.conditions ?? ''),
@@ -37,19 +39,25 @@ export function PlanEditor({
           ? lines.map((i) => ({ ...i, unitPrice: i.unitPrice.toFixed(2) }))
           : [{ ...emptyItem }],
     ),
-    [error, setError] = useState('')
+    setError = useErrorNotification()
+  const busy = form.busy || Object.values(pendingServices).some(Boolean)
   return (
     <Modal
       title={
-        additional ? 'Añadir concepto al plan' : plan ? 'Editar presupuesto' : 'Nuevo presupuesto'
+        additional
+          ? 'Añadir tratamiento al plan'
+          : plan
+            ? 'Editar presupuesto'
+            : 'Nuevo presupuesto'
       }
       onClose={onClose}
-      busy={form.busy}
+      busy={busy}
     >
       <form
         className="space-y-5"
         onSubmit={(e) => {
           e.preventDefault()
+          if (busy) return
           if (!doctor[0]) {
             setError('Selecciona el profesional responsable.')
             return
@@ -114,15 +122,23 @@ export function PlanEditor({
             <ItemEditor
               item={item}
               index={index + 1}
-              onChange={(value) => setItems(items.map((entry, i) => (i === index ? value : entry)))}
+              onChange={(change) =>
+                setItems((current) =>
+                  current.map((entry, i) => (i === index ? { ...entry, ...change } : entry)),
+                )
+              }
+              onLoadingChange={(loading) =>
+                setPendingServices((current) => ({ ...current, [index]: loading }))
+              }
             />
             {!additional && items.length > 1 && (
               <Button
                 type="button"
                 variant="quiet"
+                disabled={busy}
                 onClick={() => setItems(items.filter((_, i) => i !== index))}
               >
-                Quitar concepto {index + 1}
+                Quitar tratamiento {index + 1}
               </Button>
             )}
           </div>
@@ -131,10 +147,10 @@ export function PlanEditor({
           <Button
             type="button"
             variant="secondary"
-            disabled={items.length >= 50}
+            disabled={busy || items.length >= 50}
             onClick={() => setItems([...items, { ...emptyItem }])}
           >
-            Añadir concepto
+            Añadir tratamiento
           </Button>
         )}
         {additional && (
@@ -146,20 +162,15 @@ export function PlanEditor({
             onChange={(e) => setReason(e.target.value)}
           />
         )}
-        {(form.error || error) && (
-          <p role="alert" className="error-box">
-            {form.error || error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
-          <Button disabled={form.busy}>
+          <Button disabled={busy}>
             {form.busy
               ? 'Guardando…'
               : additional
                 ? 'Guardar adicional y cargo'
                 : 'Guardar presupuesto'}
           </Button>
-          <Button type="button" variant="secondary" disabled={form.busy} onClick={onClose}>
+          <Button type="button" variant="secondary" disabled={busy} onClick={onClose}>
             Volver
           </Button>
         </div>

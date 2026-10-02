@@ -93,7 +93,7 @@ export function PlanDetail({
         </div>
         <div className="flex flex-wrap gap-2" role="tablist" aria-label="Detalle del plan">
           {[
-            ['items', 'Conceptos y avance'],
+            ['items', 'Tratamientos y avance'],
             ['history', 'Historial'],
             ['sessions', 'Sesiones realizadas'],
           ].map(([key, label]) => (
@@ -127,7 +127,7 @@ function PlanItems({ plan }: { plan: Plan }) {
       keyFor={(i) => i.id}
       columns={[
         {
-          label: 'Concepto',
+          label: 'Tratamiento',
           render: (i) => (
             <>
               <p>{i.description}</p>
@@ -148,7 +148,7 @@ function PlanItems({ plan }: { plan: Plan }) {
             money(i.unitPrice, plan.currency),
         },
         { label: 'Sesiones', render: (i) => i.completedSessions + ' / ' + i.sessions },
-        { label: 'Deuda del concepto', render: (i) => money(i.currentDebt, plan.currency) },
+        { label: 'Deuda del tratamiento', render: (i) => money(i.currentDebt, plan.currency) },
       ]}
     />
   )
@@ -175,7 +175,7 @@ function PlanHistory({ id }: { id: string }) {
                 ACCEPT: 'Aceptado',
                 FINISH: 'Finalizado',
                 CANCEL: 'Cancelado',
-                ADDITIONAL: 'Concepto adicional',
+                ADDITIONAL: 'Tratamiento adicional',
               }) as Record<string, string>
             )[o.action] ?? o.action,
         },
@@ -202,7 +202,7 @@ function CompletedSessions({ plan }: { plan: Plan }) {
       list={list}
       keyFor={(s) => s.id}
       columns={[
-        { label: 'Concepto realizado', render: (s) => s.description },
+        { label: 'Tratamiento realizado', render: (s) => s.description },
         { label: 'Sesiones', render: (s) => s.sessions },
         { label: 'Responsable', render: (s) => s.actorName },
       ]}

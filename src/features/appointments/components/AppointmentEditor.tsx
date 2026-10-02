@@ -180,11 +180,6 @@ export function AppointmentEditor({
             }}
           />
         </fieldset>
-        {form.error && (
-          <p className="error-box" role="alert">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap justify-end gap-3 border-t border-line pt-4">
           <Button type="button" variant="secondary" onClick={onClose} disabled={form.busy}>
             Cancelar

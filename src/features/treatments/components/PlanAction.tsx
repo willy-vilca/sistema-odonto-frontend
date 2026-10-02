@@ -97,11 +97,6 @@ export function PlanAction({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy || (action === 'accept' && !confirmed)}>
             {titles[action]}

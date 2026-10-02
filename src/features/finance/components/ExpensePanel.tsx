@@ -161,11 +161,6 @@ function ExpenseForm({
         <p className="text-xs text-muted">
           Moneda {currency}. Después de guardar podrás adjuntar imágenes o PDF como sustento.
         </p>
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <Button disabled={form.busy}>Guardar egreso</Button>
       </form>
     </Modal>

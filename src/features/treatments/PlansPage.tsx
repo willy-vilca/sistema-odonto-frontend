@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
@@ -25,7 +26,7 @@ export function PlansPage() {
     [editor, setEditor] = useState<'new' | 'edit' | 'additional'>(),
     [action, setAction] = useState(''),
     [lines, setLines] = useState<PlanItem[]>([]),
-    [error, setError] = useState('')
+    setError = useErrorNotification()
   function saved() {
     setSelected(undefined)
     setEditor(undefined)
@@ -91,11 +92,6 @@ export function PlansPage() {
           </Button>
         )}
       </div>
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
-        </p>
-      )}
       <PagedTable
         list={list}
         keyFor={(p) => p.id}

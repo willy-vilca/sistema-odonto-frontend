@@ -55,11 +55,6 @@ export function ChargeAdjustment({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy}>Registrar ajuste</Button>
           <Button type="button" variant="secondary" disabled={form.busy} onClick={onClose}>

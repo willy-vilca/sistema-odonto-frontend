@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { formatLocalDate } from '../../../shared/data/dateFormat'
 import { useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
@@ -34,7 +35,7 @@ export function MovementList({
     [to, setTo] = useState(''),
     [selected, setSelected] = useState<Movement>(),
     [operation, setOperation] = useState<{ movement: Movement; action: string }>(),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     list = usePagedList<Movement>(
       '/api/v1/finance/movements',
       {
@@ -56,11 +57,6 @@ export function MovementList({
   }
   return (
     <div className="space-y-4">
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
-        </p>
-      )}
       <PagedTable
         list={list}
         keyFor={(m) => m.id}

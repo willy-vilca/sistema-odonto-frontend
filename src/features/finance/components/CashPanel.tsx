@@ -235,11 +235,6 @@ function CashForm({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <Button disabled={form.busy}>Confirmar {cash ? 'cierre' : 'apertura'}</Button>
       </form>
     </Modal>

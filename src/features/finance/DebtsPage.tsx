@@ -104,7 +104,7 @@ export function DebtWorkspace({
         }
         columns={[
           {
-            label: 'Concepto y origen',
+            label: 'Tratamiento y origen',
             render: (c) => (
               <>
                 <p className="font-semibold">{c.description}</p>

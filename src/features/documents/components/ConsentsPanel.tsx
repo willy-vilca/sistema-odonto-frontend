@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
@@ -34,7 +35,7 @@ export function ConsentsPanel({
     [date, setDate] = useState(clinicToday(timeZone)),
     [documents, setDocuments] = useState<PickedEntity[]>([]),
     [templateText, setTemplateText] = useState(''),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     form = useSaveForm()
   return (
     <div className="space-y-5">
@@ -150,11 +151,6 @@ export function ConsentsPanel({
             )}
             {templateText && (
               <p className="rounded-xl bg-canvas p-4 text-sm whitespace-pre-wrap">{templateText}</p>
-            )}
-            {(form.error || error) && (
-              <p role="alert" className="error-box">
-                {error || form.error}
-              </p>
             )}
             <Button disabled={form.busy}>Guardar consentimiento</Button>
           </form>

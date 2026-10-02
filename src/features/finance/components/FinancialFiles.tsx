@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState, useEffect } from 'react'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { PagedTable } from '../../../shared/ui/PagedTable'
@@ -24,7 +25,7 @@ export function FinancialFiles({
     ),
     [upload, setUpload] = useState(false),
     [preview, setPreview] = useState<FinancialDocument>(),
-    [error, setError] = useState('')
+    setError = useErrorNotification()
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap justify-between gap-3">
@@ -33,11 +34,6 @@ export function FinancialFiles({
           <Button onClick={() => setUpload(true)}>Adjuntar sustento</Button>
         )}
       </div>
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
-        </p>
-      )}
       <PagedTable
         list={list}
         keyFor={(d) => d.id}
@@ -132,11 +128,6 @@ function SupportForm({
           Se conserva el archivo original. Se aplica el límite configurado para archivos,
           inicialmente 20 MiB.
         </p>
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <Button disabled={form.busy}>Guardar sustento</Button>
       </form>
     </Modal>

@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { getPlanItem } from '../../treatments/services/treatmentService'
 import { useState } from 'react'
@@ -20,7 +21,7 @@ export function ProcedureEditor({
   onChange: (value: Procedure[]) => void
 }) {
   const auth = useAuth(),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     [loading, setLoading] = useState(false)
   function update(index: number, change: Partial<Procedure>) {
     onChange(value.map((procedure, i) => (i === index ? { ...procedure, ...change } : procedure)))
@@ -33,16 +34,11 @@ export function ProcedureEditor({
           ? 'La corrección clínica conserva los cargos originales; una diferencia económica requiere un ajuste explícito.'
           : 'Al finalizar, los servicios individuales generan un cargo. Las sesiones vinculadas a un plan aceptado registran avance sin otra deuda.'}
       </p>
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
-        </p>
-      )}
       {value.map((procedure, index) => (
         <article key={index} className="space-y-3 rounded-xl border border-line p-4">
           {auth.can('PLANS_READ') && !correcting && (
             <EntityPicker
-              label={'Concepto de plan ' + (index + 1) + ' (opcional)'}
+              label={'Plan de tratamiento ' + (index + 1) + ' (opcional)'}
               source={{
                 endpoint: '/api/v1/plans/items',
                 labelKey: 'label',

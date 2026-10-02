@@ -145,11 +145,6 @@ export function EncounterEditor({
             onChange={(e) => setCorrection(e.target.value)}
           />
         )}
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy || !professionalId}>
             {correcting ? 'Guardar corrección' : 'Guardar borrador'}

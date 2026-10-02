@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState, type FormEvent } from 'react'
 import { ApiError, errorMessage, saveJson } from '../../../shared/api/http'
 import { Button } from '../../../shared/ui/Button'
@@ -33,7 +34,7 @@ export function EntityEditor({
     ),
   )
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     [fields, setFields] = useState<Record<string, string>>({})
   function change(key: string, value: unknown) {
     setValues((v) => ({ ...v, [key]: value }))
@@ -88,11 +89,6 @@ export function EntityEditor({
             </div>
           ))}
         </fieldset>
-        {error && (
-          <p role="alert" className="error-box">
-            {error}
-          </p>
-        )}
         <div className="flex flex-wrap justify-end gap-3 border-t border-line pt-5">
           <Button type="button" variant="secondary" disabled={busy} onClick={onClose}>
             Cerrar

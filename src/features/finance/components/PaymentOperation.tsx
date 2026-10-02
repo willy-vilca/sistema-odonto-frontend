@@ -112,11 +112,6 @@ export function PaymentOperation({
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy}>Confirmar operación</Button>
           <Button type="button" variant="secondary" onClick={onClose} disabled={form.busy}>

@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
@@ -33,7 +34,7 @@ export function EncountersPanel({
     )
   const [selected, setSelected] = useState<Encounter>(),
     [editor, setEditor] = useState<'new' | 'edit' | 'correction'>(),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     form = useSaveForm()
   useEffect(() => {
     if (!initialEncounterId) return
@@ -48,7 +49,7 @@ export function EncountersPanel({
     return () => {
       active = false
     }
-  }, [initialEncounterId, patientId])
+  }, [initialEncounterId, patientId, setError])
   function saved() {
     setEditor(undefined)
     setSelected(undefined)
@@ -83,11 +84,6 @@ export function EncountersPanel({
           </Button>
         )}
       </header>
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
-        </p>
-      )}
       <PagedTable
         list={list}
         keyFor={(row) => row.id}
@@ -164,11 +160,6 @@ export function EncountersPanel({
                   </Button>
                 )}
               </div>
-            )}
-            {form.error && (
-              <p role="alert" className="error-box">
-                {form.error}
-              </p>
             )}
             {selected.status === 'FINAL' && (
               <EncounterVersions id={selected.id} dateFormat={dateFormat} timeZone={timeZone} />

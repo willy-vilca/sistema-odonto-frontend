@@ -72,11 +72,6 @@ function PolicyEditor({
         <p className="text-xs text-muted">
           Límite inicial: 20 MiB. Cambiar el límite no altera documentos ya guardados.
         </p>
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         {writable && <Button disabled={form.busy}>Guardar límite</Button>}
       </form>
     </section>

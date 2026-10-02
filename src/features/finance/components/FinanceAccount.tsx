@@ -1,3 +1,5 @@
+import { notify } from '../../../shared/notifications/notifications'
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { useQueryData } from '../../../shared/data/useQueryData'
@@ -29,7 +31,7 @@ export function FinanceAccount({
     [form, setForm] = useState(false),
     [selectedCurrency, setCurrency] = useState(currency),
     [revision, setRevision] = useState(0),
-    [error, setError] = useState(''),
+    setError = useErrorNotification(),
     [busy, setBusy] = useState(false)
   function changed() {
     summary.reload()
@@ -45,6 +47,7 @@ export function FinanceAccount({
         currency: selectedCurrency,
       })
       await downloadDocument(d)
+      notify('Estado de cuenta emitido correctamente.')
       changed()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'No se pudo emitir el estado.')
@@ -57,11 +60,6 @@ export function FinanceAccount({
       {summary.error && (
         <p role="alert" className="error-box">
           {summary.error}
-        </p>
-      )}
-      {error && (
-        <p role="alert" className="error-box">
-          {error}
         </p>
       )}
       <div className="grid gap-4 xl:grid-cols-2">

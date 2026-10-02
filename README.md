@@ -17,6 +17,8 @@ La primera instalación solicita crear una cuenta administradora. En Configuraci
 
 Listas y selectores solicitan páginas al backend. La búsqueda espera 250 ms, cancela solicitudes obsoletas y vuelve a la primera página al cambiar filtros. Las tablas se convierten en tarjetas en celular. Los formularios conservan valores ante errores, se cierran con Escape y devuelven el foco al control de apertura.
 
+Los resultados de las acciones se muestran como notificaciones flotantes: éxito durante 5 segundos y error durante 8 segundos, con cierre manual y pausa mediante foco o puntero sobre su botón. Funcionan dentro de los formularios abiertos y permiten seguir operando sus controles. Se conservan las validaciones de campo y los errores persistentes de carga o permisos.
+
 ## Organización
 
 - app: composición, navegación, disposición y estilos.
@@ -27,7 +29,8 @@ Listas y selectores solicitan páginas al backend. La búsqueda espera 250 ms, c
 - features/appointments: calendario, lista, reserva, disponibilidad, estados e historial.
 - shared/api: HTTP, CSRF y errores.
 - shared/data: consultas paginadas y formatos.
-- shared/ui: botones, modal, tabla y selector remoto reutilizables.
+- shared/ui: botones, modal, tabla, selector remoto y presentación de notificaciones reutilizables.
+- shared/notifications: avisos de acciones, cierre, temporizadores y contexto del diálogo activo.
 
 Las reglas de negocio se validan en el backend. Las vistas de módulos futuros no simulan citas, cobros ni mensajes de WhatsApp.
 
@@ -74,7 +77,7 @@ Consentimientos: adjuntar primero su copia, luego registrar nombre, responsable,
 
 ## Presupuestos, planes y deuda
 
-Presupuestos y planes permite seleccionar paciente, crear conceptos con precio, unidades, sesiones y pieza, presentar la oferta y registrar aceptación explícita. Editar una propuesta la devuelve a borrador. Los adicionales y ajustes conservan el acuerdo original; cancelar puede mantener deuda o liberar lo pendiente con permiso de ajustes. Finalizar requiere completar sesiones.
+Presupuestos y planes permite seleccionar paciente, crear tratamientos con precio, unidades, sesiones y pieza, presentar la oferta y registrar aceptación explícita. Editar una propuesta la devuelve a borrador. Los adicionales y ajustes conservan el acuerdo original; cancelar puede mantener deuda o liberar lo pendiente con permiso de ajustes. Finalizar requiere completar sesiones.
 
 En la atención clínica, seleccionar un concepto del plan vincula el avance sin otro cargo. Servicio y pieza se conservan desde ese concepto; la cantidad indica sesiones realizadas. Un procedimiento individual utiliza precio acordado o de catálogo y genera un cargo al finalizar. Las correcciones clínicas conservan los movimientos financieros; una diferencia económica necesita un ajuste.
 
@@ -91,3 +94,7 @@ Programar cuotas desde un cargo distribuye su total neto; el dinero ya aplicado 
 Los documentos se recuperan a demanda, admiten vista por página y zoom de 100 % a 400 %, y se descargan con permisos. Los formularios, listados y cajas se usan con teclado y controles táctiles, en 1440×900, 768×1024 y 390×844. Las listas siguen paginadas/filtradas/buscadas desde el servidor.
 
 Comprobación: tests/phase5.spec.ts incluye 11 escenarios nuevos; la regresión conjunta suma 48 escenarios. Capturas en docs/verification/phase5. Requisitos y resultados en las guías maestras de la raíz y sus instantáneas backend/docs/project. WhatsApp real permanece pendiente de fase 6.
+
+## Ajustes previos a la revisión general
+
+02/10/2026: selección de servicios corregida mediante consulta individual autorizada. La descripción y el precio se completan automáticamente; el precio sigue editable y el guardado espera a que termine la consulta. La interfaz usa Tratamiento en presupuestos y Plan de tratamiento en la vinculación clínica. Se incorporaron avisos flotantes compartidos sin dependencias adicionales. Regresión final: 52 escenarios de navegador aprobados. Alcance 1.3 y plan 1.7; resultados en ../docs/ajustes-previos-fase-6.md y capturas en docs/verification/adjustments. La integración de WhatsApp continúa pendiente de fase 6.

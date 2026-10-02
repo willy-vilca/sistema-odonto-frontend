@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../shared/notifications/useErrorNotification'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { Button } from '../../shared/ui/Button'
@@ -6,7 +7,7 @@ import { errorMessage } from '../../shared/api/http'
 export function AccessPage() {
   const auth = useAuth(),
     setup = auth.session?.setupRequired
-  const [error, setError] = useState(''),
+  const setError = useErrorNotification(),
     [busy, setBusy] = useState(false)
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -101,11 +102,6 @@ export function AccessPage() {
                 </span>
               )}
             </label>
-            {error && (
-              <p role="alert" className="error-box">
-                {error}
-              </p>
-            )}
             <Button disabled={busy} className="w-full">
               {busy ? 'Un momento…' : setup ? 'Crear cuenta y acceder' : 'Iniciar sesión'}
             </Button>

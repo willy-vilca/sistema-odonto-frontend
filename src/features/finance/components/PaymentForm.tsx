@@ -103,11 +103,6 @@ export function PaymentForm({
           rows={rows}
           onChange={setRows}
         />
-        {form.error && (
-          <p role="alert" className="error-box">
-            {form.error}
-          </p>
-        )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy}>Guardar abono</Button>
           <Button type="button" variant="secondary" onClick={onClose} disabled={form.busy}>

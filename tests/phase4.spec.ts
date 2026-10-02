@@ -105,7 +105,7 @@ test('presupuesto desde interfaz, propuesta sin deuda y aceptación explícita',
   await page.getByLabel('Título del presupuesto').fill('Presupuesto demostrado')
   await pick(page, 'profesional del plan', data.doctor.fullName)
   await page.getByLabel('Condiciones acordadas').fill('Tres sesiones por importe acordado.')
-  await page.getByLabel('Descripción del concepto 1').fill('Tratamiento integral')
+  await page.getByLabel('Descripción del tratamiento 1').fill('Tratamiento integral')
   await page.getByLabel('Precio unitario 1').fill('1200')
   await page.getByLabel('Sesiones previstas 1').fill('3')
   await page.getByRole('button', { name: 'Guardar presupuesto' }).click()
@@ -149,7 +149,7 @@ test('sesión clínica incluida muestra avance y conserva la deuda', async ({ pa
     .fill('Diagnóstico registrado')
   await page.getByRole('button', { name: 'Añadir procedimiento' }).click()
   const items = await (await page.request.get('/api/v1/plans/items?planId=' + p.id)).json()
-  await pick(page, 'concepto de plan 1 (opcional)', items.items[0].label)
+  await pick(page, 'plan de tratamiento 1 (opcional)', items.items[0].label)
   await page.getByRole('button', { name: 'Guardar borrador' }).click()
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page
@@ -173,7 +173,7 @@ test('adicional, ajuste y cancelación conservan movimientos', async ({ page }) 
   await page.goto('/tratamientos?patientId=' + data.patient.id)
   await page.getByRole('button', { name: 'Ver plan' }).filter({ visible: true }).click()
   await page.getByRole('button', { name: 'Añadir adicional' }).click()
-  await page.getByLabel('Descripción del concepto 1').fill('Procedimiento adicional')
+  await page.getByLabel('Descripción del tratamiento 1').fill('Procedimiento adicional')
   await page.getByLabel('Precio unitario 1').fill('200')
   await page
     .getByRole('textbox', { name: 'Motivo del adicional' })
@@ -283,4 +283,134 @@ test('caja consulta deuda sin aceptar planes ni ajustar cargos', async ({ page }
   ).toBe(403)
   await page.goto('/tratamientos?patientId=' + data.patient.id)
   await expect(page.getByRole('button', { name: 'Nuevo presupuesto' })).toHaveCount(0)
+})
+
+for (const width of [1440, 768, 390])
+  test('servicio con precio editable y avisos flotantes en ' + width + ' px', async ({ page }) => {
+    await page.setViewportSize({ width, height: width === 1440 ? 900 : width === 768 ? 1024 : 844 })
+    const data = await seed(page)
+    const category = await mutate(page, '/api/v1/categories', {
+      name: 'Pruebas de precio ' + data.suffix,
+      active: true,
+    })
+    const service = await mutate(page, '/api/v1/services', {
+      name: 'Limpieza de prueba ' + data.suffix,
+      categoryId: category.id,
+      price: '185.50',
+      durationMinutes: 60,
+      description: '',
+      active: true,
+      bookableByAgent: true,
+    })
+    await page.goto('/tratamientos?patientId=' + data.patient.id)
+    await page.getByRole('button', { name: 'Nuevo presupuesto' }).click()
+    await page.getByLabel('Título del presupuesto').fill('Presupuesto ajustado ' + data.suffix)
+    await pick(page, 'profesional del plan', data.doctor.fullName)
+    await page.route('**/api/v1/services/' + service.id, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 800))
+      await route.continue()
+    })
+    await pick(page, 'servicio 1 (opcional)', service.name)
+    await expect(page.getByRole('button', { name: 'Guardar presupuesto' })).toBeDisabled()
+    await expect(page.getByLabel('Precio unitario 1')).toHaveValue('185.50')
+    await expect(page.getByLabel('Descripción del tratamiento 1')).toHaveValue(service.name)
+    await mkdir('docs/verification/adjustments', { recursive: true })
+    await page.getByLabel('Precio unitario 1').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: 'docs/verification/adjustments/price-' + width + '.png' })
+    await page.getByLabel('Precio unitario 1').fill('160.75')
+    await page.getByRole('button', { name: 'Añadir tratamiento' }).click()
+    await page.getByLabel('Descripción del tratamiento 2').fill('Control incluido')
+    await page.getByRole('button', { name: 'Guardar presupuesto' }).click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    const success = page.locator('[data-notification="success"]')
+    await expect(success).toContainText('Cambios guardados correctamente.')
+    const plans = await (
+      await page.request.get('/api/v1/plans?patientId=' + data.patient.id)
+    ).json()
+    const record = plans.items[0]
+    expect(record.originalTotal).toBe(160.75)
+    const items = await (
+      await page.request.get('/api/v1/plans/items?planId=' + record.id + '&sort=position')
+    ).json()
+    expect(items.items[0].serviceId).toBe(service.id)
+    expect(items.items[0].unitPrice).toBe(160.75)
+    expect(items.items[1].description).toBe('Control incluido')
+    await mkdir('docs/verification/adjustments', { recursive: true })
+    await page.screenshot({ path: 'docs/verification/adjustments/success-' + width + '.png' })
+    await success.getByRole('button', { name: 'Cerrar notificación' }).tap()
+    await expect(success).toHaveCount(0)
+    await page.getByRole('button', { name: 'Nuevo presupuesto' }).click()
+    await page.getByLabel('Título del presupuesto').fill('Se conservan los datos')
+    await page.getByLabel('Descripción del tratamiento 1').fill('Tratamiento pendiente')
+    await page.getByRole('button', { name: 'Guardar presupuesto' }).click()
+    const error = page.locator('[data-notification="error"]')
+    await expect(error).toContainText('Selecciona el profesional responsable.')
+    await expect(page.getByRole('dialog').locator('[data-notification="error"]')).toBeVisible()
+    await expect(page.getByLabel('Título del presupuesto')).toHaveValue('Se conservan los datos')
+    await page.getByLabel('Título del presupuesto').focus()
+    await page.keyboard.press('Tab')
+    await expect(
+      page.getByRole('button', { name: 'Seleccionar profesional del plan' }),
+    ).toBeFocused()
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+    ).toBeTruthy()
+    await page.screenshot({ path: 'docs/verification/adjustments/error-' + width + '.png' })
+    await error.getByRole('button', { name: 'Cerrar notificación' }).tap()
+    await expect(error).toHaveCount(0)
+    await page.clock.install()
+    // Repeat the same validation to ensure a dismissed message can be shown again.
+    await page.getByRole('button', { name: 'Guardar presupuesto' }).click()
+    await expect(error).toBeVisible()
+    if (width === 1440) {
+      await error.getByRole('button', { name: 'Cerrar notificación' }).hover()
+      await page.clock.fastForward(9000)
+      await expect(error).toBeVisible()
+      await error.getByRole('button', { name: 'Cerrar notificación' }).focus()
+      await page.mouse.move(0, 0)
+      await page.clock.fastForward(9000)
+      await expect(error).toBeVisible()
+      await page.getByLabel('Título del presupuesto').focus()
+    }
+    await page.mouse.move(0, 0)
+    await page.clock.fastForward(8500)
+    await expect(error).toHaveCount(0)
+    await expect(page.getByRole('dialog')).toHaveCount(1)
+  })
+
+test('un fallo al cargar el servicio muestra un aviso y permite reintentarlo', async ({ page }) => {
+  const data = await seed(page)
+  const category = await mutate(page, '/api/v1/categories', {
+    name: 'Reintento ' + data.suffix,
+    active: true,
+  })
+  const service = await mutate(page, '/api/v1/services', {
+    name: 'Servicio reintento ' + data.suffix,
+    categoryId: category.id,
+    price: '99.99',
+    durationMinutes: 30,
+    description: '',
+    active: true,
+    bookableByAgent: true,
+  })
+  await page.goto('/tratamientos?patientId=' + data.patient.id)
+  await page.getByRole('button', { name: 'Nuevo presupuesto' }).click()
+  await page.getByLabel('Título del presupuesto').fill('Conservar valores')
+  await page.route('**/api/v1/services/' + service.id, (route) =>
+    route.fulfill({
+      status: 503,
+      contentType: 'application/problem+json',
+      body: JSON.stringify({ detail: 'El servicio no está disponible en este momento.' }),
+    }),
+  )
+  await pick(page, 'servicio 1 (opcional)', service.name)
+  const error = page.locator('[data-notification="error"]')
+  await expect(error).toContainText('El servicio no está disponible en este momento.')
+  await expect(page.getByLabel('Título del presupuesto')).toHaveValue('Conservar valores')
+  await expect(page.getByLabel('Precio unitario 1')).toHaveValue('0.00')
+  await error.getByRole('button', { name: 'Cerrar notificación' }).click()
+  await page.unroute('**/api/v1/services/' + service.id)
+  await pick(page, 'servicio 1 (opcional)', service.name)
+  await expect(page.getByLabel('Precio unitario 1')).toHaveValue('99.99')
 })

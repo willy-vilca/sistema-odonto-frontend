@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../shared/notifications/useErrorNotification'
 import { LogOut, Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
@@ -34,7 +35,7 @@ function Brand({ state }: { state: InstallationState }) {
 
 export function AppShell({ state, children }: { state: InstallationState; children: ReactNode }) {
   const auth = useAuth(),
-    [logoutError, setLogoutError] = useState(''),
+    setLogoutError = useErrorNotification(),
     [loggingOut, setLoggingOut] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -191,11 +192,6 @@ export function AppShell({ state, children }: { state: InstallationState; childr
           tabIndex={-1}
           className="mx-auto max-w-7xl px-5 py-7 focus-visible:outline-none sm:px-8 sm:py-9 xl:px-10"
         >
-          {logoutError && (
-            <p role="alert" className="error-box mb-4">
-              {logoutError}
-            </p>
-          )}
           {children}
         </main>
         <footer className="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-5 pb-7 text-xs text-muted sm:flex-row sm:px-8 xl:px-10">

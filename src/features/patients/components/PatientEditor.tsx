@@ -208,11 +208,6 @@ export function PatientEditor({
             onChange={(e) => change('notes', e.target.value)}
           />
         </fieldset>
-        {form.error && (
-          <p className="error-box" role="alert">
-            {form.error}
-          </p>
-        )}
         <footer className="flex flex-wrap justify-end gap-3 border-t border-line pt-4">
           <Button type="button" variant="secondary" disabled={form.busy} onClick={onClose}>
             Cancelar

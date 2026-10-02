@@ -1,3 +1,4 @@
+import { notify } from '../../shared/notifications/notifications'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../auth/hooks/useAuth'
 import { request, saveJson, ApiError, errorMessage } from '../../shared/api/http'
@@ -66,8 +67,7 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
     [data, setData] = useState<Settings | null>(null),
     [error, setError] = useState(''),
     [fields, setFields] = useState<Record<string, string>>({}),
-    [busy, setBusy] = useState(false),
-    [notice, setNotice] = useState('')
+    [busy, setBusy] = useState(false)
   useEffect(() => {
     const abort = new AbortController()
     void request<Settings>('/api/v1/settings', { signal: abort.signal })
@@ -86,15 +86,15 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
     e.preventDefault()
     setBusy(true)
     setError('')
-    setNotice('')
+
     setFields({})
     try {
       const { hasLogo: _has, logoRevision: _rev, ...body } = data!
       setData(await saveJson<Settings>('/api/v1/settings', body, 'PUT'))
       onChanged()
-      setNotice('Configuración guardada correctamente.')
+      notify('Configuración guardada correctamente.')
     } catch (e) {
-      setError(errorMessage(e))
+      notify(errorMessage(e), 'error')
       if (e instanceof ApiError) setFields(e.fields)
     } finally {
       setBusy(false)
@@ -104,7 +104,7 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
     if (!data) return
     setBusy(true)
     setError('')
-    setNotice('')
+
     try {
       if (file) {
         const body = new FormData()
@@ -113,9 +113,9 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
         await request('/api/v1/settings/logo', { method: 'POST', body })
       } else await request('/api/v1/settings/logo?version=' + data.version, { method: 'DELETE' })
       await reload()
-      setNotice(file ? 'Logo actualizado.' : 'Logo retirado.')
+      notify(file ? 'Logo actualizado.' : 'Logo retirado.')
     } catch (e) {
-      setError(errorMessage(e))
+      notify(errorMessage(e), 'error')
     } finally {
       setBusy(false)
     }
@@ -297,11 +297,6 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
         {error && (
           <p role="alert" className="error-box">
             {error}
-          </p>
-        )}
-        {notice && (
-          <p role="status" className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800">
-            {notice}
           </p>
         )}
         {editable && (

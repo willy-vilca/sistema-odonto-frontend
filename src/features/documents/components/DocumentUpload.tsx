@@ -1,3 +1,4 @@
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { useQueryData } from '../../../shared/data/useQueryData'
@@ -30,7 +31,7 @@ export function DocumentUpload({
     [date, setDate] = useState(clinicToday(timeZone)),
     [description, setDescription] = useState(''),
     [tooth, setTooth] = useState(''),
-    [error, setError] = useState('')
+    setError = useErrorNotification()
   return (
     <Modal title="Adjuntar archivo" busy={form.busy} onClose={onClose}>
       <form
@@ -123,11 +124,6 @@ export function DocumentUpload({
             selected={encounter}
             onChange={setEncounter}
           />
-        )}
-        {(error || form.error) && (
-          <p role="alert" className="error-box">
-            {error || form.error}
-          </p>
         )}
         <Button disabled={form.busy || policy.loading || !!policy.error}>Guardar archivo</Button>
         {policy.error && (

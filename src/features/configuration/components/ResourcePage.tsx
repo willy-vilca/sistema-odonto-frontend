@@ -1,3 +1,4 @@
+import { notify } from '../../../shared/notifications/notifications'
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useAuth } from '../../auth/hooks/useAuth'
@@ -9,8 +10,7 @@ import { EntityEditor } from './EntityEditor'
 export function ResourcePage({ resource }: { resource: ResourceDefinition }) {
   const auth = useAuth(),
     [active, setActive] = useState(''),
-    [editor, setEditor] = useState<EntityRow | null | undefined>(undefined),
-    [notice, setNotice] = useState('')
+    [editor, setEditor] = useState<EntityRow | null | undefined>(undefined)
   const list = usePagedList<EntityRow>(
     resource.endpoint,
     resource.endpoint.endsWith('/roles') ? {} : { active },
@@ -27,7 +27,6 @@ export function ResourcePage({ resource }: { resource: ResourceDefinition }) {
         {write && resource.endpoint !== '/api/v1/roles' && (
           <Button
             onClick={() => {
-              setNotice('')
               setEditor(null)
             }}
           >
@@ -36,14 +35,6 @@ export function ResourcePage({ resource }: { resource: ResourceDefinition }) {
           </Button>
         )}
       </div>
-      {notice && (
-        <p
-          role="status"
-          className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800"
-        >
-          {notice}
-        </p>
-      )}
       <PagedTable
         list={list}
         columns={resource.columns}
@@ -80,7 +71,7 @@ export function ResourcePage({ resource }: { resource: ResourceDefinition }) {
           onClose={() => setEditor(undefined)}
           onSaved={() => {
             setEditor(undefined)
-            setNotice('Cambios guardados correctamente.')
+            notify('Cambios guardados correctamente.')
             list.reload()
           }}
         />
