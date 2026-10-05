@@ -11,6 +11,7 @@ export function usePagedList<T>(
   endpoint: string,
   filters: Record<string, string> = {},
   sort = 'name',
+  refreshKey = 0,
 ) {
   const [search, setSearch] = useState(''),
     [debounced, setDebounced] = useState(''),
@@ -32,7 +33,7 @@ export function usePagedList<T>(
   })
   for (const [key, value] of [...params]) if (value === '') params.delete(key)
   const url = endpoint + '?' + params,
-    requestKey = url + '|' + revision
+    requestKey = url + '|' + revision + '|' + refreshKey
   const [result, setResult] = useState<{ key: string; data: PageData<T> | null; error: string }>({
     key: '',
     data: null,

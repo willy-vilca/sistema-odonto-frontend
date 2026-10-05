@@ -25,7 +25,19 @@ export function Modal({
       unregister?.()
       dialog?.close()
       queueMicrotask(() => {
-        if (previousFocus?.isConnected) previousFocus.focus()
+        const parentDialog = [...document.querySelectorAll<HTMLDialogElement>('dialog[open]')].at(
+          -1,
+        )
+        if (previousFocus?.isConnected && (!parentDialog || parentDialog.contains(previousFocus))) {
+          previousFocus.focus()
+        } else if (parentDialog) {
+          // A refreshed list can replace the button that opened the upper dialog.
+          parentDialog
+            .querySelector<HTMLElement>(
+              'button:not([disabled]),input:not([disabled]),select:not([disabled])',
+            )
+            ?.focus()
+        }
       })
     }
   }, [])

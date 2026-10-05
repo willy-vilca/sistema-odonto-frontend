@@ -10,6 +10,7 @@ import { AppointmentEditor } from './components/AppointmentEditor'
 import { AppointmentDetail } from './components/AppointmentDetail'
 import { AppointmentCalendar } from './components/AppointmentCalendar'
 import { AppointmentList } from './components/AppointmentList'
+import { DayAppointmentsDialog } from './components/DayAppointmentsDialog'
 import { clinicToday, dateRange, dateAdd, monthAdd, type CalendarView } from './model/calendar'
 import { statusLabels, type CalendarResponse, type Appointment } from './model/appointment'
 import { formatLocalDate } from '../../shared/data/dateFormat'
@@ -26,6 +27,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
   const [editor, setEditor] = useState(false)
   const [selected, setSelected] = useState<Appointment>()
   const [revision, setRevision] = useState(0)
+  const [expandedDay, setExpandedDay] = useState<string>()
   if (!auth.can('APPOINTMENTS_READ'))
     return (
       <p role="alert" className="error-box">
@@ -186,6 +188,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
             setView('day')
           }}
           onOpen={setSelected}
+          onOpenDay={setExpandedDay}
         />
       )}
       <p className="text-xs text-muted">
@@ -207,6 +210,18 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           }}
         />
       )}
+      {expandedDay && (
+        <DayAppointmentsDialog
+          key={expandedDay + '|' + (dentist[0]?.id ?? '')}
+          date={expandedDay}
+          dentistId={dentist[0]?.id}
+          dentistName={dentist[0]?.label}
+          dateFormat={dateFormat}
+          revision={revision}
+          onOpen={setSelected}
+          onClose={() => setExpandedDay(undefined)}
+        />
+      )}
       {selected && (
         <AppointmentDetail
           appointment={selected}
@@ -226,6 +241,7 @@ function CalendarSection({
   dateFormat,
   onDay,
   onOpen,
+  onOpenDay,
 }: {
   date: string
   view: CalendarView
@@ -233,6 +249,7 @@ function CalendarSection({
   dateFormat: string
   onDay: (date: string) => void
   onOpen: (a: Appointment) => void
+  onOpenDay: (date: string) => void
 }) {
   const range = dateRange(date, view)
   const url =
@@ -269,6 +286,7 @@ function CalendarSection({
           selectedDate={date}
           onDay={onDay}
           onOpen={onOpen}
+          onOpenDay={onOpenDay}
         />
       )}
     </div>

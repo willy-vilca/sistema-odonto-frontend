@@ -18,12 +18,14 @@ export function AppointmentList({
   filters,
   onOpen,
   dateFormat = 'DMY',
+  refreshKey = 0,
 }: {
   filters: Record<string, string>
   onOpen: (a: Appointment) => void
   dateFormat?: string
+  refreshKey?: number
 }) {
-  const list = usePagedList<Appointment>('/api/v1/appointments', filters, 'startsAt')
+  const list = usePagedList<Appointment>('/api/v1/appointments', filters, 'startsAt', refreshKey)
   return (
     <PagedTable
       list={list}

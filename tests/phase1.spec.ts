@@ -272,7 +272,7 @@ test('changing page loads ten services and then only the remaining page', async 
   const categories = await (
     await page.request.get('/api/v1/categories?size=10&search=Atenci')
   ).json()
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 11; i++) {
     const response = await page.request.post('/api/v1/services', {
       headers: { [token.headerName]: token.token },
       data: {
@@ -288,6 +288,7 @@ test('changing page loads ten services and then only the remaining page', async 
     expect(response.status()).toBe(201)
   }
   await page.goto('/configuracion/servicios')
+  await page.getByRole('searchbox', { name: 'Buscar', exact: true }).fill('Servicio de prueba ')
   await page.getByLabel('Por página', { exact: true }).selectOption('10')
   await expect(page.getByRole('status').filter({ hasText: 'Página 1 de 2' })).toBeVisible()
   const second = page.waitForResponse(

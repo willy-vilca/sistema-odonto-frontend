@@ -98,3 +98,9 @@ Comprobación: tests/phase5.spec.ts incluye 11 escenarios nuevos; la regresión 
 ## Ajustes previos a la revisión general
 
 02/10/2026: selección de servicios corregida mediante consulta individual autorizada. La descripción y el precio se completan automáticamente; el precio sigue editable y el guardado espera a que termine la consulta. La interfaz usa Tratamiento en presupuestos y Plan de tratamiento en la vinculación clínica. Se incorporaron avisos flotantes compartidos sin dependencias adicionales. Regresión final: 52 escenarios de navegador aprobados. Alcance 1.3 y plan 1.7; resultados en ../docs/ajustes-previos-fase-6.md y capturas en docs/verification/adjustments. La integración de WhatsApp continúa pendiente de fase 6.
+
+## Servicios asociados y mes compacto
+
+05/10/2026: cada odontólogo muestra hasta tres servicios y Ver servicios abre su consulta completa con búsqueda, estado y paginación del servidor. El mes muestra hasta tres citas por día y +N citas más; en celular muestra el contador. La ventana del día reutiliza la lista remota y el detalle existente, conservando mes, profesional y filtros al volver. Los cambios de cita actualizan ambas vistas. El modal compartido recupera el foco dentro de la ventana inferior cuando una actualización reemplaza el control de apertura.
+
+Pruebas nuevas: tests/compact-lists.spec.ts, con 21 servicios y 21 citas para comprobar páginas reales. Regresión con phase1.spec.ts y phase2.spec.ts, compilación, lint y formato. Capturas en docs/verification/compact-lists. Decisiones y resultados: ../docs/ajustes-listas-agenda-odontologos.md; alcance 1.4 y plan 1.9. Reiniciar el backend actualizado para habilitar la nueva consulta de servicios asociados.

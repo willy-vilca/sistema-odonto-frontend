@@ -1,5 +1,6 @@
 import { StatusBadge } from '../../../shared/ui/PagedTable'
 import { serviceSource, type ResourceDefinition } from '../model/resources'
+import { DentistServices } from '../components/DentistServices'
 export const dentistsResource: ResourceDefinition = {
   endpoint: '/api/v1/dentists',
   title: 'Odontólogos',
@@ -63,8 +64,7 @@ export const dentistsResource: ResourceDefinition = {
     { label: 'Cuenta', render: (r) => String(r.userName) },
     {
       label: 'Servicios asignados',
-      render: (r) =>
-        Object.values(r.services as Record<string, string>).join(', ') || 'Sin servicios',
+      render: (r) => <DentistServices dentist={r} />,
     },
     { label: 'Estado', render: (r) => <StatusBadge active={!!r.active} /> },
   ],
