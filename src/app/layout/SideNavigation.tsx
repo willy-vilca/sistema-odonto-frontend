@@ -22,7 +22,8 @@ export function SideNavigation({ onNavigate }: { onNavigate?: () => void }) {
       (module.phase === 3 && ['CLINICAL_READ', 'DOCUMENTS_READ'].some(auth.can)) ||
       (module.phase === 4 &&
         auth.can(module.path === '/finanzas' ? 'FINANCES_READ' : 'PLANS_READ')) ||
-      (module.phase > 4 && auth.session?.user?.roles.includes('ADMIN')),
+      (module.phase === 6 && auth.can('WHATSAPP_READ')) ||
+      (module.phase > 6 && auth.session?.user?.roles.includes('ADMIN')),
   )
   return (
     <nav aria-label="Navegación principal" className="space-y-6 px-4">

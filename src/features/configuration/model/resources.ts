@@ -54,6 +54,8 @@ export const roleOptions = [
   { value: 'CASHIER', label: 'Caja' },
 ]
 export const permissionLabels: Record<string, string> = {
+  WHATSAPP_READ: 'Consultar conversaciones de WhatsApp',
+  WHATSAPP_WRITE: 'Enviar respuestas por WhatsApp',
   CLINICAL_READ: 'Consultar expediente clínico',
   CLINICAL_WRITE: 'Registrar atenciones y odontograma',
   DOCUMENTS_READ: 'Consultar y descargar archivos clínicos',

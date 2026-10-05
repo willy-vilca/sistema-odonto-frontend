@@ -1,6 +1,6 @@
 # OdontoCare — frontend
 
-React + Vite + TypeScript + TailwindCSS. Fases 0 a 5: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes, deuda, pagos, cuotas, egresos y caja. Adaptación para computadora, tablet y celular.
+React + Vite + TypeScript + TailwindCSS. Fases 0 a 5: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes, deuda, pagos, cuotas, egresos y caja. Fase 6 en desarrollo: bandeja de WhatsApp y prueba de conexión. Adaptación para computadora, tablet y celular.
 
 ## Iniciar
 
@@ -104,3 +104,11 @@ Comprobación: tests/phase5.spec.ts incluye 11 escenarios nuevos; la regresión 
 05/10/2026: cada odontólogo muestra hasta tres servicios y Ver servicios abre su consulta completa con búsqueda, estado y paginación del servidor. El mes muestra hasta tres citas por día y +N citas más; en celular muestra el contador. La ventana del día reutiliza la lista remota y el detalle existente, conservando mes, profesional y filtros al volver. Los cambios de cita actualizan ambas vistas. El modal compartido recupera el foco dentro de la ventana inferior cuando una actualización reemplaza el control de apertura.
 
 Pruebas nuevas: tests/compact-lists.spec.ts, con 21 servicios y 21 citas para comprobar páginas reales. Regresión con phase1.spec.ts y phase2.spec.ts, compilación, lint y formato. Capturas en docs/verification/compact-lists. Decisiones y resultados: ../docs/ajustes-listas-agenda-odontologos.md; alcance 1.4 y plan 1.9. Reiniciar el backend actualizado para habilitar la nueva consulta de servicios asociados.
+
+## WhatsApp · Fase 6, conexión inicial
+
+WhatsApp abre una bandeja real del sistema, con búsqueda y paginación del servidor. Ver conversación permite consultar mensajes, filtrar sentido/estado, revisar referencias y errores y registrar una respuesta de prueba. El modo TEMPLATE envía la plantilla configurada; TEXT muestra el formulario solo cuando esa modalidad está configurada. Actualizar mensajes consulta los estados nuevos.
+
+La pantalla distingue configuración local de conexión externa comprobada. No solicita tokens en el navegador ni crea reservas. Administrador y recepción acceden según WHATSAPP_READ/WRITE; caja y odontólogo no reciben esos permisos por defecto. La guía [conectar-whatsapp-prueba.md](../docs/conectar-whatsapp-prueba.md) explica el registro de cuenta, archivo privado, túnel y prueba con teléfono.
+
+tests/whatsapp.spec.ts comprueba recepción firmada a través del servidor real de pruebas, páginas, filtros, permisos y reintento de solicitud con la misma clave. Requiere las credenciales ficticias del diseño de fase 6 en el backend de pruebas y worker-enabled=false; no usar tokens reales ni enviar al Sandbox en E2E. Capturas en docs/verification/whatsapp; resultados en ../docs/conexion-whatsapp-fase-6.md. Alcance vigente 1.5 y plan 2.0.

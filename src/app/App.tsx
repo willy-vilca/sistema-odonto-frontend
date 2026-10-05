@@ -1,4 +1,5 @@
 import { PlansPage } from '../features/treatments/PlansPage'
+import { WhatsAppPage } from '../features/whatsapp/WhatsAppPage'
 import { FinancePage } from '../features/finance/FinancePage'
 import { ClinicalPage } from '../features/clinical/ClinicalPage'
 import { useEffect } from 'react'
@@ -112,6 +113,16 @@ function Application() {
               )
             }
           />
+          <Route
+            path="/conversaciones"
+            element={
+              state.status === 'ready' ? (
+                <WhatsAppPage timeZone={state.data.timeZone} dateFormat={state.data.dateFormat} />
+              ) : (
+                <ConnectionCard state={state} reload={reload} />
+              )
+            }
+          />
           {modules
             .filter(
               (module) =>
@@ -119,7 +130,8 @@ function Application() {
                 module.phase !== 1 &&
                 module.phase !== 2 &&
                 module.phase !== 3 &&
-                module.phase !== 4,
+                module.phase !== 4 &&
+                module.phase !== 6,
             )
             .map((module) => (
               <Route

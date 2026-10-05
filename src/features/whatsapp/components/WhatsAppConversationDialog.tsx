@@ -1,0 +1,146 @@
+import { useState } from 'react'
+import { useAuth } from '../../auth/hooks/useAuth'
+import { usePagedList } from '../../../shared/data/usePagedList'
+import { useQueryData } from '../../../shared/data/useQueryData'
+import { PagedTable } from '../../../shared/ui/PagedTable'
+import { Modal } from '../../../shared/ui/Modal'
+import { Button } from '../../../shared/ui/Button'
+import { useWhatsAppReply } from '../hooks/useWhatsAppReply'
+import { WhatsAppMessageContent } from './WhatsAppMessageContent'
+import { WhatsAppReplyForm } from './WhatsAppReplyForm'
+import {
+  messageStatusLabels,
+  type WhatsAppConnection,
+  type WhatsAppConversation,
+  type WhatsAppMessage,
+} from '../model/whatsapp'
+
+export function WhatsAppConversationDialog({
+  conversationId,
+  connection,
+  timeZone,
+  dateFormat,
+  onChanged,
+  onClose,
+}: {
+  conversationId: string
+  connection?: WhatsAppConnection
+  timeZone: string
+  dateFormat: string
+  onChanged: () => void
+  onClose: () => void
+}) {
+  const auth = useAuth()
+  const [messageDirection, setMessageDirection] = useState('')
+  const [status, setStatus] = useState('')
+  const path = '/api/v1/whatsapp/conversations/' + conversationId
+  const conversation = useQueryData<WhatsAppConversation>(path)
+  const messages = usePagedList<WhatsAppMessage>(
+    path + '/messages',
+    { direction: 'desc', messageDirection, status },
+    'createdAt',
+  )
+  function reload() {
+    conversation.reload()
+    messages.reload()
+    onChanged()
+  }
+  const reply = useWhatsAppReply(conversationId, () => {
+    messages.setPage(0)
+    reload()
+  })
+  return (
+    <Modal title="Conversación de WhatsApp" onClose={onClose} busy={reply.busy}>
+      <div className="space-y-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          {conversation.error ? (
+            <p role="alert" className="error-box">
+              {conversation.error}
+            </p>
+          ) : conversation.loading ? (
+            <p role="status" className="text-sm text-muted">
+              Consultando contacto…
+            </p>
+          ) : (
+            <div className="min-w-0">
+              <h3 className="font-semibold break-words">
+                {conversation.data?.contactName || 'Contacto de WhatsApp'}
+              </h3>
+              <p className="mt-1 break-all text-sm text-muted">{conversation.data?.phone}</p>
+            </div>
+          )}
+          <Button
+            variant="secondary"
+            onClick={reload}
+            disabled={reply.busy || messages.loading || conversation.loading}
+          >
+            Actualizar mensajes
+          </Button>
+        </div>
+        <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
+          El agente y las reservas automáticas están pendientes de integración. Esta conversación
+          permite comprobar la recepción y el envío de mensajes.
+        </p>
+        <PagedTable
+          list={messages}
+          keyFor={(message) => message.id}
+          columns={[
+            {
+              label: 'Mensajes · más recientes primero',
+              render: (message) => (
+                <WhatsAppMessageContent
+                  message={message}
+                  timeZone={timeZone}
+                  dateFormat={dateFormat}
+                />
+              ),
+            },
+          ]}
+          filters={
+            <>
+              <label className="field-label min-w-0 basis-40">
+                Dirección del mensaje
+                <select
+                  className="field"
+                  value={messageDirection}
+                  onChange={(event) => setMessageDirection(event.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="INBOUND">Recibidos</option>
+                  <option value="OUTBOUND">Enviados</option>
+                </select>
+              </label>
+              <label className="field-label min-w-0 basis-40">
+                Estado del mensaje
+                <select
+                  className="field"
+                  value={status}
+                  onChange={(event) => setStatus(event.target.value)}
+                >
+                  <option value="">Todos</option>
+                  {Object.entries(messageStatusLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          }
+        />
+        {auth.can('WHATSAPP_WRITE') &&
+          connection?.enabled &&
+          connection.configured &&
+          conversation.data && <WhatsAppReplyForm reply={reply} connection={connection} />}
+        {!connection?.configured && (
+          <p className="text-sm text-muted">
+            Completa la conexión para habilitar la respuesta de prueba.
+          </p>
+        )}
+        <Button variant="secondary" onClick={onClose} disabled={reply.busy}>
+          Volver a conversaciones
+        </Button>
+      </div>
+    </Modal>
+  )
+}

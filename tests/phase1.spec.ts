@@ -5,7 +5,9 @@ import { readFile, mkdir } from 'node:fs/promises'
 async function editor(page: Page, path: string, singular: string) {
   await page.goto('/configuracion/' + path)
   await page.getByRole('button', { name: 'Añadir ' + singular, exact: true }).click()
-  return page.getByRole('dialog', { name: 'Crear ' + singular, exact: true })
+  const dialog = page.getByRole('dialog', { name: 'Crear ' + singular, exact: true })
+  await expect(dialog).toBeVisible()
+  return dialog
 }
 async function save(page: Page) {
   await page
@@ -290,7 +292,10 @@ test('changing page loads ten services and then only the remaining page', async 
   await page.goto('/configuracion/servicios')
   await page.getByRole('searchbox', { name: 'Buscar', exact: true }).fill('Servicio de prueba ')
   await page.getByLabel('Por página', { exact: true }).selectOption('10')
-  await expect(page.getByRole('status').filter({ hasText: 'Página 1 de 2' })).toBeVisible()
+  // Wait for the debounced search, not the unfiltered page that has the same page count.
+  await expect(
+    page.getByRole('status').filter({ hasText: '11 registros · Página 1 de 2' }),
+  ).toBeVisible()
   const second = page.waitForResponse(
     (r) =>
       r.url().includes('/api/v1/services?') && new URL(r.url()).searchParams.get('page') === '1',
