@@ -14,7 +14,11 @@ export function WhatsAppMessageContent({
     <article className={'space-y-3 rounded-xl p-4 ' + (outbound ? 'bg-brand-50' : 'bg-canvas')}>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
         <span className="font-semibold">
-          {outbound ? 'Respuesta del consultorio' : 'Mensaje del contacto'}
+          {message.source === 'APP_TEST'
+            ? 'Entrada de prueba desde la aplicación'
+            : outbound
+              ? 'Respuesta del consultorio'
+              : 'Mensaje del contacto'}
         </span>
         <time dateTime={message.createdAt} className="text-muted">
           {messageDate(message.createdAt, timeZone, dateFormat)}

@@ -47,10 +47,12 @@ export function Modal({
       aria-labelledby={titleId}
       onCancel={(e) => {
         e.preventDefault()
+        e.stopPropagation()
         if (!busy) onClose()
       }}
       onKeyDown={(e) => {
         if (e.key !== 'Tab') return
+        e.stopPropagation()
         const nodes = [
           ...e.currentTarget.querySelectorAll<HTMLElement>(
             'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]',

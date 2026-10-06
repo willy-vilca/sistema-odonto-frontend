@@ -11,7 +11,7 @@ export interface WhatsAppConnection {
   sendMode: 'TEMPLATE' | 'TEXT'
   testTemplateConfigured: boolean
   missing: string[]
-  agentEnabled: false
+  agentEnabled: boolean
 }
 
 export interface WhatsAppConversation {
@@ -49,6 +49,7 @@ export interface WhatsAppMessage {
   errorCode: string | null
   errorMessage: string | null
   attempts: number
+  source: 'TWILIO' | 'APP_TEST'
 }
 
 export function messageDate(value: string, timeZone: string, dateFormat: string) {

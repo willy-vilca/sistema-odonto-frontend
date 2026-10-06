@@ -83,11 +83,12 @@ for (const width of [1440, 768, 390]) {
     await expect(
       page.getByText('Configuración lista para la prueba', { exact: true }),
     ).toBeVisible()
-    await expect(page.getByText('Primer paso:', { exact: false })).toContainText(
-      'se incorporarán después',
+    await expect(page.getByText('El agente prepara respuestas', { exact: false })).toContainText(
+      'se incorporará después',
     )
     await page.getByLabel('Buscar', { exact: true }).fill(phone)
     const opener = page.getByRole('button', { name: 'Ver conversación', exact: true })
+    await expect(opener).toHaveCount(1)
     await expect(opener).toBeVisible()
     await checkAccessAndOverflow(page)
     await mkdir('docs/verification/whatsapp', { recursive: true })
@@ -99,24 +100,29 @@ for (const width of [1440, 768, 390]) {
     await opener.click()
     const dialog = page.getByRole('dialog', { name: 'Conversación de WhatsApp', exact: true })
     await expect(dialog).toContainText(phone)
-    await dialog.getByLabel('Buscar', { exact: true }).fill(messagePrefix)
+    await dialog.getByLabel('Buscar', { exact: true }).first().fill(messagePrefix)
     await dialog.getByLabel('Dirección del mensaje').selectOption('INBOUND')
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('21 registros')
+    await expect(dialog.locator('footer').first().getByRole('status')).toContainText('21 registros')
     await expect(dialog).toContainText(messagePrefix + ' mensaje 21')
-    await dialog.getByRole('button', { name: 'Siguiente', exact: true }).click()
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('Página 2 de 2')
-    await dialog.getByLabel('Buscar', { exact: true }).fill(transportMessage)
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('1 registros')
+    await dialog.getByRole('button', { name: 'Siguiente', exact: true }).first().click()
+    await expect(dialog.locator('footer').first().getByRole('status')).toContainText(
+      'Página 2 de 2',
+    )
+    await dialog.getByLabel('Buscar', { exact: true }).first().fill(transportMessage)
+    await expect(dialog.locator('footer').first().getByRole('status')).toContainText('1 registros')
     const visibleMessages = dialog.locator('article:visible')
     await expect(visibleMessages.getByText(transportMessage, { exact: true })).toBeVisible()
     await visibleMessages.getByText('Referencia de Twilio', { exact: true }).click()
     await expect(visibleMessages.getByText(reference, { exact: true })).toBeVisible()
     await dialog.getByLabel('Estado del mensaje').selectOption('UNSUPPORTED')
     await expect(dialog).toContainText('Sin registros para mostrar')
-    await dialog.getByLabel('Buscar', { exact: true }).fill('Adjunto de prueba ' + suffix)
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('1 registros')
+    await dialog
+      .getByLabel('Buscar', { exact: true })
+      .first()
+      .fill('Adjunto de prueba ' + suffix)
+    await expect(dialog.locator('footer').first().getByRole('status')).toContainText('1 registros')
     await expect(dialog).toContainText('Formato no admitido')
-    await dialog.getByLabel('Buscar', { exact: true }).fill('')
+    await dialog.getByLabel('Buscar', { exact: true }).first().fill('')
     await dialog.getByLabel('Estado del mensaje').selectOption('')
     await dialog.getByLabel('Dirección del mensaje').selectOption('OUTBOUND')
 

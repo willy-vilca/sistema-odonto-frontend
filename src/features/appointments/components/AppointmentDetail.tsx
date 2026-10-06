@@ -143,8 +143,13 @@ export function AppointmentDetail({
             {current.durationMinutes} min
           </p>
           <p className="mt-2 text-xs text-muted">
-            Origen: {current.origin === 'MANUAL' ? 'Recepción' : 'WhatsApp'} · Zona horaria:{' '}
-            {timeZone}
+            Origen:{' '}
+            {current.origin === 'MANUAL'
+              ? 'Recepción'
+              : current.origin === 'AI_TEST'
+                ? 'Prueba IA'
+                : 'WhatsApp'}{' '}
+            · Zona horaria: {timeZone}
           </p>
           {current.notes && <p className="mt-3 text-sm whitespace-pre-wrap">{current.notes}</p>}
         </div>

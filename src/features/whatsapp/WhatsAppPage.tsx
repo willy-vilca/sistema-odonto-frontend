@@ -7,6 +7,8 @@ import { Button } from '../../shared/ui/Button'
 import { PagedTable } from '../../shared/ui/PagedTable'
 import { WhatsAppConnectionCard } from './components/WhatsAppConnectionCard'
 import { WhatsAppConversationDialog } from './components/WhatsAppConversationDialog'
+import { AgentConfigurationCard } from './components/AgentConfigurationCard'
+import { AgentTestDialog } from './components/AgentTestDialog'
 import { messageDate, type WhatsAppConnection, type WhatsAppConversation } from './model/whatsapp'
 
 export function WhatsAppPage({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
@@ -23,6 +25,7 @@ export function WhatsAppPage({ timeZone, dateFormat }: { timeZone: string; dateF
 function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
   const auth = useAuth()
   const [selected, setSelected] = useState<string>()
+  const [testPhone, setTestPhone] = useState<string>()
   const returnFocus = useRef<string | undefined>(undefined)
   const connection = useQueryData<WhatsAppConnection>('/api/v1/whatsapp/connection')
   const conversations = usePagedList<WhatsAppConversation>(
@@ -60,11 +63,15 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
         connection={connection}
         canConfigure={!!auth.session?.user?.roles.includes('ADMIN')}
       />
+      <AgentConfigurationCard
+        canTest={auth.can('AGENT_TEST_WRITE')}
+        onTest={() => setTestPhone('')}
+      />
       <div className="flex items-start gap-3 rounded-2xl bg-brand-50 p-5 text-sm text-brand-700">
         <MessageCircle size={20} className="mt-0.5 shrink-0" aria-hidden="true" />
         <p>
-          Primer paso: conectar WhatsApp y comprobar sus mensajes. El agente de IA y la reserva
-          automática se incorporarán después de verificar esta conexión.
+          El agente prepara respuestas y propuestas en la aplicación. Las reservas requieren
+          confirmar el resumen; el envío personalizado por WhatsApp se incorporará después.
         </p>
       </div>
       <PagedTable
@@ -118,9 +125,21 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
           timeZone={timeZone}
           dateFormat={dateFormat}
           onChanged={conversations.reload}
+          onAgentTest={(phone) => setTestPhone(phone)}
           onClose={() => {
             returnFocus.current = selected
             setSelected(undefined)
+          }}
+        />
+      )}
+      {testPhone !== undefined && (
+        <AgentTestDialog
+          phone={testPhone}
+          onClose={() => setTestPhone(undefined)}
+          onQueued={(id) => {
+            setTestPhone(undefined)
+            setSelected(id)
+            conversations.reload()
           }}
         />
       )}

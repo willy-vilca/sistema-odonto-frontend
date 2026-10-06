@@ -8,6 +8,7 @@ import { Button } from '../../../shared/ui/Button'
 import { useWhatsAppReply } from '../hooks/useWhatsAppReply'
 import { WhatsAppMessageContent } from './WhatsAppMessageContent'
 import { WhatsAppReplyForm } from './WhatsAppReplyForm'
+import { AgentConversationPanel } from './AgentConversationPanel'
 import {
   messageStatusLabels,
   type WhatsAppConnection,
@@ -22,6 +23,7 @@ export function WhatsAppConversationDialog({
   dateFormat,
   onChanged,
   onClose,
+  onAgentTest,
 }: {
   conversationId: string
   connection?: WhatsAppConnection
@@ -29,6 +31,7 @@ export function WhatsAppConversationDialog({
   dateFormat: string
   onChanged: () => void
   onClose: () => void
+  onAgentTest: (phone: string) => void
 }) {
   const auth = useAuth()
   const [messageDirection, setMessageDirection] = useState('')
@@ -78,8 +81,9 @@ export function WhatsAppConversationDialog({
           </Button>
         </div>
         <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
-          El agente y las reservas automáticas están pendientes de integración. Esta conversación
-          permite comprobar la recepción y el envío de mensajes.
+          Consulta debajo la interpretación y acciones del agente. Las respuestas preparadas se
+          muestran en la aplicación; los mensajes enviados manualmente conservan sus estados de
+          entrega.
         </p>
         <PagedTable
           list={messages}
@@ -127,6 +131,13 @@ export function WhatsAppConversationDialog({
               </label>
             </>
           }
+        />
+        <AgentConversationPanel
+          conversationId={conversationId}
+          canTest={auth.can('AGENT_TEST_WRITE')}
+          timeZone={timeZone}
+          dateFormat={dateFormat}
+          onTest={() => onAgentTest(conversation.data?.phone || '')}
         />
         {auth.can('WHATSAPP_WRITE') &&
           connection?.enabled &&
