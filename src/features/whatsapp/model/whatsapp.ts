@@ -3,7 +3,7 @@ import { dateLocale } from '../../../shared/data/dateFormat'
 export interface WhatsAppConnection {
   enabled: boolean
   configured: boolean
-  provider: 'TWILIO_SANDBOX'
+  provider: 'TWILIO_SANDBOX' | 'KAPSO_SANDBOX'
   sender: string
   inboundUrl: string
   statusUrl: string
@@ -26,7 +26,7 @@ export interface WhatsAppConversation {
 export const messageStatusLabels = {
   QUEUED: 'En cola',
   SENDING: 'Enviando',
-  ACCEPTED: 'Aceptado por Twilio',
+  ACCEPTED: 'Aceptado por el proveedor',
   SENT: 'Enviado',
   DELIVERED: 'Entregado',
   READ: 'Leído',
@@ -49,7 +49,7 @@ export interface WhatsAppMessage {
   errorCode: string | null
   errorMessage: string | null
   attempts: number
-  source: 'TWILIO' | 'APP_TEST'
+  source: 'TWILIO' | 'KAPSO' | 'APP_TEST'
 }
 
 export function messageDate(value: string, timeZone: string, dateFormat: string) {

@@ -81,9 +81,9 @@ export function WhatsAppConversationDialog({
           </Button>
         </div>
         <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
-          Consulta debajo la interpretación y acciones del agente. Las respuestas preparadas se
-          muestran en la aplicación; los mensajes enviados manualmente conservan sus estados de
-          entrega.
+          {connection?.provider === 'KAPSO_SANDBOX'
+            ? 'Conexión manual con Kapso. Escribe una respuesta para comprobar su envío al teléfono. Estos mensajes no activan el agente ni generan citas.'
+            : 'Consulta debajo la interpretación y acciones del agente. Las respuestas preparadas se muestran en la aplicación; los mensajes enviados manualmente conservan sus estados de entrega.'}
         </p>
         <PagedTable
           list={messages}
@@ -132,13 +132,15 @@ export function WhatsAppConversationDialog({
             </>
           }
         />
-        <AgentConversationPanel
-          conversationId={conversationId}
-          canTest={auth.can('AGENT_TEST_WRITE')}
-          timeZone={timeZone}
-          dateFormat={dateFormat}
-          onTest={() => onAgentTest(conversation.data?.phone || '')}
-        />
+        {connection?.provider === 'TWILIO_SANDBOX' && (
+          <AgentConversationPanel
+            conversationId={conversationId}
+            canTest={auth.can('AGENT_TEST_WRITE')}
+            timeZone={timeZone}
+            dateFormat={dateFormat}
+            onTest={() => onAgentTest(conversation.data?.phone || '')}
+          />
+        )}
         {auth.can('WHATSAPP_WRITE') &&
           connection?.enabled &&
           connection.configured &&

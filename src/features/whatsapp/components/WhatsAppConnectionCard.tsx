@@ -11,6 +11,7 @@ export function WhatsAppConnectionCard({
   canConfigure: boolean
 }) {
   const config = connection.data
+  const kapso = config?.provider === 'KAPSO_SANDBOX'
   return (
     <section
       aria-label="Conexión de WhatsApp"
@@ -23,7 +24,9 @@ export function WhatsAppConnectionCard({
           </span>
           <div>
             <h2 className="text-lg font-semibold">Conexión de prueba</h2>
-            <p className="mt-1 text-sm text-muted">Twilio Sandbox para WhatsApp</p>
+            <p className="mt-1 text-sm text-muted">
+              {kapso ? 'Kapso Sandbox para WhatsApp' : 'Twilio Sandbox para WhatsApp'}
+            </p>
           </div>
         </div>
         <Button variant="secondary" onClick={connection.reload} disabled={connection.loading}>
@@ -73,6 +76,12 @@ export function WhatsAppConnectionCard({
               </dd>
             </div>
           </dl>
+          {kapso && (
+            <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
+              Prueba de conexión manual. Puedes recibir y responder texto personalizado; el agente y
+              las reservas automáticas están desactivados en este modo.
+            </p>
+          )}
           {config.sendMode === 'TEMPLATE' && !config.testTemplateConfigured && (
             <p className="text-sm text-muted">
               Falta configurar la plantilla para probar el envío de respuestas.
@@ -91,21 +100,27 @@ export function WhatsAppConnectionCard({
           {canConfigure && (config.inboundUrl || config.statusUrl) && (
             <details className="rounded-xl border border-line p-4 text-sm">
               <summary className="min-h-11 cursor-pointer font-semibold text-brand-700">
-                Direcciones para configurar en Twilio
+                {kapso
+                  ? 'Dirección para configurar en Kapso'
+                  : 'Direcciones para configurar en Twilio'}
               </summary>
               <dl className="mt-2 space-y-3">
                 <div>
-                  <dt className="font-medium">Recepción de mensajes</dt>
+                  <dt className="font-medium">
+                    {kapso ? 'Mensajes y estados de entrega' : 'Recepción de mensajes'}
+                  </dt>
                   <dd className="mt-1 break-all text-muted">
                     {config.inboundUrl || 'Sin configurar'}
                   </dd>
                 </div>
-                <div>
-                  <dt className="font-medium">Estados de envío</dt>
-                  <dd className="mt-1 break-all text-muted">
-                    {config.statusUrl || 'Sin configurar'}
-                  </dd>
-                </div>
+                {!kapso && (
+                  <div>
+                    <dt className="font-medium">Estados de envío</dt>
+                    <dd className="mt-1 break-all text-muted">
+                      {config.statusUrl || 'Sin configurar'}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </details>
           )}

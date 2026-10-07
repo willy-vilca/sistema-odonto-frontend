@@ -28,6 +28,7 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
   const [testPhone, setTestPhone] = useState<string>()
   const returnFocus = useRef<string | undefined>(undefined)
   const connection = useQueryData<WhatsAppConnection>('/api/v1/whatsapp/connection')
+  const kapso = connection.data?.provider === 'KAPSO_SANDBOX'
   const conversations = usePagedList<WhatsAppConversation>(
     '/api/v1/whatsapp/conversations',
     { direction: 'desc' },
@@ -63,15 +64,18 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
         connection={connection}
         canConfigure={!!auth.session?.user?.roles.includes('ADMIN')}
       />
-      <AgentConfigurationCard
-        canTest={auth.can('AGENT_TEST_WRITE')}
-        onTest={() => setTestPhone('')}
-      />
+      {connection.data?.provider === 'TWILIO_SANDBOX' && (
+        <AgentConfigurationCard
+          canTest={auth.can('AGENT_TEST_WRITE')}
+          onTest={() => setTestPhone('')}
+        />
+      )}
       <div className="flex items-start gap-3 rounded-2xl bg-brand-50 p-5 text-sm text-brand-700">
         <MessageCircle size={20} className="mt-0.5 shrink-0" aria-hidden="true" />
         <p>
-          El agente prepara respuestas y propuestas en la aplicación. Las reservas requieren
-          confirmar el resumen; el envío personalizado por WhatsApp se incorporará después.
+          {kapso
+            ? 'Recibe mensajes del participante y responde con tu propio texto desde la conversación. La integración de Kapso con el agente se realizará después de comprobar esta conexión.'
+            : 'El agente prepara respuestas y propuestas en la aplicación. Las reservas requieren confirmar el resumen; el envío personalizado por WhatsApp se incorporará después.'}
         </p>
       </div>
       <PagedTable

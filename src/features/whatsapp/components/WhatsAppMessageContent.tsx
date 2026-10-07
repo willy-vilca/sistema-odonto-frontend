@@ -59,7 +59,9 @@ export function WhatsAppMessageContent({
       )}
       {message.providerSid && (
         <details className="text-xs text-muted">
-          <summary className="min-h-11 cursor-pointer pt-3">Referencia de Twilio</summary>
+          <summary className="min-h-11 cursor-pointer pt-3">
+            {message.source === 'KAPSO' ? 'Referencia de Kapso' : 'Referencia de Twilio'}
+          </summary>
           <p className="break-all pt-1">{message.providerSid}</p>
         </details>
       )}

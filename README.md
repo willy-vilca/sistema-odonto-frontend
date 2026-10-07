@@ -122,3 +122,11 @@ La clave de Groq se guarda exclusivamente en backend/config/ai.local.properties;
 E2E: preparar la base automática protegida con scripts/prepare-e2e.ps1 y el backend test según backend/README.md, con clave ficticia y ambos trabajadores externos desactivados. Ejecutar npx playwright test tests/phase1.spec.ts tests/whatsapp.spec.ts tests/agent.spec.ts; el escenario agent genera únicamente evidencia controlada de interfaz, sin contactar Groq. Las pruebas de diálogos y regreso a listas usan tests/phase2.spec.ts y tests/compact-lists.spec.ts. Verificación total de este tramo: 24 escenarios distintos aprobados; lint, TypeScript, build y formato aprobados. Formulario y bitácora revisados en computadora, tablet y celular. Capturas en docs/verification/agent.
 
 Los diálogos compartidos detienen el evento Escape y el recorrido Tab del diálogo superior para conservar la conversación inferior y su foco. Alcance 1.7, plan 2.6. La salida personalizada real por WhatsApp sigue pendiente de completar fase 6.
+
+## Kapso · conexión manual
+
+La rama kapso muestra el proveedor y habilita el formulario de texto propio cuando el backend selecciona odontocare.kapso.enabled=true. Oculta las pruebas, propuestas y bitácora del agente en ese modo. Reutiliza permisos, búsqueda, filtros, páginas remotas y avisos flotantes. Referencias de mensajes identifican Kapso; aceptación, entrega y lectura son estados diferentes.
+
+[Guía de conexión y prueba](../docs/conectar-kapso-prueba.md), [resultados](../docs/conexion-kapso-fase-6.md). Backend y frontend conservan ramas main. Para volver al conector anterior basta desactivar Kapso en el backend o volver a main en ambos repositorios.
+
+E2E usa el backend test con kapso-e2e.properties, claves ficticias y envíos desactivados; preparar únicamente sistema_odontologo_test con scripts/prepare-e2e.ps1. tests/kapso.spec.ts verifica tres tamaños, texto Unicode, filtros/páginas, reintento con clave estable, estados y ausencia de solicitudes al agente. La regresión con Twilio desactivando Kapso usa tests/whatsapp.spec.ts y tests/agent.spec.ts. Diez escenarios aprobados y revisión visual en computadora, tablet y celular; capturas en docs/verification/kapso y capturas conservadas de la regresión anterior. Las capturas son evidencia controlada de interfaz y el intercambio externo se documenta aparte. Alcance 1.8 y plan 2.8.
