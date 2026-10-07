@@ -14,7 +14,7 @@ export function AgentConfigurationCard({
     <section className="space-y-4 rounded-2xl border border-line bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold">Agente IA · primeras pruebas</h2>
+          <h2 className="text-lg font-semibold">Agente IA · reservas</h2>
           <p className="mt-1 text-sm text-muted">
             Interpretación, herramientas y reservas con confirmación.
           </p>
@@ -54,8 +54,9 @@ export function AgentConfigurationCard({
               <p className="text-sm text-muted">El procesamiento automático está desactivado.</p>
             )}
             <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
-              Las respuestas se preparan en la aplicación y todavía no se envían a WhatsApp. Una
-              configuración lista no acredita la validez de la clave ni la precisión del modelo.
+              {config.data.responseMode === 'WHATSAPP'
+                ? 'El agente responde por WhatsApp, consulta horarios y registra la cita después de confirmar el paciente. Las pruebas desde la aplicación son vistas previas y no envían mensajes al teléfono.'
+                : 'Las respuestas se preparan en la aplicación y todavía no se envían a WhatsApp. Una configuración lista no acredita la validez de la clave ni la precisión del modelo.'}
             </p>
             {canTest && (
               <Button onClick={onTest} disabled={!config.data.configured}>

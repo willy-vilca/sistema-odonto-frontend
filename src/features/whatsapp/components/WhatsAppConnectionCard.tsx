@@ -78,8 +78,9 @@ export function WhatsAppConnectionCard({
           </dl>
           {kapso && (
             <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
-              Prueba de conexión manual. Puedes recibir y responder texto personalizado; el agente y
-              las reservas automáticas están desactivados en este modo.
+              {config.agentEnabled
+                ? 'El agente responde automáticamente por WhatsApp. Una cita se registra únicamente después de confirmar el resumen del paciente, servicio, profesional y horario.'
+                : 'Prueba de conexión manual. Puedes recibir y responder texto personalizado; el agente y las reservas automáticas están desactivados en este modo.'}
             </p>
           )}
           {config.sendMode === 'TEMPLATE' && !config.testTemplateConfigured && (

@@ -14,18 +14,33 @@ export function AgentConversationPanel({
   timeZone,
   dateFormat,
   onTest,
+  automatic = false,
 }: {
   conversationId: string
   canTest: boolean
   timeZone: string
   dateFormat: string
   onTest: () => void
+  automatic?: boolean
 }) {
   const [state, setState] = useState('')
   const [selected, setSelected] = useState<string>()
+  const returnFocus = useRef<string | undefined>(undefined)
   const path = '/api/v1/whatsapp/conversations/' + conversationId + '/agent'
   const runs = usePagedList<AgentRun>(path + '/runs', { direction: 'desc', state }, 'createdAt')
   const proposal = useQueryData<AgentProposal | null>(path + '/proposal')
+  useEffect(() => {
+    if (selected || runs.loading || !returnFocus.current) return
+    const trigger = [
+      ...document.querySelectorAll<HTMLButtonElement>('[data-agent-run-trigger]'),
+    ].find(
+      (button) =>
+        button.dataset.agentRunTrigger === returnFocus.current &&
+        button.getClientRects().length > 0,
+    )
+    if (trigger) window.requestAnimationFrame(() => trigger.focus())
+    returnFocus.current = undefined
+  }, [selected, runs.loading])
   const reloadRef = useRef(() => {})
   useEffect(() => {
     reloadRef.current = () => {
@@ -57,7 +72,9 @@ export function AgentConversationPanel({
         </div>
       </div>
       <p className="text-sm text-muted">
-        Respuestas preparadas en la aplicación. No se marcan como enviadas a WhatsApp.
+        {automatic
+          ? 'Respuestas autónomas y herramientas de reserva. La bitácora muestra la respuesta y su estado real de envío.'
+          : 'Respuestas preparadas en la aplicación. No se marcan como enviadas a WhatsApp.'}
       </p>
       {proposal.error && (
         <p role="alert" className="error-box">
@@ -73,7 +90,8 @@ export function AgentConversationPanel({
           {proposal.data.state === 'PENDING' && (
             <>
               <p className="text-sm">
-                Revisa los datos y responde desde WhatsApp o desde la prueba de la aplicación:
+                Revisa los datos y responde «Sí, confirmo» después de recibir el resumen o utiliza
+                el código:
               </p>
               <p className="select-all rounded-lg bg-white p-3 font-mono font-semibold">
                 CONFIRMO {proposal.data.confirmationCode}
@@ -111,14 +129,22 @@ export function AgentConversationPanel({
                   {agentStateLabels[run.state]}
                 </span>
                 <p className="line-clamp-3 whitespace-pre-wrap break-words text-sm">
-                  {run.responseText || run.errorMessage || 'Pendiente de interpretación.'}
+                  {run.responseText ||
+                    run.errorMessage ||
+                    (run.state === 'GROUPED'
+                      ? 'Incluido en la siguiente solicitud de esta conversación.'
+                      : 'Pendiente de interpretación.')}
                 </p>
               </div>
             ),
           },
         ]}
         actions={(run) => (
-          <Button variant="quiet" onClick={() => setSelected(run.id)}>
+          <Button
+            variant="quiet"
+            data-agent-run-trigger={run.id}
+            onClick={() => setSelected(run.id)}
+          >
             Ver bitácora
           </Button>
         )}
@@ -145,7 +171,10 @@ export function AgentConversationPanel({
           id={selected}
           canTest={canTest}
           onChanged={() => reloadRef.current()}
-          onClose={() => setSelected(undefined)}
+          onClose={() => {
+            returnFocus.current = selected
+            setSelected(undefined)
+          }}
         />
       )}
     </section>

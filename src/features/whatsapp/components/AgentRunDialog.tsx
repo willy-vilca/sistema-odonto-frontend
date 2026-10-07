@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from '../../auth/hooks/useAuth'
 import { Link } from 'react-router-dom'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
@@ -7,7 +8,8 @@ import { useQueryData } from '../../../shared/data/useQueryData'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { agentStateLabels, agentToolLabels, type AgentDetail, type AgentStep } from '../model/agent'
-import { retryAgentRun } from '../services/agentService'
+import { retryAgentRun, retryAgentReply } from '../services/agentService'
+import { messageStatusLabels } from '../model/whatsapp'
 
 export function AgentRunDialog({
   id,
@@ -28,6 +30,7 @@ export function AgentRunDialog({
     'ordinal',
   )
   const form = useSaveForm()
+  const auth = useAuth()
   return (
     <Modal title="Bitácora del agente IA" onClose={onClose} busy={form.busy}>
       <div className="space-y-5">
@@ -66,10 +69,54 @@ export function AgentRunDialog({
                 </p>
               </div>
               <div className="rounded-xl bg-brand-50 p-4">
-                <h3 className="font-semibold">Respuesta preparada · sin envío a WhatsApp</h3>
+                <h3 className="font-semibold">
+                  {detail.data.reply
+                    ? 'Respuesta del agente'
+                    : 'Respuesta preparada · sin envío a WhatsApp'}
+                </h3>
                 <p className="mt-2 whitespace-pre-wrap break-words text-sm">
                   {detail.data.run.responseText || 'Todavía no hay una respuesta preparada.'}
                 </p>
+                {detail.data.reply && (
+                  <div className="mt-3 space-y-2 text-sm">
+                    <p>
+                      <span className="status-active">
+                        {messageStatusLabels[detail.data.reply.status]}
+                      </span>{' '}
+                      · Intentos de envío: {detail.data.reply.attempts}
+                    </p>
+                    {detail.data.reply.errorMessage && (
+                      <p role="alert" className="error-box">
+                        {detail.data.reply.errorMessage}
+                      </p>
+                    )}
+                    {detail.data.reply.providerSid && (
+                      <p className="break-all text-xs text-muted">
+                        Referencia de Kapso: {detail.data.reply.providerSid}
+                      </p>
+                    )}
+                    {auth.can('WHATSAPP_WRITE') &&
+                      detail.data.reply.status === 'FAILED' &&
+                      !detail.data.reply.providerSid &&
+                      detail.data.reply.attempts < 3 && (
+                        <Button
+                          variant="secondary"
+                          disabled={form.busy}
+                          onClick={() =>
+                            void form.submit(
+                              () => retryAgentReply(id),
+                              () => {
+                                detail.reload()
+                                onChanged()
+                              },
+                            )
+                          }
+                        >
+                          Reintentar envío de respuesta
+                        </Button>
+                      )}
+                  </div>
+                )}
               </div>
               {detail.data.run.errorMessage && (
                 <p role="alert" className="error-box">

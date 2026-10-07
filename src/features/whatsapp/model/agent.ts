@@ -4,7 +4,7 @@ export interface AgentConfiguration {
   workerEnabled: boolean
   provider: string
   model: string
-  responseMode: 'PREVIEW'
+  responseMode: 'PREVIEW' | 'WHATSAPP'
   missing: string[]
   maxModelCalls: number
   maxCompletionTokens: number
@@ -13,7 +13,7 @@ export interface AgentRun {
   id: string
   messageId: string
   conversationId: string
-  state: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
+  state: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'GROUPED'
   model: string
   responseText: string
   errorCode: string | null
@@ -37,6 +37,7 @@ export interface AgentDetail {
   incomingText: string
   source: string
   proposal: AgentProposal | null
+  reply: WhatsAppMessage | null
 }
 export interface AgentStep {
   id: string
@@ -53,6 +54,7 @@ export const agentStateLabels = {
   PROCESSING: 'Analizando',
   COMPLETED: 'Completado',
   FAILED: 'Fallido',
+  GROUPED: 'Mensajes agrupados',
 }
 export const agentToolLabels: Record<string, string> = {
   consultar_servicios: 'Consultó servicios y precios',
@@ -62,4 +64,6 @@ export const agentToolLabels: Record<string, string> = {
   descartar_propuesta: 'Descartó la propuesta pendiente',
   crear_cita_confirmada: 'Registró una cita confirmada',
   confirmar_propuesta: 'Comprobó la confirmación',
+  guardar_respuesta: 'Guardó la respuesta para enviar',
 }
+import type { WhatsAppMessage } from './whatsapp'

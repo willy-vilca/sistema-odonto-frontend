@@ -16,9 +16,11 @@ export function WhatsAppMessageContent({
         <span className="font-semibold">
           {message.source === 'APP_TEST'
             ? 'Entrada de prueba desde la aplicación'
-            : outbound
-              ? 'Respuesta del consultorio'
-              : 'Mensaje del contacto'}
+            : message.source === 'AGENT'
+              ? 'Respuesta del agente IA'
+              : outbound
+                ? 'Respuesta del consultorio'
+                : 'Mensaje del contacto'}
         </span>
         <time dateTime={message.createdAt} className="text-muted">
           {messageDate(message.createdAt, timeZone, dateFormat)}
@@ -60,7 +62,9 @@ export function WhatsAppMessageContent({
       {message.providerSid && (
         <details className="text-xs text-muted">
           <summary className="min-h-11 cursor-pointer pt-3">
-            {message.source === 'KAPSO' ? 'Referencia de Kapso' : 'Referencia de Twilio'}
+            {message.source === 'KAPSO' || message.source === 'AGENT'
+              ? 'Referencia de Kapso'
+              : 'Referencia de Twilio'}
           </summary>
           <p className="break-all pt-1">{message.providerSid}</p>
         </details>

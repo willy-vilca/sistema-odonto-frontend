@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { useQueryData } from '../../../shared/data/useQueryData'
@@ -43,11 +43,23 @@ export function WhatsAppConversationDialog({
     { direction: 'desc', messageDirection, status },
     'createdAt',
   )
-  function reload() {
+  const reload = useCallback(() => {
     conversation.reload()
     messages.reload()
     onChanged()
-  }
+  }, [conversation, messages, onChanged])
+  const reloadRef = useRef(() => {})
+  useEffect(() => {
+    reloadRef.current = reload
+  }, [reload])
+  useEffect(() => {
+    if (!connection?.agentEnabled) return
+    const timer = window.setInterval(() => {
+      if (document.querySelectorAll('dialog[open]').length > 1) return
+      reloadRef.current()
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [connection?.agentEnabled])
   const reply = useWhatsAppReply(conversationId, () => {
     messages.setPage(0)
     reload()
@@ -82,7 +94,9 @@ export function WhatsAppConversationDialog({
         </div>
         <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
           {connection?.provider === 'KAPSO_SANDBOX'
-            ? 'Conexión manual con Kapso. Escribe una respuesta para comprobar su envío al teléfono. Estos mensajes no activan el agente ni generan citas.'
+            ? connection.agentEnabled
+              ? 'El agente atiende los mensajes por WhatsApp y registra la cita después de confirmar el paciente. Consulta debajo las propuestas, herramientas y estados de envío.'
+              : 'Conexión manual con Kapso. Escribe una respuesta para comprobar su envío al teléfono. Estos mensajes no activan el agente ni generan citas.'
             : 'Consulta debajo la interpretación y acciones del agente. Las respuestas preparadas se muestran en la aplicación; los mensajes enviados manualmente conservan sus estados de entrega.'}
         </p>
         <PagedTable
@@ -132,13 +146,14 @@ export function WhatsAppConversationDialog({
             </>
           }
         />
-        {connection?.provider === 'TWILIO_SANDBOX' && (
+        {(connection?.provider === 'TWILIO_SANDBOX' || connection?.agentEnabled) && (
           <AgentConversationPanel
             conversationId={conversationId}
             canTest={auth.can('AGENT_TEST_WRITE')}
             timeZone={timeZone}
             dateFormat={dateFormat}
             onTest={() => onAgentTest(conversation.data?.phone || '')}
+            automatic={connection?.provider === 'KAPSO_SANDBOX' && connection.agentEnabled}
           />
         )}
         {auth.can('WHATSAPP_WRITE') &&

@@ -130,3 +130,9 @@ La rama kapso muestra el proveedor y habilita el formulario de texto propio cuan
 [Guía de conexión y prueba](../docs/conectar-kapso-prueba.md), [resultados](../docs/conexion-kapso-fase-6.md). Backend y frontend conservan ramas main. Para volver al conector anterior basta desactivar Kapso en el backend o volver a main en ambos repositorios.
 
 E2E usa el backend test con kapso-e2e.properties, claves ficticias y envíos desactivados; preparar únicamente sistema_odontologo_test con scripts/prepare-e2e.ps1. tests/kapso.spec.ts verifica tres tamaños, texto Unicode, filtros/páginas, reintento con clave estable, estados y ausencia de solicitudes al agente. La regresión con Twilio desactivando Kapso usa tests/whatsapp.spec.ts y tests/agent.spec.ts. Diez escenarios aprobados y revisión visual en computadora, tablet y celular; capturas en docs/verification/kapso y capturas conservadas de la regresión anterior. Las capturas son evidencia controlada de interfaz y el intercambio externo se documenta aparte. Alcance 1.8 y plan 2.8.
+
+## Agente autónomo de fase 6
+
+Con Kapso y agent-enabled=true, la bandeja muestra la tarjeta del modelo, propuestas y bitácora. El diálogo real se actualiza y conserva el foco tras abrir/cerrar una bitácora que recargó sus datos. La respuesta diferencia vista previa, tarea de envío y entrega/lectura. Reintentar envío de respuesta requiere permiso de WhatsApp y no vuelve a ejecutar la reserva.
+
+Las entradas APP_TEST no envían al teléfono y se etiquetan como pruebas. Confirmaciones naturales expresas o códigos se validan desde el backend después de revisar el resumen. [Guía](../docs/probar-agente-kapso-fase-6.md), [implementación y pendiente externo](../docs/integracion-agente-kapso-fase-6.md). Seis escenarios de agent.spec.ts/autonomous-agent.spec.ts aprobados en tres tamaños; capturas en docs/verification/autonomous-agent. Lint, build y formato aprobados. A22 pendiente de la conversación real completa; alcance 1.9 y plan 2.9.

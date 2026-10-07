@@ -64,7 +64,7 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
         connection={connection}
         canConfigure={!!auth.session?.user?.roles.includes('ADMIN')}
       />
-      {connection.data?.provider === 'TWILIO_SANDBOX' && (
+      {(connection.data?.provider === 'TWILIO_SANDBOX' || connection.data?.agentEnabled) && (
         <AgentConfigurationCard
           canTest={auth.can('AGENT_TEST_WRITE')}
           onTest={() => setTestPhone('')}
@@ -74,7 +74,9 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
         <MessageCircle size={20} className="mt-0.5 shrink-0" aria-hidden="true" />
         <p>
           {kapso
-            ? 'Recibe mensajes del participante y responde con tu propio texto desde la conversación. La integración de Kapso con el agente se realizará después de comprobar esta conexión.'
+            ? connection.data?.agentEnabled
+              ? 'Consulta los mensajes, las acciones del agente y los estados de entrega. Las reservas requieren una confirmación explícita del resumen; las consultas y negaciones no crean citas.'
+              : 'Recibe mensajes del participante y responde con tu propio texto desde la conversación. El agente está desactivado en esta conexión manual.'
             : 'El agente prepara respuestas y propuestas en la aplicación. Las reservas requieren confirmar el resumen; el envío personalizado por WhatsApp se incorporará después.'}
         </p>
       </div>

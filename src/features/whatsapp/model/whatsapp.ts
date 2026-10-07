@@ -49,7 +49,7 @@ export interface WhatsAppMessage {
   errorCode: string | null
   errorMessage: string | null
   attempts: number
-  source: 'TWILIO' | 'KAPSO' | 'APP_TEST'
+  source: 'TWILIO' | 'KAPSO' | 'APP_TEST' | 'AGENT'
 }
 
 export function messageDate(value: string, timeZone: string, dateFormat: string) {
