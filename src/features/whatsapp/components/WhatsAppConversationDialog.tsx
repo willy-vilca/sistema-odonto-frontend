@@ -1,3 +1,4 @@
+import { AgentSupervisionPanel } from './AgentSupervisionPanel'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
@@ -99,6 +100,13 @@ export function WhatsAppConversationDialog({
               : 'Conexión manual con Kapso. Escribe una respuesta para comprobar su envío al teléfono. Estos mensajes no activan el agente ni generan citas.'
             : 'Consulta debajo la interpretación y acciones del agente. Las respuestas preparadas se muestran en la aplicación; los mensajes enviados manualmente conservan sus estados de entrega.'}
         </p>
+        {connection?.provider === 'KAPSO_SANDBOX' && (
+          <AgentSupervisionPanel
+            id={conversationId}
+            canControl={auth.can('AGENT_CONTROL_WRITE')}
+            onChanged={reload}
+          />
+        )}
         <PagedTable
           list={messages}
           keyFor={(message) => message.id}

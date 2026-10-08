@@ -1,3 +1,5 @@
+import { AgentPolicyDialog } from './components/AgentPolicyDialog'
+import { controlLabels, requestLabels } from './model/supervision'
 import { useEffect, useRef, useState } from 'react'
 import { MessageCircle } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
@@ -24,14 +26,17 @@ export function WhatsAppPage({ timeZone, dateFormat }: { timeZone: string; dateF
 
 function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
   const auth = useAuth()
+  const [policyOpen, setPolicyOpen] = useState(false)
+  const [mode, setMode] = useState(''),
+    [requestState, setRequestState] = useState('')
   const [selected, setSelected] = useState<string>()
   const [testPhone, setTestPhone] = useState<string>()
   const returnFocus = useRef<string | undefined>(undefined)
   const connection = useQueryData<WhatsAppConnection>('/api/v1/whatsapp/connection')
   const kapso = connection.data?.provider === 'KAPSO_SANDBOX'
   const conversations = usePagedList<WhatsAppConversation>(
-    '/api/v1/whatsapp/conversations',
-    { direction: 'desc' },
+    kapso ? '/api/v1/whatsapp/agent/inbox' : '/api/v1/whatsapp/conversations',
+    { direction: 'desc', ...(kapso ? { mode, state: requestState } : {}) },
     'lastMessageAt',
   )
   useEffect(() => {
@@ -56,9 +61,20 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
             Mensajes recibidos y respuestas de prueba, con referencias y estados verificables.
           </p>
         </div>
-        <Button variant="secondary" onClick={conversations.reload} disabled={conversations.loading}>
-          Actualizar conversaciones
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          {auth.can('SETTINGS_WRITE') && kapso && (
+            <Button variant="secondary" onClick={() => setPolicyOpen(true)}>
+              Reglas del agente
+            </Button>
+          )}
+          <Button
+            variant="secondary"
+            onClick={conversations.reload}
+            disabled={conversations.loading}
+          >
+            Actualizar conversaciones
+          </Button>
+        </div>
       </header>
       <WhatsAppConnectionCard
         connection={connection}
@@ -98,6 +114,18 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
             render: (row) => (
               <p className="line-clamp-2 whitespace-pre-wrap">
                 {row.lastMessagePreview || 'Mensaje sin texto'}
+                {row.mode && (
+                  <span className="mt-2 block text-xs font-medium text-brand-700">
+                    {controlLabels[row.mode]} ·{' '}
+                    {requestLabels[row.requestState || 'INFORMATION_PENDING']}
+                  </span>
+                )}
+                {row.patientName && (
+                  <span className="mt-1 block text-xs text-muted">Paciente: {row.patientName}</span>
+                )}
+                {row.summary && (
+                  <span className="mt-1 block text-xs text-muted">{row.summary}</span>
+                )}
               </p>
             ),
           },
@@ -110,6 +138,38 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
             ),
           },
         ]}
+        filters={
+          kapso && (
+            <>
+              <label className="field-label">
+                Control
+                <select className="field" value={mode} onChange={(e) => setMode(e.target.value)}>
+                  <option value="">Todos</option>
+                  {Object.entries(controlLabels).map(([v, label]) => (
+                    <option key={v} value={v}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field-label">
+                Solicitud
+                <select
+                  className="field"
+                  value={requestState}
+                  onChange={(e) => setRequestState(e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  {Object.entries(requestLabels).map(([v, label]) => (
+                    <option key={v} value={v}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </>
+          )
+        }
         actions={(row) => (
           <Button
             variant="quiet"
@@ -124,6 +184,7 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
         Se muestran los mensajes recibidos por esta conexión desde su activación. No se importa el
         historial previo de los chats del teléfono.
       </p>
+      {policyOpen && <AgentPolicyDialog onClose={() => setPolicyOpen(false)} />}
       {selected && (
         <WhatsAppConversationDialog
           conversationId={selected}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
 import { Button } from '../../shared/ui/Button'
@@ -8,6 +8,7 @@ import { FormField } from '../../shared/ui/FormField'
 import { useQueryData } from '../../shared/data/useQueryData'
 import { AppointmentEditor } from './components/AppointmentEditor'
 import { AppointmentDetail } from './components/AppointmentDetail'
+import { AppointmentById } from './components/AppointmentById'
 import { AppointmentCalendar } from './components/AppointmentCalendar'
 import { AppointmentList } from './components/AppointmentList'
 import { DayAppointmentsDialog } from './components/DayAppointmentsDialog'
@@ -16,6 +17,8 @@ import { statusLabels, type CalendarResponse, type Appointment } from './model/a
 import { formatLocalDate } from '../../shared/data/dateFormat'
 export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
   const auth = useAuth()
+  const [params, setParams] = useSearchParams()
+  const linkedAppointment = params.get('appointment')
   const [view, setView] = useState<CalendarView>(() =>
     window.matchMedia('(max-width:767px)').matches ? 'list' : 'week',
   )
@@ -229,6 +232,20 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           dateFormat={dateFormat}
           onClose={() => setSelected(undefined)}
           onChanged={() => setRevision((n) => n + 1)}
+        />
+      )}
+      {linkedAppointment && (
+        <AppointmentById
+          key={linkedAppointment}
+          id={linkedAppointment}
+          timeZone={timeZone}
+          dateFormat={dateFormat}
+          onChanged={() => setRevision((n) => n + 1)}
+          onClose={() => {
+            const next = new URLSearchParams(params)
+            next.delete('appointment')
+            setParams(next, { replace: true })
+          }}
         />
       )}
     </div>

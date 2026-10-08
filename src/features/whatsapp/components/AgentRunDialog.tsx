@@ -123,12 +123,33 @@ export function AgentRunDialog({
                   {detail.data.run.errorMessage} · {detail.data.run.errorCode}
                 </p>
               )}
+              {detail.data.metadata && (
+                <p className="text-xs text-muted">
+                  Flujo: {detail.data.metadata.flow_version} · Resultado:{' '}
+                  {detail.data.metadata.operational_result}
+                </p>
+              )}
+              {detail.data.change && (
+                <div className="rounded-xl border border-line p-4 text-sm">
+                  <h3 className="font-semibold">Cambio de cita · {detail.data.change.state}</h3>
+                  <p className="mt-2 whitespace-pre-wrap">{detail.data.change.summary}</p>
+                  <Link
+                    to={'/agenda?appointment=' + detail.data.change.appointmentId}
+                    className="inline-block min-h-11 py-3 font-semibold text-brand-700 underline"
+                  >
+                    Ver cita vinculada
+                  </Link>
+                </div>
+              )}
               <p className="text-xs text-muted">
                 Intentos: {detail.data.run.attempts} · Tokens de entrada:{' '}
                 {detail.data.run.inputTokens} · Tokens de salida: {detail.data.run.outputTokens}
               </p>
               {detail.data.proposal?.appointmentId && (
-                <Link className="text-sm font-semibold text-brand-700 underline" to="/agenda">
+                <Link
+                  className="text-sm font-semibold text-brand-700 underline"
+                  to={'/agenda?appointment=' + detail.data.proposal.appointmentId}
+                >
                   Ver cita en la agenda · {detail.data.proposal.appointmentId}
                 </Link>
               )}

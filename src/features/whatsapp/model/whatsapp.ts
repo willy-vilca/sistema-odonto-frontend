@@ -15,6 +15,11 @@ export interface WhatsAppConnection {
 }
 
 export interface WhatsAppConversation {
+  mode?: string
+  requestState?: string
+  patientName?: string
+  summary?: string
+  appointmentId?: string | null
   id: string
   phone: string
   contactName: string | null

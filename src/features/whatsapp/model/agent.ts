@@ -13,7 +13,7 @@ export interface AgentRun {
   id: string
   messageId: string
   conversationId: string
-  state: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'GROUPED'
+  state: 'QUEUED' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'GROUPED' | 'PAUSED'
   model: string
   responseText: string
   errorCode: string | null
@@ -38,6 +38,14 @@ export interface AgentDetail {
   source: string
   proposal: AgentProposal | null
   reply: WhatsAppMessage | null
+  change?: {
+    summary: string
+    action: string
+    appointmentId: string
+    state: string
+    confirmationCode: string
+  } | null
+  metadata?: { provider: string; model: string; flow_version: string; operational_result: string }
 }
 export interface AgentStep {
   id: string
@@ -55,8 +63,16 @@ export const agentStateLabels = {
   COMPLETED: 'Completado',
   FAILED: 'Fallido',
   GROUPED: 'Mensajes agrupados',
+  PAUSED: 'Pausado por atención humana',
 }
 export const agentToolLabels: Record<string, string> = {
+  verificar_paciente: 'Verificó el paciente y su relación',
+  consultar_mis_citas: 'Consultó citas del paciente verificado',
+  proponer_reprogramacion: 'Propuso una reprogramación',
+  proponer_cancelacion: 'Propuso una cancelación',
+  reprogramar_cita_confirmada: 'Reprogramó la cita confirmada',
+  cancelar_cita_confirmada: 'Canceló la cita confirmada',
+  derivar_recepcion: 'Derivó la consulta a recepción',
   consultar_servicios: 'Consultó servicios y precios',
   pacientes_contacto: 'Buscó pacientes de este contacto',
   consultar_horarios: 'Consultó la disponibilidad de la agenda',

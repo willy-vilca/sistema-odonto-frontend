@@ -265,6 +265,14 @@ test('reception completes reservation, confirmation, failed reschedule and cance
   const appointments = await api.json()
   const cancelled = appointments.items.find((a: { status: string }) => a.status === 'CANCELLED')
   expect(cancelled.localStart).toBe('2030-01-07T15:00:00')
+  await page.goto('/agenda?appointment=' + cancelled.id)
+  const linked = page.getByRole('dialog', { name: 'Detalle de la cita' })
+  await expect(linked.getByText(f.patient.fullName, { exact: true })).toBeVisible()
+  await expect(linked.getByText('Cancelada', { exact: true }).first()).toBeVisible()
+  await expect(linked.getByRole('heading', { name: 'Historial de la cita' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(linked).not.toBeVisible()
+  expect(new URL(page.url()).searchParams.has('appointment')).toBe(false)
   const refreshedToken = await (await page.request.get('/api/v1/auth/csrf')).json()
   const denied = await page.request.put('/api/v1/services/' + f.service.id, {
     data: { ...f.service, durationMinutes: 30 },
