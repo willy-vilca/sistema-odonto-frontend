@@ -1,6 +1,6 @@
 # OdontoCare — frontend
 
-React + Vite + TypeScript + TailwindCSS. Fases 0 a 5: configuración, pacientes, agenda, clínica, documentación, presupuestos, planes, deuda, pagos, cuotas, egresos y caja. Fase 6 en desarrollo: bandeja de WhatsApp y prueba de conexión. Adaptación para computadora, tablet y celular.
+React + Vite + TypeScript + TailwindCSS. Fases 0 a 6: configuración, pacientes, agenda, clínica, documentación, tratamientos, finanzas y conversación de WhatsApp con propuestas, agente y bitácora. Fase 6 validada mediante reserva real el 07/10/2026. Adaptación para computadora, tablet y celular.
 
 ## Iniciar
 
@@ -135,4 +135,4 @@ E2E usa el backend test con kapso-e2e.properties, claves ficticias y envíos des
 
 Con Kapso y agent-enabled=true, la bandeja muestra la tarjeta del modelo, propuestas y bitácora. El diálogo real se actualiza y conserva el foco tras abrir/cerrar una bitácora que recargó sus datos. La respuesta diferencia vista previa, tarea de envío y entrega/lectura. Reintentar envío de respuesta requiere permiso de WhatsApp y no vuelve a ejecutar la reserva.
 
-Las entradas APP_TEST no envían al teléfono y se etiquetan como pruebas. Confirmaciones naturales expresas o códigos se validan desde el backend después de revisar el resumen. [Guía](../docs/probar-agente-kapso-fase-6.md), [implementación y pendiente externo](../docs/integracion-agente-kapso-fase-6.md). Seis escenarios de agent.spec.ts/autonomous-agent.spec.ts aprobados en tres tamaños; capturas en docs/verification/autonomous-agent. Lint, build y formato aprobados. A22 pendiente de la conversación real completa; alcance 1.9 y plan 2.9.
+Las entradas APP_TEST no envían al teléfono y se etiquetan como pruebas. Confirmaciones naturales expresas o códigos se validan desde el backend después de revisar el resumen. [Guía](../docs/probar-agente-kapso-fase-6.md), [implementación y estado](../docs/integracion-agente-kapso-fase-6.md). Seis escenarios de agent.spec.ts/autonomous-agent.spec.ts aprobados en tres tamaños; capturas en docs/verification/autonomous-agent. Lint, build y formato aprobados. A22 cumplido mediante conversación real y cita con Julia el martes 13/10/2026 09:00–10:00; consultas, negación, datos faltantes, repetición, alternativas y límites verificados. [Resultados reales](../docs/validacion-real-agente-kapso-fase-6.md) y [cierre](../docs/cierre-fase-6.md). Alcance 1.9 y plan 3.0; fase 7 pendiente.
