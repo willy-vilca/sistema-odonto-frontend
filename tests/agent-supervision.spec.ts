@@ -38,40 +38,50 @@ for (const width of [1440, 768, 390]) {
     await page.goto('/conversaciones')
     await page.getByRole('button', { name: 'Ver conversación' }).first().click()
     const dialog = page.getByRole('dialog', { name: 'Conversación de WhatsApp' })
-    await expect(dialog.getByRole('heading', { name: 'Control y solicitud' })).toBeVisible()
-    const giveBack = dialog.getByRole('button', { name: 'Devolver al agente' })
+    await expect(dialog.getByRole('button', { name: 'Historial del asistente' })).toBeVisible()
+    await expect(dialog.getByLabel('Mensaje de respuesta')).toBeDisabled()
+    const giveBack = dialog.getByRole('button', { name: 'Devolver al asistente' })
     if (await giveBack.count()) {
       await giveBack.click()
       await expect(dialog.getByText('Agente activo', { exact: true })).toBeVisible()
     }
-    await dialog
-      .getByLabel('Motivo de atención o cierre')
-      .fill('Solicitud de ayuda para cambiar una cita')
     await dialog.getByRole('button', { name: 'Asumir conversación' }).click()
     await expect(dialog.getByText('Atención humana', { exact: true })).toBeVisible()
-    await expect(dialog.getByText('Responsable: Administradora de pruebas')).toBeVisible()
-    await expect(dialog.getByRole('button', { name: 'Devolver al agente' })).toBeVisible()
+    await expect(dialog.getByLabel('Mensaje de respuesta')).toBeEnabled()
+    await dialog
+      .getByRole('button', { name: 'Información de la conversación', exact: true })
+      .click()
+    const information = page.getByRole('dialog', {
+      name: 'Información de la conversación',
+      exact: true,
+    })
+    await expect(information.getByText('Responsable: Administradora de pruebas')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog.getByRole('button', { name: 'Devolver al asistente' })).toBeVisible()
     expect((await new AxeBuilder({ page }).include('dialog[open]').analyze()).violations).toEqual(
       [],
     )
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    await mkdir('docs/verification/phase7', { recursive: true })
-    await page.screenshot({ path: `docs/verification/phase7/control-${width}.png`, fullPage: true })
+    await mkdir('docs/verification/whatsapp-ui', { recursive: true })
+    await page.screenshot({
+      path: `docs/verification/whatsapp-ui/control-${width}.png`,
+      fullPage: true,
+    })
     await dialog.getByRole('button', { name: 'Cerrar conversación', exact: true }).click()
     await expect(dialog.getByText('Cerrada', { exact: true })).toBeVisible()
-    await dialog.getByRole('button', { name: 'Devolver al agente' }).click()
+    await dialog.getByRole('button', { name: 'Devolver al asistente' }).click()
     await expect(dialog.getByText('Agente activo', { exact: true })).toBeVisible()
     await page.keyboard.press('Escape')
     await expect(page.getByRole('button', { name: 'Ver conversación' }).first()).toBeFocused()
-    await page.getByRole('combobox', { name: 'Control', exact: true }).selectOption('AUTO')
+    await page.getByRole('combobox', { name: 'Atención', exact: true }).selectOption('AUTO')
     await expect(page.locator('p:visible').filter({ hasText: /^Familia Demo$/ })).toBeVisible()
-    await page.getByRole('combobox', { name: 'Control', exact: true }).selectOption('HUMAN')
+    await page.getByRole('combobox', { name: 'Atención', exact: true }).selectOption('HUMAN')
     await expect(page.getByText('Sin registros para mostrar')).toBeVisible()
   })
   test(`editable agent policy and log at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1024 })
     await page.goto('/conversaciones')
-    await page.getByRole('button', { name: 'Reglas del agente' }).click()
+    await page.getByRole('button', { name: 'Ajustes del asistente' }).click()
     const dialog = page.getByRole('dialog', { name: 'Reglas y mensajes del agente' })
     await dialog.getByRole('button', { name: 'Añadir jornada' }).click()
     await dialog.getByRole('combobox', { name: 'Día 1', exact: true }).selectOption('2')
@@ -85,10 +95,13 @@ for (const width of [1440, 768, 390]) {
       [],
     )
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-    await page.screenshot({ path: `docs/verification/phase7/policy-${width}.png`, fullPage: true })
+    await page.screenshot({
+      path: `docs/verification/whatsapp-ui/policy-${width}.png`,
+      fullPage: true,
+    })
     await dialog.getByRole('button', { name: 'Guardar reglas del agente' }).click()
     await expect(dialog).not.toBeVisible()
-    await page.getByRole('button', { name: 'Reglas del agente' }).click()
+    await page.getByRole('button', { name: 'Ajustes del asistente' }).click()
     await expect(dialog.getByLabel('Inicio 1', { exact: true })).toHaveValue('08:30')
     await expect(dialog.getByLabel('Anticipación mínima para cambios (minutos)')).toHaveValue('60')
     await dialog.getByRole('button', { name: 'Quitar jornada 1' }).click()
@@ -96,8 +109,14 @@ for (const width of [1440, 768, 390]) {
     await dialog.getByRole('button', { name: 'Guardar reglas del agente' }).click()
     await page.getByRole('button', { name: 'Ver conversación' }).first().click()
     const conversation = page.getByRole('dialog', { name: 'Conversación de WhatsApp' })
+    await expect(conversation.getByRole('heading', { name: 'Seguimiento del agente' })).toHaveCount(
+      0,
+    )
+    await conversation.getByRole('button', { name: 'Historial del asistente' }).click()
     await expect(
-      conversation.getByRole('heading', { name: 'Seguimiento del agente' }),
+      page
+        .getByRole('dialog', { name: 'Historial del asistente' })
+        .getByRole('heading', { name: 'Seguimiento del agente' }),
     ).toBeVisible()
   })
 }

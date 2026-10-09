@@ -1,4 +1,8 @@
-# Verificación de la fase 0
+# Evidencias de interfaz
+
+09/10/2026: verificación actual de WhatsApp en [whatsapp-ui](whatsapp-ui/README.md). Interfaz de chat, atención humana, vistas secundarias y limpieza de avisos de desarrollo. Las capturas de fases anteriores se conservan como evidencia histórica.
+
+## Verificación de la fase 0
 
 Fecha: 30/09/2026. Base visual comprobada con conexión real frontend/backend/PostgreSQL.
 

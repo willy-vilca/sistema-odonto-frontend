@@ -5,9 +5,9 @@ import type { Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from './fixtures'
 
-const phone = '+51999998888'
-const number = '123456789012345'
-const secret = 'kapso-webhook-unit-secret-32-characters'
+const phone = '+51999998888',
+  number = '123456789012345',
+  secret = 'kapso-webhook-unit-secret-32-characters'
 function reference() {
   return 'wamid.' + randomUUID().replaceAll('-', '') + 'ABCDEFGHIJ0123456789=='
 }
@@ -41,45 +41,121 @@ async function signedMessage(page: Page, body: string, state = 'received', id = 
   expect(response.status(), await response.text()).toBe(200)
   return id
 }
+function fixture(sql: string) {
+  const psql = 'C:/Program Files/PostgreSQL/18/bin/psql.exe',
+    pg = { env: { ...process.env, PGPASSWORD: 'admin' }, encoding: 'utf8' as const }
+  expect(
+    execFileSync(
+      psql,
+      [
+        '-h',
+        'localhost',
+        '-U',
+        'postgres',
+        '-d',
+        'sistema_odontologo_test',
+        '-Atc',
+        'SELECT current_database()',
+      ],
+      pg,
+    ).trim(),
+  ).toBe('sistema_odontologo_test')
+  execFileSync(
+    psql,
+    [
+      '-h',
+      'localhost',
+      '-U',
+      'postgres',
+      '-d',
+      'sistema_odontologo_test',
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-c',
+      sql,
+    ],
+    pg,
+  )
+}
 
 for (const width of [1440, 768, 390]) {
-  test(`Kapso manual messages, pagination and stable retry at ${width}px`, async ({ page }) => {
+  test(`chat cursors, live scroll, server filters and stable manual retry at ${width}px`, async ({
+    page,
+  }) => {
     test.setTimeout(120000)
     await page.setViewportSize({ width, height: width === 1440 ? 900 : width === 768 ? 1024 : 844 })
-    const pageErrors: string[] = [],
-      agentRequests: string[] = []
-    page.on('pageerror', (error) => pageErrors.push(error.message))
-    page.on('request', (request) => {
-      if (request.url().includes('/agent/')) agentRequests.push(request.url())
+    const errors: string[] = [],
+      agentRequests: string[] = [],
+      timelineQueries: string[] = []
+    page.on('pageerror', (error) => errors.push(error.message))
+    page.on('request', (r) => {
+      if (r.url().includes('/agent/')) agentRequests.push(r.url())
+      if (r.url().includes('/timeline?')) timelineQueries.push(r.url())
     })
-    const prefix = 'Kapso prueba ' + randomUUID().slice(0, 8)
-    for (let i = 0; i < 21; i++)
+    const prefix = 'Chat ' + randomUUID().slice(0, 8)
+    for (let i = 0; i < 36; i++)
       await signedMessage(page, `${prefix} ${i}: mañana ñ 😀 10%_especial`)
     await page.goto('/conversaciones')
-    await expect(page.getByText('Kapso Sandbox para WhatsApp', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Probar agente', exact: true })).toHaveCount(0)
-    await expect(page.getByText('Prueba de conexión manual.', { exact: false })).toContainText(
-      'desactivados',
-    )
+    await expect(page.getByText('Kapso Sandbox para WhatsApp', { exact: true })).toHaveCount(0)
+    await expect(page.getByText(/fase [0-9]|primera entrega|Sistema conectado/i)).toHaveCount(0)
     await page.getByLabel('Buscar', { exact: true }).fill(phone)
     const opener = page.getByRole('button', { name: 'Ver conversación', exact: true })
     await expect(opener).toHaveCount(1)
-    await mkdir('docs/verification/kapso', { recursive: true })
-    await page.screenshot({ path: `docs/verification/kapso/inbox-${width}.png`, fullPage: true })
     await opener.click()
-    const dialog = page.getByRole('dialog', { name: 'Conversación de WhatsApp', exact: true })
+    const chat = page.getByRole('dialog', { name: 'Conversación de WhatsApp', exact: true })
+    const viewport = chat.locator('[data-chat-scroll]')
+    await expect(chat.locator('article[data-message-id]')).toHaveCount(30)
     await expect(
-      dialog.getByRole('heading', { name: 'Seguimiento del agente', exact: true }),
+      chat.getByText(`${prefix} 35: mañana ñ 😀 10%_especial`, { exact: true }),
+    ).toBeVisible()
+    await expect(
+      chat.getByRole('button', { name: 'Historial del asistente', exact: true }),
     ).toHaveCount(0)
-    await dialog.getByLabel('Buscar', { exact: true }).fill(prefix)
-    await dialog.getByLabel('Dirección del mensaje').selectOption('INBOUND')
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('21 registros')
-    await dialog.getByRole('button', { name: 'Siguiente', exact: true }).click()
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('Página 2 de 2')
-    const needle = `${prefix} 20: mañana ñ 😀 10%_especial`
-    await dialog.getByLabel('Buscar', { exact: true }).fill(needle)
-    await expect(dialog.locator('footer').getByRole('status')).toContainText('1 registros')
-    await expect(dialog.getByText(needle, { exact: true }).filter({ visible: true })).toBeVisible()
+    await chat.getByRole('button', { name: 'Buscar mensajes', exact: true }).click()
+    const filtered = page.waitForResponse((r) => {
+      const url = new URL(r.url())
+      return (
+        url.pathname.endsWith('/timeline') &&
+        url.searchParams.get('search') === prefix &&
+        url.searchParams.get('messageDirection') === 'INBOUND' &&
+        !url.searchParams.has('before')
+      )
+    })
+    await chat.getByRole('textbox', { name: 'Buscar mensajes', exact: true }).fill(prefix)
+    await chat.getByLabel('Dirección del mensaje').selectOption('INBOUND')
+    await filtered
+    await expect(chat.locator('article[data-message-id]')).toHaveCount(30)
+    await expect(chat.locator('article[data-message-id]').first()).toContainText(`${prefix} 6:`)
+    await viewport.evaluate((node) => {
+      node.scrollTop = 0
+    })
+    await expect(chat.locator('article[data-message-id]')).toHaveCount(36)
+    expect(await viewport.evaluate((node) => node.scrollTop)).toBeGreaterThan(100)
+    await chat
+      .getByRole('textbox', { name: 'Buscar mensajes', exact: true })
+      .fill(`${prefix} 35: mañana ñ 😀 10%_especial`)
+    await expect(chat.locator('article[data-message-id]')).toHaveCount(1)
+    await chat.getByLabel('Estado del mensaje').selectOption('READ')
+    await expect(chat.getByText('No hay mensajes para mostrar.', { exact: true })).toBeVisible()
+    await chat.getByRole('button', { name: 'Cerrar búsqueda', exact: true }).click()
+    await expect(chat.locator('article[data-message-id]')).toHaveCount(30)
+    await viewport.evaluate((node) => {
+      node.scrollTop = 0
+    })
+    await expect(chat.locator('article[data-message-id]')).not.toHaveCount(30)
+    await viewport.evaluate((node) => {
+      node.scrollTop = 250
+    })
+    const anchor = await viewport.evaluate((node) => node.scrollTop)
+    await signedMessage(page, prefix + ' mensaje nuevo mientras leo el historial')
+    await expect(chat.getByRole('button', { name: 'Nuevos mensajes', exact: true })).toBeVisible({
+      timeout: 12000,
+    })
+    expect(Math.abs((await viewport.evaluate((node) => node.scrollTop)) - anchor)).toBeLessThan(4)
+    await chat.getByRole('button', { name: 'Nuevos mensajes', exact: true }).click()
+    await expect(
+      chat.getByText(prefix + ' mensaje nuevo mientras leo el historial', { exact: true }),
+    ).toBeVisible()
     const keys: string[] = []
     await page.route('**/api/v1/whatsapp/conversations/*/messages', async (route) => {
       if (route.request().method() !== 'POST') return route.continue()
@@ -93,77 +169,57 @@ for (const width of [1440, 768, 390]) {
       else await route.continue()
     })
     const reply = `Respuesta manual ${prefix}: mañana ñ 😀`
-    await dialog.getByLabel('Mensaje de respuesta').fill(reply)
-    const send = dialog.getByRole('button', { name: 'Enviar mensaje', exact: true })
+    await chat.getByLabel('Mensaje de respuesta').fill(reply)
+    const send = chat.getByRole('button', { name: 'Enviar mensaje', exact: true })
     await send.click()
-    await expect(dialog.getByRole('alert')).toContainText('Fallo temporal de prueba')
-    await expect(dialog.getByLabel('Mensaje de respuesta')).toHaveValue(reply)
+    await expect(chat.getByRole('alert')).toContainText('Fallo temporal de prueba')
+    await expect(chat.getByLabel('Mensaje de respuesta')).toHaveValue(reply)
     const saved = page.waitForResponse(
-      (response) =>
-        response.request().method() === 'POST' &&
-        response.url().endsWith('/messages') &&
-        response.status() === 200,
+      (r) => r.request().method() === 'POST' && r.url().endsWith('/messages') && r.status() === 200,
     )
     await send.click()
     const outgoing = (await (await saved).json()) as { id: string }
     expect(keys).toHaveLength(2)
     expect(keys[0]).toBe(keys[1])
-    await dialog.getByLabel('Buscar', { exact: true }).fill(reply)
-    await dialog.getByLabel('Dirección del mensaje').selectOption('OUTBOUND')
-    await expect(
-      dialog.getByText('En cola', { exact: true }).filter({ visible: true }),
-    ).toBeVisible()
-    // Fixture only: connect the controlled API reference before delivering a signed status event.
-    const psql = 'C:/Program Files/PostgreSQL/18/bin/psql.exe'
-    const pg = { env: { ...process.env, PGPASSWORD: 'admin' }, encoding: 'utf8' as const }
-    const database = execFileSync(
-      psql,
-      [
-        '-h',
-        'localhost',
-        '-U',
-        'postgres',
-        '-d',
-        'sistema_odontologo_test',
-        '-Atc',
-        'SELECT current_database()',
-      ],
-      pg,
-    ).trim()
-    expect(database).toBe('sistema_odontologo_test')
+    const bubble = chat.locator(`[data-message-id="${outgoing.id}"]`)
+    await expect(bubble).toHaveAttribute('data-direction', 'OUTBOUND')
+    await expect(bubble.getByLabel('Pendiente de envío', { exact: true })).toBeVisible()
+    await expect(chat.getByLabel('Mensaje de respuesta')).toHaveValue('')
     expect(outgoing.id).toMatch(/^[0-9a-f-]{36}$/)
+    await bubble.getByRole('button', { name: /Información del mensaje/ }).click()
+    const information = page.getByRole('dialog', { name: 'Información del mensaje', exact: true })
+    await expect(information.getByText('Pendiente de envío', { exact: true })).toBeVisible()
     const sid = reference()
-    execFileSync(
-      psql,
-      [
-        '-h',
-        'localhost',
-        '-U',
-        'postgres',
-        '-d',
-        database,
-        '-v',
-        'ON_ERROR_STOP=1',
-        '-c',
-        `UPDATE kapso_message SET provider_sid='${sid}' WHERE id='${outgoing.id}'`,
-      ],
-      pg,
-    )
+    fixture(`UPDATE kapso_message SET provider_sid='${sid}',attempts=1 WHERE id='${outgoing.id}'`)
     await signedMessage(page, reply, 'read', sid)
-    await dialog.getByRole('button', { name: 'Actualizar mensajes', exact: true }).click()
-    await expect(dialog.getByText('Leído', { exact: true }).filter({ visible: true })).toBeVisible()
-    await dialog.getByText('Referencia de Kapso', { exact: true }).filter({ visible: true }).click()
-    await expect(dialog.getByText(sid, { exact: true }).filter({ visible: true })).toBeVisible()
+    await expect(information.getByText('Leído', { exact: true })).toBeVisible({ timeout: 12000 })
+    await expect(
+      information
+        .locator('dt')
+        .filter({ hasText: 'Intentos de envío' })
+        .locator('..')
+        .getByText('1', { exact: true }),
+    ).toBeVisible()
+    await information.getByText('Referencia del mensaje', { exact: true }).click()
+    await expect(information.getByText(sid, { exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    expect(await chat.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true)
     expect(
       (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
         .violations,
     ).toEqual([])
-    await page.screenshot({ path: `docs/verification/kapso/conversation-${width}.png` })
+    await mkdir('docs/verification/whatsapp-ui', { recursive: true })
+    await page.screenshot({ path: `docs/verification/whatsapp-ui/chat-${width}.png` })
     await page.keyboard.press('Escape')
-    await expect(dialog).not.toBeVisible()
+    await expect(chat).not.toBeVisible()
     await expect(opener).toBeFocused()
     expect(agentRequests).toEqual([])
-    expect(pageErrors).toEqual([])
+    expect(errors).toEqual([])
+    expect(timelineQueries.some((url) => new URL(url).searchParams.has('before'))).toBe(true)
+    expect(timelineQueries.some((url) => new URL(url).searchParams.has('after'))).toBe(true)
+    expect(
+      timelineQueries.every((url) => Number(new URL(url).searchParams.get('size')) <= 50),
+    ).toBe(true)
   })
 }

@@ -21,14 +21,9 @@ export function ModulePreviewPage({ module }: { module: Exclude<Module, { phase:
             <LockKeyhole size={14} aria-hidden="true" />
           </span>
         </div>
-        <span className="mt-7 rounded-full bg-canvas px-3 py-1.5 text-xs font-medium text-muted">
-          Previsto para la fase {module.phase}
-        </span>
-        <h2 className="mt-4 text-xl font-semibold sm:text-2xl">{module.empty}</h2>
-        <p className="mt-3 max-w-lg text-sm leading-7 text-muted">{module.detail}</p>
-        <p className="mt-4 max-w-md text-xs leading-6 text-muted">
-          Este módulo aún no está implementado. Lo desarrollaremos y probaremos en su fase antes de
-          habilitar sus operaciones.
+        <h2 className="mt-7 text-xl font-semibold sm:text-2xl">Opción no disponible</h2>
+        <p className="mt-3 max-w-lg text-sm leading-7 text-muted">
+          Esta opción no está habilitada en tu instalación.
         </p>
         <Link
           to="/"

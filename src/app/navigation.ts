@@ -26,7 +26,7 @@ export const modules = [
     description: 'Organiza las citas y la disponibilidad de cada odontólogo.',
     empty: 'Tu agenda comienza aquí',
     detail:
-      'Las citas manuales y las reservas por WhatsApp compartirán las mismas reglas de disponibilidad. Cada servicio ocupará su duración completa.',
+      'Las citas manuales y las reservas por WhatsApp comparten las reglas de disponibilidad y la duración completa del servicio.',
   },
   {
     path: '/pacientes',
@@ -37,7 +37,7 @@ export const modules = [
     description: 'Toda la información del paciente, en un solo lugar.',
     empty: 'Cada paciente, una historia',
     detail:
-      'Aquí podrás gestionar fichas, contactos y responsables de menores, y acceder a las citas, atenciones y cuentas de cada paciente.',
+      'Fichas, contactos y responsables de menores, con acceso a las citas, atenciones y cuentas del paciente.',
   },
   {
     path: '/clinica',
@@ -48,7 +48,7 @@ export const modules = [
     description: 'Acompaña la evolución clínica con información organizada.',
     empty: 'Un registro para cada atención',
     detail:
-      'Las atenciones, el odontograma y los documentos se integrarán a la ficha del paciente, conservando el historial de cambios.',
+      'Atenciones, odontograma y documentos en la ficha del paciente, con historial de cambios.',
   },
   {
     path: '/tratamientos',
@@ -68,8 +68,7 @@ export const modules = [
     phase: 4,
     description: 'Cobros, cuotas y saldos con claridad.',
     empty: 'Cuentas claras, mejor seguimiento',
-    detail:
-      'Los cargos se originarán en servicios realizados o planes aceptados. Los abonos y cuotas conservarán su trazabilidad, sin duplicar deudas.',
+    detail: 'Cargos por servicios realizados y planes aceptados. Abonos y cuotas con trazabilidad.',
   },
   {
     path: '/conversaciones',
@@ -80,7 +79,7 @@ export const modules = [
     description: 'Reservas y conversaciones conectadas con tu agenda.',
     empty: 'La próxima cita empieza con un mensaje',
     detail:
-      'El agente consultará disponibilidad y registrará la reserva después de la confirmación del paciente. Cada acción quedará registrada para su revisión.',
+      'El asistente consulta horarios y registra reservas después de la confirmación del paciente, con historial verificable.',
   },
   {
     path: '/reportes',
@@ -90,8 +89,7 @@ export const modules = [
     phase: 8,
     description: 'Una visión clara de la actividad del consultorio.',
     empty: 'Información para decidir mejor',
-    detail:
-      'Podrás consultar citas, servicios, cobros, egresos y cuentas pendientes por periodo, utilizando los datos reales de tu consultorio.',
+    detail: 'Actividad del consultorio por periodo.',
   },
   {
     path: '/configuracion',
@@ -101,8 +99,7 @@ export const modules = [
     phase: 1,
     description: 'Un sistema que se adapta a tu consultorio.',
     empty: 'Tu consultorio, a tu manera',
-    detail:
-      'Configurarás identidad, usuarios, odontólogos, servicios y horarios. Cada instalación tendrá una sede y sus propios datos.',
+    detail: 'Identidad, usuarios, odontólogos, servicios y horarios de tu consultorio.',
   },
 ] as const
 export type Module = (typeof modules)[number]

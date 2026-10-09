@@ -1,5 +1,7 @@
 # OdontoCare — frontend
 
+Actualización 09/10/2026: desarrollo en main, fases 6 y 7 cerradas, alcance 1.10 y plan 3.12. WhatsApp presenta un chat con atención humana integrada; conexión, solicitud y bitácora se consultan en vistas secundarias. Se retiraron los avisos de desarrollo de las pantallas habituales. [Guía de uso y verificación](../docs/mejoras-interfaz-whatsapp.md). Capturas actuales en docs/verification/whatsapp-ui; los apartados históricos siguientes conservan el recorrido de implementación.
+
 React + Vite + TypeScript + TailwindCSS. Fases 0 a 6: configuración, pacientes, agenda, clínica, documentación, tratamientos, finanzas y conversación de WhatsApp con propuestas, agente y bitácora. Fase 6 validada mediante reserva real el 07/10/2026. Adaptación para computadora, tablet y celular.
 
 ## Iniciar

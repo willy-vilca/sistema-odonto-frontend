@@ -15,7 +15,10 @@ export function NotificationViewport() {
     <div
       role="region"
       aria-label="Notificaciones"
-      className="pointer-events-none fixed right-3 bottom-3 left-3 z-50 flex flex-col gap-3 sm:right-6 sm:bottom-6 sm:left-auto sm:w-96"
+      className={
+        'pointer-events-none fixed right-3 left-3 z-50 flex flex-col gap-3 sm:right-6 sm:left-auto sm:w-96 ' +
+        (target?.dataset.modalVariant === 'chat' ? 'top-3 sm:top-6' : 'bottom-3 sm:bottom-6')
+      }
     >
       {items.map((item) => (
         <NotificationCard key={item.id} item={item} />

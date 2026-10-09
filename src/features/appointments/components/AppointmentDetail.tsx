@@ -147,7 +147,7 @@ export function AppointmentDetail({
             {current.origin === 'MANUAL'
               ? 'Recepción'
               : current.origin === 'AI_TEST'
-                ? 'Prueba IA'
+                ? 'Simulación'
                 : 'WhatsApp'}{' '}
             · Zona horaria: {timeZone}
           </p>

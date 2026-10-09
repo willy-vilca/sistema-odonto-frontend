@@ -48,12 +48,6 @@ export function AppShell({ state, children }: { state: InstallationState; childr
         module.path === pathname || (module.path !== '/' && pathname.startsWith(module.path + '/')),
     )?.label ?? 'Página no encontrada'
   const clinicName = state.status === 'ready' ? state.data.displayName : 'Mi consultorio'
-  const statusLabel =
-    state.status === 'ready'
-      ? 'Sistema conectado'
-      : state.status === 'loading'
-        ? 'Conectando…'
-        : 'Sin conexión'
   useEffect(() => {
     const dialog = dialogRef.current
     if (menuOpen && !dialog?.open) dialog?.showModal()
@@ -81,14 +75,6 @@ export function AppShell({ state, children }: { state: InstallationState; childr
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto pb-6">
           <SideNavigation />
-        </div>
-        <div className="mx-5 mb-5 rounded-xl border border-line bg-canvas p-4">
-          <p className="text-xs font-semibold text-ink">Tu equipo, conectado</p>
-          <p className="mt-1 text-xs leading-5 text-muted">
-            Primera entrega en desarrollo.
-            <br />
-            Avanzamos módulo por módulo.
-          </p>
         </div>
       </aside>
       <dialog
@@ -147,13 +133,6 @@ export function AppShell({ state, children }: { state: InstallationState; childr
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3 sm:gap-5">
-            <div role="status" className="flex items-center gap-2 text-xs font-medium text-muted">
-              <span
-                className={`size-2 rounded-full ${state.status === 'ready' ? 'bg-emerald-600' : state.status === 'error' ? 'bg-amber-600' : 'animate-pulse bg-slate-400'}`}
-              />
-              <span className="hidden sm:inline">{statusLabel}</span>
-              <span className="sr-only sm:hidden">{statusLabel}</span>
-            </div>
             <span className="hidden h-7 w-px bg-line sm:block" />
             <span
               className="flex size-10 items-center justify-center rounded-full border border-brand-100 bg-brand-50 text-xs font-bold text-brand-700"
@@ -196,7 +175,6 @@ export function AppShell({ state, children }: { state: InstallationState; childr
         </main>
         <footer className="mx-auto flex max-w-7xl flex-col justify-between gap-2 px-5 pb-7 text-xs text-muted sm:flex-row sm:px-8 xl:px-10">
           <span>OdontoCare · Cuidado y gestión en un solo lugar</span>
-          <span>Primera entrega · Fase 7 en validación</span>
         </footer>
       </div>
     </>

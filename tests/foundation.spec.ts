@@ -18,7 +18,7 @@ for (const viewport of viewports) {
     const failures: string[] = []
     page.on('pageerror', (error) => failures.push(error.message))
     await page.goto('/')
-    await expect(page.getByText('Información del consultorio disponible')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Bienvenido a tu consultorio' })).toBeVisible()
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
@@ -68,10 +68,10 @@ test('loading, connection failure and recovery preserve usable navigation', asyn
     else await route.continue()
   })
   await page.goto('/')
-  await expect(page.getByRole('alert')).toContainText('No pudimos conectar')
+  await expect(page.getByRole('alert')).toContainText('No pudimos cargar los datos del consultorio')
   fail = false
-  await page.getByRole('button', { name: 'Reintentar conexión' }).click()
-  await expect(page.getByText('Información del consultorio disponible')).toBeVisible()
+  await page.getByRole('button', { name: 'Reintentar' }).click()
+  await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
   await page.unroute('**/api/v1/system/installation')
   let release: (() => void) | undefined
   const gate = new Promise<void>((resolve) => {
@@ -82,9 +82,9 @@ test('loading, connection failure and recovery preserve usable navigation', asyn
     await route.continue()
   })
   await page.reload()
-  await expect(page.getByText('Comprobando la conexión del consultorio…')).toBeVisible()
+  await expect(page.getByText('Cargando información…')).toBeVisible()
   release?.()
-  await expect(page.getByText('Información del consultorio disponible')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
 })
 
 test('mobile menu traps focus, closes with Escape and restores focus', async ({ page }) => {

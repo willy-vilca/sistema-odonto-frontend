@@ -23,7 +23,7 @@ export function WhatsAppConnectionCard({
             <Link2 size={22} aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold">Conexión de prueba</h2>
+            <h2 className="text-lg font-semibold">Servicio de WhatsApp</h2>
             <p className="mt-1 text-sm text-muted">
               {kapso ? 'Kapso Sandbox para WhatsApp' : 'Twilio Sandbox para WhatsApp'}
             </p>
@@ -50,19 +50,19 @@ export function WhatsAppConnectionCard({
               <CircleAlert size={18} className="shrink-0 text-muted" aria-hidden="true" />
             )}
             {config.enabled && config.configured
-              ? 'Configuración lista para la prueba'
+              ? 'Servicio habilitado'
               : config.enabled
                 ? 'Pendiente de configuración'
                 : 'Conexión desactivada'}
           </p>
           <p className="text-sm text-muted">
             {config.enabled && config.configured
-              ? 'Comprueba la recepción enviando un mensaje desde un participante autorizado. Luego actualiza las conversaciones.'
-              : 'El administrador debe completar la conexión y autorizar los teléfonos que participarán en la prueba.'}
+              ? 'Los mensajes nuevos se guardan en las conversaciones. El estado de cada envío se actualiza automáticamente.'
+              : 'Consulta al administrador para habilitar la recepción y el envío de mensajes.'}
           </p>
           <dl className="grid gap-4 text-sm sm:grid-cols-3">
             <div>
-              <dt className="text-xs text-muted">Número de prueba</dt>
+              <dt className="text-xs text-muted">Número de WhatsApp</dt>
               <dd className="mt-1 break-all font-medium">{config.sender || 'Sin configurar'}</dd>
             </div>
             <div>
@@ -70,7 +70,7 @@ export function WhatsAppConnectionCard({
               <dd className="mt-1 font-medium">{config.allowedParticipantsCount}</dd>
             </div>
             <div>
-              <dt className="text-xs text-muted">Respuesta de prueba</dt>
+              <dt className="text-xs text-muted">Tipo de respuesta</dt>
               <dd className="mt-1 font-medium">
                 {config.sendMode === 'TEMPLATE' ? 'Plantilla de Twilio' : 'Mensaje de texto'}
               </dd>
@@ -80,12 +80,12 @@ export function WhatsAppConnectionCard({
             <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
               {config.agentEnabled
                 ? 'El agente responde automáticamente por WhatsApp. Una cita se registra únicamente después de confirmar el resumen del paciente, servicio, profesional y horario.'
-                : 'Prueba de conexión manual. Puedes recibir y responder texto personalizado; el agente y las reservas automáticas están desactivados en este modo.'}
+                : 'Atención manual. Recepción puede responder a los mensajes; la atención automática está desactivada.'}
             </p>
           )}
           {config.sendMode === 'TEMPLATE' && !config.testTemplateConfigured && (
             <p className="text-sm text-muted">
-              Falta configurar la plantilla para probar el envío de respuestas.
+              Falta configurar la plantilla para enviar respuestas.
             </p>
           )}
           {canConfigure && config.missing.length > 0 && (

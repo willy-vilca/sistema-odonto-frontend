@@ -29,9 +29,9 @@ export interface WhatsAppConversation {
 }
 
 export const messageStatusLabels = {
-  QUEUED: 'En cola',
+  QUEUED: 'Pendiente de envío',
   SENDING: 'Enviando',
-  ACCEPTED: 'Aceptado por el proveedor',
+  ACCEPTED: 'Enviando',
   SENT: 'Enviado',
   DELIVERED: 'Entregado',
   READ: 'Leído',
@@ -55,6 +55,17 @@ export interface WhatsAppMessage {
   errorMessage: string | null
   attempts: number
   source: 'TWILIO' | 'KAPSO' | 'APP_TEST' | 'AGENT'
+}
+
+export interface ChatItem {
+  sequence: number
+  message: WhatsAppMessage
+}
+export interface ChatPage {
+  items: ChatItem[]
+  before: number | null
+  after: number | null
+  hasMore: boolean
 }
 
 export function messageDate(value: string, timeZone: string, dateFormat: string) {

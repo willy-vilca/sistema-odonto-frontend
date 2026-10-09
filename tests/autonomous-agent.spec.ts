@@ -96,15 +96,17 @@ for (const width of [1440, 768, 390]) {
       pg,
     )
     await page.goto('/conversaciones')
-    await expect(page.getByText('Configuración del agente lista', { exact: true })).toBeVisible()
-    await expect(
-      page.getByText('El agente responde automáticamente por WhatsApp.', { exact: false }),
-    ).toBeVisible()
+    await expect(page.getByText('Configuración del agente lista', { exact: true })).toHaveCount(0)
     await page.getByLabel('Buscar', { exact: true }).fill(phone)
     await expect(page.getByRole('button', { name: 'Ver conversación', exact: true })).toHaveCount(1)
     await page.getByRole('button', { name: 'Ver conversación', exact: true }).click()
     const conversation = page.getByRole('dialog', { name: 'Conversación de WhatsApp', exact: true })
-    const card = conversation.locator('section[aria-label="Seguimiento del agente"]')
+    await expect(conversation.getByLabel('Mensaje de respuesta')).toBeDisabled()
+    await expect(conversation.getByText(visualReply, { exact: true })).toBeVisible()
+    await conversation.getByRole('button', { name: 'Historial del asistente' }).click()
+    const card = page
+      .getByRole('dialog', { name: 'Historial del asistente' })
+      .locator('section[aria-label="Seguimiento del agente"]')
     await card.getByLabel('Buscar', { exact: true }).fill(visualReply)
     await expect(card.getByRole('button', { name: 'Ver bitácora', exact: true })).toHaveCount(1)
     await card.getByRole('button', { name: 'Ver bitácora', exact: true }).click()
@@ -116,8 +118,10 @@ for (const width of [1440, 768, 390]) {
     await expect(
       trace.getByText('Respuesta preparada · sin envío a WhatsApp', { exact: true }),
     ).toHaveCount(0)
-    await mkdir('docs/verification/autonomous-agent', { recursive: true })
-    await page.screenshot({ path: `docs/verification/autonomous-agent/trace-${width}.png` })
+    await mkdir('docs/verification/whatsapp-ui/autonomous-agent', { recursive: true })
+    await page.screenshot({
+      path: `docs/verification/whatsapp-ui/autonomous-agent/trace-${width}.png`,
+    })
     // Controlled delivery fixture only; no external provider or model is called.
     execFileSync(
       psql,
@@ -137,7 +141,7 @@ for (const width of [1440, 768, 390]) {
     )
     await trace.getByRole('button', { name: 'Actualizar ejecución', exact: true }).click()
     await trace.getByRole('button', { name: 'Reintentar envío de respuesta', exact: true }).click()
-    await expect(trace.getByText('En cola', { exact: true })).toBeVisible()
+    await expect(trace.getByText('Pendiente de envío', { exact: true })).toBeVisible()
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
     expect(
       (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())

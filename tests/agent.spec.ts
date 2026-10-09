@@ -11,8 +11,8 @@ for (const width of [1440, 768, 390]) {
     const errors: string[] = []
     page.on('pageerror', (error) => errors.push(error.message))
     await page.goto('/conversaciones')
-    await expect(page.getByText('Configuración del agente lista', { exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Probar agente', exact: true }).click()
+    await page.getByRole('button', { name: 'Información del servicio', exact: true }).click()
+    await page.getByRole('button', { name: 'Abrir simulador del asistente', exact: true }).click()
     const testDialog = page.getByRole('dialog', { name: 'Probar agente IA', exact: true })
     const phone = '+519' + String(width).padStart(8, '0')
     await testDialog.getByLabel('Teléfono del contacto').fill(phone)
@@ -24,8 +24,8 @@ for (const width of [1440, 768, 390]) {
       (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
         .violations,
     ).toEqual([])
-    await mkdir('docs/verification/agent', { recursive: true })
-    await page.screenshot({ path: `docs/verification/agent/form-${width}.png` })
+    await mkdir('docs/verification/whatsapp-ui/agent', { recursive: true })
+    await page.screenshot({ path: `docs/verification/whatsapp-ui/agent/form-${width}.png` })
     const queuedResponse = page.waitForResponse(
       (response) =>
         response.url().endsWith('/agent/test-messages') && response.request().method() === 'POST',
@@ -36,8 +36,10 @@ for (const width of [1440, 768, 390]) {
       runId: string
     }
     const conversation = page.getByRole('dialog', { name: 'Conversación de WhatsApp', exact: true })
+    await conversation.getByRole('button', { name: 'Historial del asistente' }).click()
+    const history = page.getByRole('dialog', { name: 'Historial del asistente' })
     await expect(
-      conversation.getByRole('heading', { name: 'Seguimiento del agente', exact: true }),
+      history.getByRole('heading', { name: 'Seguimiento del agente', exact: true }),
     ).toBeVisible()
     // Only UI fixture evidence is seeded. The backend worker is disabled; no model is called.
     const psql = 'C:/Program Files/PostgreSQL/18/bin/psql.exe'
@@ -79,11 +81,11 @@ for (const width of [1440, 768, 390]) {
       ],
       pgOptions,
     )
-    await conversation.getByRole('button', { name: 'Actualizar agente', exact: true }).click()
+    await history.getByRole('button', { name: 'Actualizar agente', exact: true }).click()
     await expect(
-      conversation.getByText('Completado', { exact: true }).filter({ visible: true }),
+      history.getByText('Completado', { exact: true }).filter({ visible: true }),
     ).toBeVisible()
-    await conversation.getByRole('button', { name: 'Ver bitácora', exact: true }).click()
+    await history.getByRole('button', { name: 'Ver bitácora', exact: true }).click()
     const trace = page.getByRole('dialog', { name: 'Bitácora del agente IA', exact: true })
     await expect(trace).toContainText('Prueba desde la aplicación')
     await expect(trace).toContainText('Respuesta preparada · sin envío a WhatsApp')
@@ -105,12 +107,12 @@ for (const width of [1440, 768, 390]) {
       (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
         .violations,
     ).toEqual([])
-    await page.screenshot({ path: `docs/verification/agent/trace-${width}.png` })
+    await page.screenshot({ path: `docs/verification/whatsapp-ui/agent/trace-${width}.png` })
     await page.keyboard.press('Escape')
     await expect(trace).not.toBeVisible()
-    await expect(
-      conversation.getByRole('button', { name: 'Ver bitácora', exact: true }),
-    ).toBeFocused()
+    await expect(history.getByRole('button', { name: 'Ver bitácora', exact: true })).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(history).not.toBeVisible()
     await page.keyboard.press('Escape')
     await expect(conversation).not.toBeVisible()
     expect(errors).toEqual([])

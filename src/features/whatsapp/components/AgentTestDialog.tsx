@@ -44,7 +44,7 @@ export function AgentTestDialog({
       >
         <p className="rounded-xl bg-brand-50 p-4 text-sm text-brand-700">
           Utiliza los pacientes y la agenda actuales. Esta entrada se identifica como prueba desde
-          la aplicación y no se envía a Twilio. Una cita solo se guarda después de confirmar su
+          la aplicación y no se envía al teléfono. Una cita solo se guarda después de confirmar su
           propuesta con el código indicado.
         </p>
         <label className="field-label">

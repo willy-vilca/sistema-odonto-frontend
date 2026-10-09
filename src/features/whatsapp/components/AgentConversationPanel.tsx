@@ -103,8 +103,11 @@ export function AgentConversationPanel({
             </>
           )}
           {proposal.data.appointmentId && (
-            <Link className="font-semibold text-brand-700 underline" to="/agenda">
-              Ver agenda · cita {proposal.data.appointmentId}
+            <Link
+              className="font-semibold text-brand-700 underline"
+              to={'/agenda?appointment=' + proposal.data.appointmentId}
+            >
+              Consultar cita en la agenda
             </Link>
           )}
           {!['PENDING', 'CONFIRMED'].includes(proposal.data.state) && (
