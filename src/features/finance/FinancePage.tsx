@@ -84,6 +84,7 @@ export function FinancePage({
           </section>
           {patientId ? (
             <FinanceAccount
+              encounterId={params.get('encounterId') ?? undefined}
               dateFormat={dateFormat}
               key={patientId}
               patientId={patientId}

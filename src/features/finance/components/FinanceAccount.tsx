@@ -11,7 +11,8 @@ import { MovementList } from './MovementList'
 import { InstallmentList } from './InstallmentList'
 import { FinancialFiles } from './FinancialFiles'
 import { financePost, downloadDocument } from '../services/paymentService'
-import type { AccountSummary, FinancialDocument } from '../model/payments'
+import type { AccountSummary, FinancialDocument, OpenCharge } from '../model/payments'
+import type { PageData } from '../../../shared/data/usePagedList'
 import { PatientNavigation } from '../../patients/components/PatientNavigation'
 export function FinanceAccount({
   patientId,
@@ -19,15 +20,29 @@ export function FinanceAccount({
   today,
   timeZone,
   dateFormat,
+  encounterId,
 }: {
   patientId: string
   currency: string
   today: string
   timeZone: string
   dateFormat: string
+  encounterId?: string
 }) {
   const auth = useAuth(),
-    summary = useQueryData<AccountSummary[]>('/api/v1/finance/summary?patientId=' + patientId),
+    encounterCharges = useQueryData<PageData<OpenCharge>>(
+      encounterId
+        ? '/api/v1/finance/charges?patientId=' +
+            patientId +
+            '&encounterId=' +
+            encounterId +
+            '&pendingOnly=true&size=50'
+        : undefined,
+    ),
+    [historical, setHistorical] = useState(false),
+    summary = useQueryData<AccountSummary[]>(
+      '/api/v1/finance/summary?patientId=' + patientId + '&historical=' + historical,
+    ),
     [tab, setTab] = useState('Cargos'),
     [form, setForm] = useState(false),
     [selectedCurrency, setCurrency] = useState(currency),
@@ -35,6 +50,7 @@ export function FinanceAccount({
     setError = useErrorNotification(),
     [busy, setBusy] = useState(false)
   function changed() {
+    encounterCharges.reload()
     summary.reload()
     setRevision((n) => n + 1)
   }
@@ -59,6 +75,42 @@ export function FinanceAccount({
   return (
     <section className="space-y-5">
       <PatientNavigation patientId={patientId} />
+      {encounterId && (
+        <section className="rounded-xl border border-line bg-brand-50 p-5">
+          <h2 className="font-semibold">Cobro de la atención</h2>
+          <p className="mt-2 text-sm">
+            El paciente ya está seleccionado. El abono se preparará con los cargos pendientes de
+            esta atención. Las sesiones incluidas en un plan se cobran desde el cargo del plan.
+          </p>
+          {encounterCharges.error && (
+            <p role="alert" className="error-box">
+              {encounterCharges.error}
+            </p>
+          )}
+          {encounterCharges.data && (
+            <p className="mt-2 text-sm">
+              {encounterCharges.data.totalElements
+                ? encounterCharges.data.totalElements + ' cargo(s) pendiente(s) de esta atención.'
+                : 'No hay cargos individuales pendientes de esta atención.'}
+            </p>
+          )}
+        </section>
+      )}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold">
+            {historical ? 'Resumen histórico' : 'Cuenta activa'}
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            {historical
+              ? 'Todos los cargos y pagos, incluidos los finalizados.'
+              : 'Cargos abiertos y su dinero aplicado. Los anticipos disponibles se conservan.'}
+          </p>
+        </div>
+        <Button variant="secondary" onClick={() => setHistorical(!historical)}>
+          {historical ? 'Ver cuenta activa' : 'Ver resumen histórico'}
+        </Button>
+      </div>
       {summary.error && (
         <p role="alert" className="error-box">
           {summary.error}
@@ -68,7 +120,9 @@ export function FinanceAccount({
         {summary.data?.length ? (
           summary.data.map((s) => (
             <section key={s.currency} className="rounded-2xl border border-line bg-white p-5">
-              <p className="text-sm text-muted">Deuda generada · {s.currency}</p>
+              <p className="text-sm text-muted">
+                {historical ? 'Deuda histórica' : 'Cargos activos'} · {s.currency}
+              </p>
               <div className="mt-3 grid gap-4 grid-cols-2">
                 <div>
                   <p className="text-xs text-muted">Saldo pendiente</p>
@@ -81,7 +135,9 @@ export function FinanceAccount({
                   <p className="text-xl font-semibold">{money(s.advance, s.currency)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted">Dinero recibido neto</p>
+                  <p className="text-xs text-muted">
+                    {historical ? 'Dinero recibido neto histórico' : 'Dinero en cuenta activa'}
+                  </p>
                   <p className="font-semibold">{money(s.received, s.currency)}</p>
                 </div>
                 <div>
@@ -116,7 +172,12 @@ export function FinanceAccount({
         </label>
         <div className="flex flex-wrap gap-3">
           {auth.can('PAYMENTS_WRITE') && (
-            <Button onClick={() => setForm(true)}>Registrar abono</Button>
+            <Button
+              disabled={!!encounterId && encounterCharges.loading}
+              onClick={() => setForm(true)}
+            >
+              Registrar abono
+            </Button>
           )}
           <Button variant="secondary" disabled={busy} onClick={() => void statement()}>
             Estado de cuenta PDF
@@ -158,6 +219,9 @@ export function FinanceAccount({
       </div>
       {form && (
         <PaymentForm
+          initialCharges={
+            encounterCharges.data?.items.filter((c) => c.currency === selectedCurrency) ?? []
+          }
           patientId={patientId}
           currency={selectedCurrency}
           today={today}

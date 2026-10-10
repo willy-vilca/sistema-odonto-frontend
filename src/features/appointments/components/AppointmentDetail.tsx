@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { FormField } from '../../../shared/ui/FormField'
@@ -153,6 +154,19 @@ export function AppointmentDetail({
           </p>
           {current.notes && <p className="mt-3 text-sm whitespace-pre-wrap">{current.notes}</p>}
         </div>
+        {auth.can('CLINICAL_WRITE') && !['CANCELLED', 'NO_SHOW'].includes(current.status) && (
+          <Link
+            className="inline-flex min-h-11 items-center rounded-xl bg-brand-700 px-4 text-sm font-semibold text-white"
+            to={
+              '/clinica?patientId=' +
+              current.patientId +
+              '&tab=atenciones&appointmentId=' +
+              current.id
+            }
+          >
+            Atender esta cita
+          </Link>
+        )}
         {mode === 'view' ? (
           <>
             {auth.can('APPOINTMENTS_WRITE') && (

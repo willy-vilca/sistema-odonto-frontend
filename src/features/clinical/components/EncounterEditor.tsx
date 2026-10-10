@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { EncounterDefaults } from '../model/encounterWorkflow'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { clinicToday } from '../../../shared/data/dateFormat'
@@ -13,6 +14,7 @@ import { emptyContent, type Encounter, type EncounterContent } from '../model/cl
 export function EncounterEditor({
   mode,
   encounter,
+  defaults,
   patientId,
   dentist,
   timeZone,
@@ -21,22 +23,29 @@ export function EncounterEditor({
 }: {
   mode: 'new' | 'edit' | 'correction'
   encounter?: Encounter
+  defaults?: EncounterDefaults
   patientId: string
   dentist?: PickedEntity
   timeZone: string
   onClose: () => void
-  onSaved: () => void
+  onSaved: (record: Encounter) => void
 }) {
   const auth = useAuth(),
     form = useSaveForm(),
-    [date, setDate] = useState(encounter?.attendedOn ?? clinicToday(timeZone)),
-    [reason, setReason] = useState(encounter?.reason ?? ''),
+    [date, setDate] = useState(
+      encounter?.attendedOn ?? defaults?.attendedOn ?? clinicToday(timeZone),
+    ),
+    [reason, setReason] = useState(encounter?.reason ?? defaults?.reason ?? ''),
     [correction, setCorrection] = useState(''),
-    [content, setContent] = useState<EncounterContent>(encounter?.content ?? emptyContent),
+    [content, setContent] = useState<EncounterContent>(
+      encounter?.content ?? defaults?.content ?? emptyContent,
+    ),
     [appointments, setAppointments] = useState<PickedEntity[]>(
-      encounter?.appointmentId ? [{ id: encounter.appointmentId, label: 'Cita vinculada' }] : [],
+      (encounter?.appointmentId ?? defaults?.appointmentId)
+        ? [{ id: (encounter?.appointmentId ?? defaults?.appointmentId)!, label: 'Cita vinculada' }]
+        : [],
     )
-  const professionalId = encounter?.dentistId ?? dentist?.id,
+  const professionalId = encounter?.dentistId ?? defaults?.dentistId ?? dentist?.id,
     correcting = mode === 'correction'
   return (
     <Modal

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { notifyPaidCharges } from '../services/paymentFeedback'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
@@ -29,7 +30,9 @@ export function PaymentOperation({
 }) {
   const form = useSaveForm(),
     [key] = useState(() => crypto.randomUUID()),
-    [amount, setAmount] = useState(String(movement.effectiveAmount)),
+    [amount, setAmount] = useState(
+      String(movement.effectiveAmount - (action === 'refund' ? (movement.closedApplied ?? 0) : 0)),
+    ),
     [reason, setReason] = useState(''),
     [date, setDate] = useState(today),
     [rows, setRows] = useState<Allocation[]>([]),
@@ -59,7 +62,10 @@ export function PaymentOperation({
                   (action === 'expenseReverse' ? 'reverse' : action),
                 body,
               ),
-            onSaved,
+            () => {
+              if (action === 'apply') void notifyPaidCharges(rows)
+              onSaved()
+            },
           )
         }}
       >
@@ -83,7 +89,7 @@ export function PaymentOperation({
             label="Importe a devolver"
             type="number"
             min="0.01"
-            max={movement.effectiveAmount}
+            max={movement.effectiveAmount - (movement.closedApplied ?? 0)}
             step="0.01"
             required
             value={amount}
@@ -102,6 +108,7 @@ export function PaymentOperation({
             currency={movement.currency}
             rows={rows}
             onChange={setRows}
+            pendingOnly={action === 'apply'}
             label={action === 'apply' ? 'Aplicación del anticipo' : 'Aplicaciones que se liberan'}
           />
         )}

@@ -1,5 +1,9 @@
 import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { fromAppointment } from '../services/encounterWorkflowService'
+import type { EncounterDefaults } from '../model/encounterWorkflow'
+import { EncounterCheckout } from './EncounterCheckout'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
@@ -14,18 +18,27 @@ import type { Encounter, EncounterRevision } from '../model/clinical'
 import { EncounterEditor } from './EncounterEditor'
 export function EncountersPanel({
   initialEncounterId,
+  appointmentId,
+  onProfessionalSelected,
   patientId,
+  patientName,
   dentist,
   dateFormat,
   timeZone,
 }: {
   initialEncounterId?: string
+  appointmentId?: string
+  onProfessionalSelected?: (items: PickedEntity[]) => void
   patientId: string
+  patientName?: string
   dentist?: PickedEntity
   dateFormat: string
   timeZone: string
 }) {
-  const auth = useAuth(),
+  const navigate = useNavigate(),
+    [defaults, setDefaults] = useState<EncounterDefaults>(),
+    [checkout, setCheckout] = useState(false),
+    auth = useAuth(),
     [status, setStatus] = useState(''),
     list = usePagedList<Encounter>(
       '/api/v1/clinical/encounters',
@@ -50,6 +63,28 @@ export function EncountersPanel({
       active = false
     }
   }, [initialEncounterId, patientId, setError])
+  useEffect(() => {
+    if (!appointmentId || !auth.can('CLINICAL_WRITE')) return
+    let active = true
+    void fromAppointment(appointmentId)
+      .then((start) => {
+        if (!active) return
+        const professionalId = start.existing?.dentistId ?? start.defaults?.dentistId
+        if (professionalId)
+          onProfessionalSelected?.([{ id: professionalId, label: start.dentistName }])
+        if (start.existing?.patientId === patientId) setSelected(start.existing)
+        else if (start.defaults?.patientId === patientId) {
+          setDefaults(start.defaults)
+          setEditor('new')
+        }
+      })
+      .catch((e) => {
+        if (active) setError(errorMessage(e))
+      })
+    return () => {
+      active = false
+    }
+  }, [appointmentId, patientId, setError, auth, onProfessionalSelected])
   function saved() {
     setEditor(undefined)
     setSelected(undefined)
@@ -76,6 +111,7 @@ export function EncountersPanel({
           <Button
             disabled={!dentist}
             onClick={() => {
+              setDefaults(undefined)
               setSelected(undefined)
               setEditor('new')
             }}
@@ -119,15 +155,34 @@ export function EncountersPanel({
       {editor && (
         <EncounterEditor
           mode={editor}
+          defaults={defaults}
           encounter={selected}
           patientId={patientId}
           dentist={dentist}
           timeZone={timeZone}
           onClose={() => setEditor(undefined)}
-          onSaved={saved}
+          onSaved={(record) => {
+            setEditor(undefined)
+            setSelected(appointmentId ? record : undefined)
+            setDefaults(undefined)
+            list.reload()
+          }}
         />
       )}
-      {selected && !editor && (
+      {selected && checkout && (
+        <EncounterCheckout
+          patientName={patientName}
+          encounter={selected}
+          timeZone={timeZone}
+          onClose={() => setCheckout(false)}
+          onSaved={(result) => {
+            setCheckout(false)
+            setSelected(result.encounter)
+            list.reload()
+          }}
+        />
+      )}
+      {selected && !editor && !checkout && (
         <Modal title="Detalle de atención" busy={form.busy} onClose={() => setSelected(undefined)}>
           <div className="space-y-5">
             <div className="rounded-xl bg-brand-50 p-4">
@@ -147,6 +202,23 @@ export function EncountersPanel({
                     <Button variant="secondary" onClick={() => setEditor('edit')}>
                       Editar borrador
                     </Button>
+                    {auth.can('FINANCES_READ') && (
+                      <Button
+                        variant="secondary"
+                        disabled={form.busy}
+                        onClick={() =>
+                          void form.submit(
+                            () => finalizeEncounter(selected),
+                            () =>
+                              navigate(
+                                '/finanzas?patientId=' + patientId + '&encounterId=' + selected.id,
+                              ),
+                          )
+                        }
+                      >
+                        Finalizar e ir a cobrar
+                      </Button>
+                    )}
                     <Button
                       disabled={form.busy}
                       onClick={() => void form.submit(() => finalizeEncounter(selected), saved)}
@@ -160,6 +232,23 @@ export function EncountersPanel({
                   </Button>
                 )}
               </div>
+            )}
+            {auth.can('CLINICAL_WRITE') &&
+              auth.can('PAYMENTS_WRITE') &&
+              auth.can('FINANCES_READ') && (
+                <Button disabled={form.busy} onClick={() => setCheckout(true)}>
+                  {selected.status === 'DRAFT' ? 'Finalizar y registrar cobro' : 'Cobrar atención'}
+                </Button>
+              )}
+            {selected.status === 'FINAL' && auth.can('FINANCES_READ') && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate('/finanzas?patientId=' + patientId + '&encounterId=' + selected.id)
+                }
+              >
+                Ir a la cuenta del paciente
+              </Button>
             )}
             {selected.status === 'FINAL' && (
               <EncounterVersions id={selected.id} dateFormat={dateFormat} timeZone={timeZone} />

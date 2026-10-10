@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { notifyPaidCharges } from '../services/paymentFeedback'
+import type { OpenCharge } from '../model/payments'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
@@ -8,12 +10,14 @@ import { methods, type Allocation, type Movement } from '../model/payments'
 import { AllocationEditor } from './AllocationEditor'
 export function PaymentForm({
   patientId,
+  initialCharges = [],
   currency,
   today,
   onClose,
   onSaved,
 }: {
   patientId: string
+  initialCharges?: OpenCharge[]
   currency: string
   today: string
   onClose: () => void
@@ -21,12 +25,21 @@ export function PaymentForm({
 }) {
   const form = useSaveForm(),
     [key] = useState(() => crypto.randomUUID()),
-    [amount, setAmount] = useState(''),
+    [amount, setAmount] = useState(
+      initialCharges.length
+        ? (
+            initialCharges.reduce((total, c) => total + Math.round(Number(c.pending) * 100), 0) /
+            100
+          ).toFixed(2)
+        : '',
+    ),
     [date, setDate] = useState(today),
     [method, setMethod] = useState('CASH'),
     [reference, setReference] = useState(''),
     [description, setDescription] = useState('Abono del paciente'),
-    [rows, setRows] = useState<Allocation[]>([])
+    [rows, setRows] = useState<Allocation[]>(
+      initialCharges.map((c) => ({ chargeId: c.id, amount: String(c.pending) })),
+    )
   return (
     <Modal title="Registrar abono" onClose={onClose} busy={form.busy}>
       <form
@@ -46,7 +59,10 @@ export function PaymentForm({
                 description,
                 allocations: rows,
               }),
-            onSaved,
+            () => {
+              void notifyPaidCharges(rows)
+              onSaved()
+            },
           )
         }}
       >
@@ -102,6 +118,7 @@ export function PaymentForm({
           currency={currency}
           rows={rows}
           onChange={setRows}
+          initialSelected={initialCharges.map((c) => ({ id: c.id, label: c.description }))}
         />
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy}>Guardar abono</Button>

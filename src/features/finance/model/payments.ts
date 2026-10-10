@@ -17,6 +17,7 @@ export interface Movement {
   effectiveAmount: number
   applied: number
   available: number
+  closedApplied: number
   occurredOn: string
   method: string
   reference: string
@@ -28,6 +29,7 @@ export interface Movement {
   createdAt: string
 }
 export interface OpenCharge {
+  closed: boolean
   id: string
   description: string
   currency: string

@@ -236,7 +236,7 @@ for (const width of [1440, 768, 390])
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([])
     await page.getByRole('button', { name: 'Cerrar formulario' }).click()
     await page.goto('/finanzas?patientId=' + data.patient.id)
-    await expect(page.getByText('Deuda generada · PEN')).toBeVisible()
+    await expect(page.getByText('Cargos activos · PEN')).toBeVisible()
     await expect(
       page.getByRole('button', { name: 'Ajustar cargo' }).filter({ visible: true }),
     ).toBeVisible()
@@ -268,7 +268,7 @@ test('caja consulta deuda sin aceptar planes ni ajustar cargos', async ({ page }
   })
   await page.goto('/finanzas?patientId=' + data.patient.id)
   await expect(page.getByRole('button', { name: 'Ajustar cargo' })).toHaveCount(0)
-  await expect(page.getByText('Deuda generada · PEN')).toBeVisible()
+  await expect(page.getByText('Cargos activos · PEN')).toBeVisible()
   const charge = (
     await (await page.request.get('/api/v1/charges?patientId=' + data.patient.id)).json()
   ).items[0]

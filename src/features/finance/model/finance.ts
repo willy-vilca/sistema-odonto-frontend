@@ -1,4 +1,6 @@
 export interface Charge {
+  closed: boolean
+  pending: number | null
   id: string
   patientId: string
   planId: string | null

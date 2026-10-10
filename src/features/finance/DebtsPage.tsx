@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChargeLifecycleForm } from './components/ChargeLifecycleForm'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
 import { usePagedList } from '../../shared/data/usePagedList'
@@ -21,12 +22,14 @@ export function DebtWorkspace({
   onChanged: () => void
 }) {
   const auth = useAuth(),
+    [closed, setClosed] = useState('false'),
+    [lifecycle, setLifecycle] = useState<{ id: string; close: boolean }>(),
     [kind, setKind] = useState(''),
     [origin, setOrigin] = useState(''),
     [currency, setCurrency] = useState(''),
     list = usePagedList<Charge>(
       '/api/v1/charges',
-      { patientId, kind, currency, originalId: origin, direction: 'desc' },
+      { patientId, kind, currency, closed, originalId: origin, direction: 'desc' },
       'createdAt',
     ),
     summary = useQueryData<DebtSummary[]>('/api/v1/charges/summary?patientId=' + patientId),
@@ -36,6 +39,7 @@ export function DebtWorkspace({
       action: 'installments' | 'discount' | 'void'
     }>()
   function saved() {
+    setLifecycle(undefined)
     setSelected(undefined)
     setOperation(undefined)
     onChanged()
@@ -77,6 +81,14 @@ export function DebtWorkspace({
         filters={
           <>
             <label className="field-label">
+              Estado del cargo
+              <select className="field" value={closed} onChange={(e) => setClosed(e.target.value)}>
+                <option value="false">Activos</option>
+                <option value="true">Finalizados</option>
+                <option value="">Todos</option>
+              </select>
+            </label>
+            <label className="field-label">
               Tipo
               <select className="field" value={kind} onChange={(e) => setKind(e.target.value)}>
                 <option value="">Todos</option>
@@ -108,7 +120,14 @@ export function DebtWorkspace({
             render: (c) => (
               <>
                 <p className="font-semibold">{c.description}</p>
-                <p className="mt-1 text-xs text-muted">{chargeKinds[c.kind]}</p>
+                <p className="mt-1 text-xs text-muted">
+                  {chargeKinds[c.kind]} ·{' '}
+                  {c.closed
+                    ? 'Finalizado'
+                    : c.pending === 0
+                      ? 'Sin saldo · Listo para finalizar'
+                      : 'Activo'}
+                </p>
                 {c.encounterId && auth.can('CLINICAL_READ') && (
                   <Link
                     className="mt-2 inline-flex min-h-11 items-center text-xs font-semibold text-brand-700"
@@ -154,16 +173,27 @@ export function DebtWorkspace({
         ]}
         actions={(c) => (
           <div className="flex flex-wrap gap-2">
+            {!c.originalId &&
+              ((!c.closed && c.pending === 0 && auth.can('PAYMENTS_WRITE')) ||
+                (c.closed && auth.can('FINANCES_ADJUST'))) && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setLifecycle({ id: c.id, close: !c.closed })}
+                >
+                  {c.closed ? 'Reabrir cargo' : 'Finalizar cargo'}
+                </Button>
+              )}
             <Button
               variant="secondary"
               onClick={() => {
+                setClosed('')
                 setKind('')
                 setOrigin(c.originalId ?? c.id)
               }}
             >
               Ver origen
             </Button>
-            {!c.originalId && auth.can('PAYMENTS_WRITE') && (
+            {!c.originalId && !c.closed && auth.can('PAYMENTS_WRITE') && (
               <Button
                 variant="quiet"
                 onClick={() => setOperation({ id: c.id, action: 'installments' })}
@@ -171,7 +201,7 @@ export function DebtWorkspace({
                 Programar cuotas
               </Button>
             )}
-            {!c.originalId && auth.can('FINANCES_ADJUST') && (
+            {!c.originalId && !c.closed && auth.can('FINANCES_ADJUST') && (
               <>
                 <Button
                   variant="quiet"
@@ -184,7 +214,7 @@ export function DebtWorkspace({
                 </Button>
               </>
             )}
-            {!c.originalId && auth.can('FINANCES_ADJUST') && (
+            {!c.originalId && !c.closed && auth.can('FINANCES_ADJUST') && (
               <Button variant="quiet" onClick={() => setSelected(c)}>
                 Ajustar cargo
               </Button>
@@ -192,6 +222,13 @@ export function DebtWorkspace({
           </div>
         )}
       />
+      {lifecycle && (
+        <ChargeLifecycleForm
+          {...lifecycle}
+          onClose={() => setLifecycle(undefined)}
+          onSaved={saved}
+        />
+      )}
       {operation && (
         <ChargeFinanceForm
           chargeId={operation.id}

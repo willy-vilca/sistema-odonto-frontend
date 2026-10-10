@@ -3,12 +3,12 @@ import { ApiError } from '../api/http'
 import { notify } from '../notifications/notifications'
 export function useSaveForm() {
   const [busy, setBusy] = useState(false)
-  async function submit(operation: () => Promise<unknown>, onSaved: () => void) {
+  async function submit<T>(operation: () => Promise<T>, onSaved: (result: T) => void) {
     setBusy(true)
     try {
-      await operation()
+      const result = await operation()
       notify('Cambios guardados correctamente.')
-      onSaved()
+      onSaved(result)
     } catch (e) {
       notify(
         e instanceof ApiError

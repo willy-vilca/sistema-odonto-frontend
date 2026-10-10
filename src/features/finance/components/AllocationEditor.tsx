@@ -9,14 +9,18 @@ export function AllocationEditor({
   rows,
   onChange,
   label = 'Aplicación a cargos',
+  pendingOnly = true,
+  initialSelected = [],
 }: {
   patientId: string
   currency: string
   rows: Allocation[]
   onChange: (rows: Allocation[]) => void
   label?: string
+  pendingOnly?: boolean
+  initialSelected?: PickedEntity[]
 }) {
-  const [selected, setSelected] = useState<PickedEntity[]>([])
+  const [selected, setSelected] = useState<PickedEntity[]>(initialSelected)
   function choose(items: PickedEntity[]) {
     setSelected(items)
     onChange(
@@ -34,7 +38,7 @@ export function AllocationEditor({
         source={{
           endpoint: '/api/v1/finance/charges',
           labelKey: 'description',
-          filters: { patientId, currency },
+          filters: { patientId, currency, closed: 'false', pendingOnly: String(pendingOnly) },
         }}
         selected={selected}
         onChange={choose}

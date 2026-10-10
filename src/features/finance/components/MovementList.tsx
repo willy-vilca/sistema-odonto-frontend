@@ -208,6 +208,12 @@ export function MovementList({
                 currency={selected.currency}
               />
             )}
+            {(selected.closedApplied ?? 0) > 0 && (
+              <p className="rounded-xl bg-brand-50 p-4 text-sm">
+                {money(selected.closedApplied, selected.currency)} están aplicados a cargos
+                finalizados. Reabre esos cargos desde Cargos para corregir su dinero aplicado.
+              </p>
+            )}
             <FinancialFiles
               movementId={selected.id}
               canUpload={auth.can(selected.patientId ? 'PAYMENTS_WRITE' : 'EXPENSES_WRITE')}
@@ -220,6 +226,7 @@ export function MovementList({
                     <>
                       <Button
                         variant="secondary"
+                        disabled={selected.applied <= (selected.closedApplied ?? 0)}
                         onClick={() => {
                           setOperation({ movement: selected, action: 'release' })
                           setSelected(undefined)
@@ -229,6 +236,7 @@ export function MovementList({
                       </Button>
                       <Button
                         variant="secondary"
+                        disabled={selected.effectiveAmount <= (selected.closedApplied ?? 0)}
                         onClick={() => {
                           setOperation({ movement: selected, action: 'refund' })
                           setSelected(undefined)
@@ -238,6 +246,7 @@ export function MovementList({
                       </Button>
                       <Button
                         variant="quiet"
+                        disabled={(selected.closedApplied ?? 0) > 0}
                         onClick={() => {
                           setOperation({ movement: selected, action: 'reverse' })
                           setSelected(undefined)
