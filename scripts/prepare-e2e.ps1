@@ -27,6 +27,7 @@ INSERT INTO role_permission(role_code,permission) SELECT r,p FROM unnest(ARRAY['
 INSERT INTO role_permission(role_code,permission) SELECT r,p FROM unnest(ARRAY['ADMIN','RECEPTION']) r CROSS JOIN unnest(ARRAY['WHATSAPP_READ','WHATSAPP_WRITE']) p ON CONFLICT DO NOTHING;
 INSERT INTO role_permission(role_code,permission) VALUES('ADMIN','AGENT_TEST_WRITE') ON CONFLICT DO NOTHING;
 INSERT INTO role_permission(role_code,permission) VALUES('ADMIN','AGENT_CONTROL_WRITE'),('RECEPTION','AGENT_CONTROL_WRITE') ON CONFLICT DO NOTHING;
+INSERT INTO role_permission(role_code,permission) SELECT r,p FROM unnest(ARRAY['ADMIN','DENTIST','RECEPTION','CASHIER']) r CROSS JOIN unnest(ARRAY['REPORTS_READ','REPORTS_EXPORT']) p ON CONFLICT DO NOTHING;
 UPDATE agent_policy SET enabled=true,schedule='[]',version=0,change_lead_minutes=0,allow_reschedule=true,allow_cancel=true;
 '@
 & $psqlExecutable -h localhost -U postgres -d sistema_odontologo_test -v ON_ERROR_STOP=1 -c $sql

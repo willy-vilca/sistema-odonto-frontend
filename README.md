@@ -1,5 +1,7 @@
 # OdontoCare — frontend
 
+Estado al 10/10/2026: dashboard en / como primera página después de iniciar sesión, reportes con filtros remotos y CSV/PDF, y áreas del paciente conectadas por permisos. [Cierre de fase 8 y guía de revisión](../docs/cierre-fase-8.md). Alcance 1.11 y plan 3.13; 76 escenarios distintos de navegador aprobados en bloques, con computadora/tablet/celular. Capturas nuevas en docs/verification/phase8. Recordatorios aplazados y fase 9 pendiente. Desarrollo en main; las notas previas conservan la historia de implementación.
+
 Actualización 09/10/2026: desarrollo en main, fases 6 y 7 cerradas, alcance 1.10 y plan 3.12. WhatsApp presenta un chat con atención humana integrada; conexión, solicitud y bitácora se consultan en vistas secundarias. Se retiraron los avisos de desarrollo de las pantallas habituales. [Guía de uso y verificación](../docs/mejoras-interfaz-whatsapp.md). Capturas actuales en docs/verification/whatsapp-ui; los apartados históricos siguientes conservan el recorrido de implementación.
 
 React + Vite + TypeScript + TailwindCSS. Fases 0 a 6: configuración, pacientes, agenda, clínica, documentación, tratamientos, finanzas y conversación de WhatsApp con propuestas, agente y bitácora. Fase 6 validada mediante reserva real el 07/10/2026. Adaptación para computadora, tablet y celular.

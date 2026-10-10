@@ -12,6 +12,7 @@ import { InstallmentList } from './InstallmentList'
 import { FinancialFiles } from './FinancialFiles'
 import { financePost, downloadDocument } from '../services/paymentService'
 import type { AccountSummary, FinancialDocument } from '../model/payments'
+import { PatientNavigation } from '../../patients/components/PatientNavigation'
 export function FinanceAccount({
   patientId,
   currency,
@@ -57,6 +58,7 @@ export function FinanceAccount({
   }
   return (
     <section className="space-y-5">
+      <PatientNavigation patientId={patientId} />
       {summary.error && (
         <p role="alert" className="error-box">
           {summary.error}

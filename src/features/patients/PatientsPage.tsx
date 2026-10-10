@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Plus, UsersRound } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
 import { usePagedList } from '../../shared/data/usePagedList'
@@ -7,11 +8,19 @@ import { Button } from '../../shared/ui/Button'
 import { formatLocalDate } from '../../shared/data/dateFormat'
 import { PatientEditor } from './components/PatientEditor'
 import { PatientDetail } from './components/PatientDetail'
+import { PatientById } from './components/PatientById'
 import { AppointmentDetail } from '../appointments/components/AppointmentDetail'
 import type { Appointment } from '../appointments/model/appointment'
 import type { Patient } from './model/patient'
 export function PatientsPage({ dateFormat, timeZone }: { dateFormat: string; timeZone: string }) {
   const auth = useAuth()
+  const [params, setParams] = useSearchParams()
+  const linkedPatient = params.get('patientId')
+  function closeLinked() {
+    const next = new URLSearchParams(params)
+    next.delete('patientId')
+    setParams(next, { replace: true })
+  }
   const [active, setActive] = useState('')
   const [provisional, setProvisional] = useState('')
   const list = usePagedList<Patient>('/api/v1/patients', {
@@ -143,6 +152,21 @@ export function PatientsPage({ dateFormat, timeZone }: { dateFormat: string; tim
           }}
           onAppointment={(a) => {
             setSelected(undefined)
+            setAppointment(a)
+          }}
+        />
+      )}
+      {linkedPatient && !selected && !editor && (
+        <PatientById
+          id={linkedPatient}
+          dateFormat={dateFormat}
+          onClose={closeLinked}
+          onEdit={(patient) => {
+            closeLinked()
+            setEditor({ patient })
+          }}
+          onAppointment={(a) => {
+            closeLinked()
             setAppointment(a)
           }}
         />

@@ -77,10 +77,20 @@ export function errorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No pudimos completar la operación.'
 }
 
-export async function requestBlob(path: string, signal: AbortSignal) {
-  const response = await fetchResponse(path, { signal, headers: { Accept: 'image/png' } })
+export async function requestBlob(path: string, signal: AbortSignal, accept = 'image/png') {
+  const response = await fetchResponse(path, { signal, headers: { Accept: accept } })
   return {
     blob: await response.blob(),
     pages: Number(response.headers.get('X-Document-Pages') ?? 1),
   }
+}
+
+export async function downloadFile(path: string, fileName: string) {
+  const { blob } = await requestBlob(path, new AbortController().signal, '*/*')
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.click()
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

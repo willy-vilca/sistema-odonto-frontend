@@ -38,7 +38,9 @@ export function FinancePage({
   const auth = useAuth(),
     [params, setParams] = useSearchParams(),
     patientId = params.get('patientId') ?? '',
-    [section, setSection] = useState('Cuenta del paciente'),
+    [section, setSection] = useState(
+      params.get('section') === 'egresos' ? 'Egresos' : 'Cuenta del paciente',
+    ),
     today = clinicToday(timeZone)
   if (!auth.can('FINANCES_READ'))
     return (

@@ -9,6 +9,7 @@ export function DayAppointmentsDialog({
   date,
   dentistId,
   dentistName,
+  patientId,
   dateFormat,
   revision,
   onOpen,
@@ -17,6 +18,7 @@ export function DayAppointmentsDialog({
   date: string
   dentistId?: string
   dentistName?: string
+  patientId?: string
   dateFormat: string
   revision: number
   onOpen: (appointment: Appointment) => void
@@ -46,6 +48,7 @@ export function DayAppointmentsDialog({
             from: date,
             to: date,
             ...(dentistId ? { dentistId } : {}),
+            ...(patientId ? { patientId } : {}),
             ...(status ? { status } : {}),
           }}
           dateFormat={dateFormat}

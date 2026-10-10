@@ -10,12 +10,11 @@ import { AgendaPage } from '../features/appointments/AgendaPage'
 import { PatientsPage } from '../features/patients/PatientsPage'
 import { ConfigurationPage } from '../features/configuration/ConfigurationPage'
 import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
-import { HomePage } from '../features/home/HomePage'
-import { ModulePreviewPage } from '../features/home/ModulePreviewPage'
+import { DashboardPage } from '../features/dashboard/DashboardPage'
+import { ReportsPage } from '../features/reports/ReportsPage'
 import { ConnectionCard } from '../features/installation/components/ConnectionCard'
 import { useInstallation } from '../features/installation/hooks/useInstallation'
 import { AppShell } from './layout/AppShell'
-import { modules } from './navigation'
 import { NotificationViewport } from '../shared/ui/NotificationViewport'
 export function App() {
   return (
@@ -44,7 +43,16 @@ function Application() {
     <BrowserRouter>
       <AppShell state={state}>
         <Routes>
-          <Route path="/" element={<HomePage state={state} reload={reload} />} />
+          <Route path="/" element={<DashboardPage state={state} reload={reload} />} />
+          <Route
+            path="/reportes"
+            element={
+              <ReportsPage
+                timeZone={state.status === 'ready' ? state.data.timeZone : 'America/Lima'}
+                dateFormat={state.status === 'ready' ? state.data.dateFormat : 'DMY'}
+              />
+            }
+          />
           <Route
             path="/configuracion/*"
             element={
@@ -123,23 +131,6 @@ function Application() {
               )
             }
           />
-          {modules
-            .filter(
-              (module) =>
-                module.phase !== 0 &&
-                module.phase !== 1 &&
-                module.phase !== 2 &&
-                module.phase !== 3 &&
-                module.phase !== 4 &&
-                module.phase !== 6,
-            )
-            .map((module) => (
-              <Route
-                key={module.path}
-                path={module.path}
-                element={<ModulePreviewPage module={module} />}
-              />
-            ))}
           <Route
             path="*"
             element={

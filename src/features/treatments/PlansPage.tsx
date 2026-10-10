@@ -1,8 +1,10 @@
 import { useErrorNotification } from '../../shared/notifications/useErrorNotification'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
 import { PatientPicker } from '../patients/components/PatientPicker'
+import { PatientNavigation } from '../patients/components/PatientNavigation'
+import { request } from '../../shared/api/http'
 import { usePagedList } from '../../shared/data/usePagedList'
 import { Button } from '../../shared/ui/Button'
 import { PagedTable } from '../../shared/ui/PagedTable'
@@ -27,6 +29,24 @@ export function PlansPage() {
     [action, setAction] = useState(''),
     [lines, setLines] = useState<PlanItem[]>([]),
     setError = useErrorNotification()
+  const linkedPlan = params.get('planId')
+  const canReadPlans = auth.can('PLANS_READ')
+  useEffect(() => {
+    if (!linkedPlan || !canReadPlans) return
+    const controller = new AbortController()
+    request<Plan>('/api/v1/plans/' + linkedPlan, { signal: controller.signal })
+      .then(setSelected)
+      .catch((e) => {
+        if (!controller.signal.aborted) setError(errorMessage(e))
+      })
+    return () => controller.abort()
+  }, [linkedPlan, canReadPlans, setError])
+  function closePlan() {
+    setSelected(undefined)
+    const next = new URLSearchParams(params)
+    next.delete('planId')
+    setParams(next, { replace: true })
+  }
   function saved() {
     setSelected(undefined)
     setEditor(undefined)
@@ -75,6 +95,7 @@ export function PlansPage() {
           }}
         />
       </section>
+      {patientId && <PatientNavigation patientId={patientId} />}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted">
           {patientId ? 'Planes del paciente seleccionado' : 'Presupuestos y planes del consultorio'}
@@ -140,7 +161,7 @@ export function PlansPage() {
       {selected && !editor && !action && (
         <PlanDetail
           plan={selected}
-          onClose={() => setSelected(undefined)}
+          onClose={closePlan}
           onEdit={() => void edit()}
           onAdditional={() => setEditor('additional')}
           onAction={setAction}

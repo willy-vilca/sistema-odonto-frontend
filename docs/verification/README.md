@@ -1,5 +1,7 @@
 # Evidencias de interfaz
 
+10/10/2026: panel, reportes, exportaciones y navegación en [phase8](phase8/README.md). Ocho escenarios nuevos y 68 de regresión aprobados en bloques; los recordatorios automáticos se mantienen aplazados.
+
 09/10/2026: verificación actual de WhatsApp en [whatsapp-ui](whatsapp-ui/README.md). Interfaz de chat, atención humana, vistas secundarias y limpieza de avisos de desarrollo. Las capturas de fases anteriores se conservan como evidencia histórica.
 
 ## Verificación de la fase 0

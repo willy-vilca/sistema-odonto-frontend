@@ -1,6 +1,7 @@
 import { AgentPolicyDialog } from './components/AgentPolicyDialog'
 import { controlLabels, requestLabels } from './model/supervision'
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Info, Settings2 } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
 import { useQueryData } from '../../shared/data/useQueryData'
@@ -29,7 +30,8 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
   const auth = useAuth()
   const [policyOpen, setPolicyOpen] = useState(false)
   const [informationOpen, setInformationOpen] = useState(false)
-  const [mode, setMode] = useState(''),
+  const [params] = useSearchParams()
+  const [mode, setMode] = useState(params.get('mode') || ''),
     [requestState, setRequestState] = useState('')
   const [selected, setSelected] = useState<string>()
   const [testPhone, setTestPhone] = useState<string>()

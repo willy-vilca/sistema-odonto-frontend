@@ -7,6 +7,7 @@ import { useAuth } from '../../auth/hooks/useAuth'
 import { AppointmentList } from '../../appointments/components/AppointmentList'
 import type { Appointment } from '../../appointments/model/appointment'
 import type { Patient } from '../model/patient'
+import { PatientNavigation } from './PatientNavigation'
 export function PatientDetail({
   patient,
   dateFormat,
@@ -24,6 +25,7 @@ export function PatientDetail({
   return (
     <Modal title="Ficha del paciente" onClose={onClose}>
       <div className="space-y-6">
+        <PatientNavigation patientId={patient.id} onNavigate={onClose} />
         <div className="rounded-xl bg-brand-50 p-5">
           <div className="flex flex-wrap justify-between gap-3">
             <div>
@@ -104,7 +106,7 @@ export function PatientDetail({
             onClick={onClose}
             to={'/finanzas?patientId=' + patient.id}
           >
-            Ver deuda del paciente
+            Ver cuenta del paciente
           </Link>
         )}
         {auth.can('APPOINTMENTS_READ') && (

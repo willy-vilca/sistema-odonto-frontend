@@ -14,7 +14,7 @@ export default async function setup(config: FullConfig) {
     await page.getByLabel('Usuario', { exact: true }).fill('adminpruebas')
     await page.getByLabel('Contraseña', { exact: true }).fill(password)
     await page.getByRole('button', { name: 'Crear cuenta y acceder' }).click()
-    await page.getByRole('heading', { name: 'Bienvenido a tu consultorio' }).waitFor()
+    await page.getByRole('heading', { name: 'Panel del consultorio' }).waitFor()
     await mkdir('.runtime', { recursive: true })
     await page.context().storageState({ path: '.runtime/admin-state.json' })
     await writeFile(

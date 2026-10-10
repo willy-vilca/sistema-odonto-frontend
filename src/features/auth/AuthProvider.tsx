@@ -38,10 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: new URLSearchParams({ username, password }).toString(),
     })
     resetCsrf()
+    window.history.replaceState(null, '', '/')
     setSession(result)
   }
   async function setup(body: unknown) {
     await saveJson('/api/v1/auth/setup', body)
+    window.history.replaceState(null, '', '/')
     await refresh()
   }
   async function logout() {

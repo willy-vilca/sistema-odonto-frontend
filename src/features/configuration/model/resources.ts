@@ -54,6 +54,9 @@ export const roleOptions = [
   { value: 'CASHIER', label: 'Caja' },
 ]
 export const permissionLabels: Record<string, string> = {
+  REPORTS_READ: 'Consultar reportes de las áreas autorizadas',
+  REPORTS_EXPORT: 'Exportar reportes en CSV y PDF',
+  AGENT_CONTROL_WRITE: 'Asumir, devolver y cerrar conversaciones',
   AGENT_TEST_WRITE: 'Probar y reintentar el agente IA',
   WHATSAPP_READ: 'Consultar conversaciones de WhatsApp',
   WHATSAPP_WRITE: 'Enviar respuestas por WhatsApp',

@@ -10,6 +10,7 @@ import { OdontogramPanel } from './components/OdontogramPanel'
 import { DocumentsPanel } from '../documents/components/DocumentsPanel'
 import { ConsentsPanel } from '../documents/components/ConsentsPanel'
 import type { Patient } from '../patients/model/patient'
+import { PatientNavigation } from '../patients/components/PatientNavigation'
 export function ClinicalPage({ dateFormat, timeZone }: { dateFormat: string; timeZone: string }) {
   const auth = useAuth(),
     [params, setParams] = useSearchParams(),
@@ -53,8 +54,13 @@ export function ClinicalPage({ dateFormat, timeZone }: { dateFormat: string; tim
             setSelected(items)
             setParams({})
           }}
-          tab={tab}
-          setTab={setTab}
+          tab={params.get('tab') || tab}
+          setTab={(value) => {
+            setTab(value)
+            const next = new URLSearchParams(params)
+            next.set('tab', value)
+            setParams(next)
+          }}
           dateFormat={dateFormat}
           timeZone={timeZone}
         />
@@ -138,6 +144,7 @@ function ClinicalWorkspace({
           Las modificaciones clínicas conservan su fecha y responsable.
         </p>
       </section>
+      <PatientNavigation patientId={patientId} />
       {auth.can('CLINICAL_WRITE') && (
         <section className="rounded-xl border border-line bg-white p-4">
           <EntityPicker

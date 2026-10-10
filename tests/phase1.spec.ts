@@ -161,7 +161,7 @@ test('configuration, two dentists, assigned services, schedules, history and res
   await page.getByLabel('Usuario', { exact: true }).fill('recepcionprueba')
   await page.getByLabel('Contraseña', { exact: true }).fill(account.password)
   await page.getByRole('button', { name: 'Iniciar sesión' }).click()
-  await expect(page.getByRole('heading', { name: 'Bienvenido a tu consultorio' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Panel del consultorio' })).toBeVisible()
   await page.goto('/configuracion/servicios')
   await expect(page.getByRole('button', { name: 'Añadir servicio' })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Usuarios', exact: true })).toHaveCount(0)

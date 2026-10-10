@@ -15,12 +15,14 @@ import { DayAppointmentsDialog } from './components/DayAppointmentsDialog'
 import { clinicToday, dateRange, dateAdd, monthAdd, type CalendarView } from './model/calendar'
 import { statusLabels, type CalendarResponse, type Appointment } from './model/appointment'
 import { formatLocalDate } from '../../shared/data/dateFormat'
+import { PatientContextBanner } from '../patients/components/PatientContextBanner'
 export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
   const auth = useAuth()
   const [params, setParams] = useSearchParams()
   const linkedAppointment = params.get('appointment')
+  const linkedPatient = params.get('patientId')
   const [view, setView] = useState<CalendarView>(() =>
-    window.matchMedia('(max-width:767px)').matches ? 'list' : 'week',
+    linkedPatient || window.matchMedia('(max-width:767px)').matches ? 'list' : 'week',
   )
   const [date, setDate] = useState(() => clinicToday(timeZone))
   const [dentist, setDentist] = useState<PickedEntity[]>([])
@@ -55,6 +57,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           </Button>
         )}
       </header>
+      {linkedPatient && auth.can('PATIENTS_READ') && <PatientContextBanner id={linkedPatient} />}
       <div className="rounded-2xl border border-line bg-white p-4 sm:p-5">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-1 rounded-xl bg-canvas p-1">
@@ -172,6 +175,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           key={revision}
           filters={{
             ...(dentist.length ? { dentistId: dentist[0].id } : {}),
+            ...(linkedPatient ? { patientId: linkedPatient } : {}),
             ...(status ? { status } : {}),
             ...(listFrom ? { from: listFrom } : {}),
             ...(listTo ? { to: listTo } : {}),
@@ -185,6 +189,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           date={date}
           view={view}
           dentistId={dentist[0]?.id}
+          patientId={linkedPatient || undefined}
           dateFormat={dateFormat}
           onDay={(day) => {
             setDate(day)
@@ -217,6 +222,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
         <DayAppointmentsDialog
           key={expandedDay + '|' + (dentist[0]?.id ?? '')}
           date={expandedDay}
+          patientId={linkedPatient || undefined}
           dentistId={dentist[0]?.id}
           dentistName={dentist[0]?.label}
           dateFormat={dateFormat}
@@ -255,6 +261,7 @@ function CalendarSection({
   date,
   view,
   dentistId,
+  patientId,
   dateFormat,
   onDay,
   onOpen,
@@ -263,6 +270,7 @@ function CalendarSection({
   date: string
   view: CalendarView
   dentistId?: string
+  patientId?: string
   dateFormat: string
   onDay: (date: string) => void
   onOpen: (a: Appointment) => void
@@ -271,7 +279,11 @@ function CalendarSection({
   const range = dateRange(date, view)
   const url =
     '/api/v1/appointments/calendar?' +
-    new URLSearchParams({ ...range, ...(dentistId ? { dentistId } : {}) })
+    new URLSearchParams({
+      ...range,
+      ...(dentistId ? { dentistId } : {}),
+      ...(patientId ? { patientId } : {}),
+    })
   const result = useQueryData<CalendarResponse>(url)
   return (
     <div className="space-y-3">

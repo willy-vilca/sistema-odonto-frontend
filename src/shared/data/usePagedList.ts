@@ -12,14 +12,15 @@ export function usePagedList<T>(
   filters: Record<string, string> = {},
   sort = 'name',
   refreshKey = 0,
+  initial: { search?: string; page?: number; size?: number } = {},
 ) {
-  const [search, setSearch] = useState(''),
-    [debounced, setDebounced] = useState(''),
-    [size, setSize] = useState(20),
+  const [search, setSearch] = useState(initial.search ?? ''),
+    [debounced, setDebounced] = useState(initial.search ?? ''),
+    [size, setSize] = useState(initial.size ?? 20),
     [revision, setRevision] = useState(0)
   const filterKey = JSON.stringify(filters),
     pageScope = endpoint + '|' + filterKey + '|' + size + '|' + debounced
-  const [position, setPosition] = useState({ scope: pageScope, page: 0 })
+  const [position, setPosition] = useState({ scope: pageScope, page: initial.page ?? 0 })
   const page = position.scope === pageScope ? position.page : 0
   function setPage(page: number) {
     setPosition({ scope: pageScope, page })

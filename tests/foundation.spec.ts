@@ -18,8 +18,8 @@ for (const viewport of viewports) {
     const failures: string[] = []
     page.on('pageerror', (error) => failures.push(error.message))
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Bienvenido a tu consultorio' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Actualizar panel', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Panel del consultorio' })).toBeVisible()
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true)
@@ -68,10 +68,10 @@ test('loading, connection failure and recovery preserve usable navigation', asyn
     else await route.continue()
   })
   await page.goto('/')
-  await expect(page.getByRole('alert')).toContainText('No pudimos cargar los datos del consultorio')
+  await expect(page.getByRole('alert')).toContainText('No pudimos cargar la información')
   fail = false
   await page.getByRole('button', { name: 'Reintentar' }).click()
-  await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Actualizar panel', exact: true })).toBeVisible()
   await page.unroute('**/api/v1/system/installation')
   let release: (() => void) | undefined
   const gate = new Promise<void>((resolve) => {
@@ -82,9 +82,9 @@ test('loading, connection failure and recovery preserve usable navigation', asyn
     await route.continue()
   })
   await page.reload()
-  await expect(page.getByText('Cargando información…')).toBeVisible()
+  await expect(page.getByText('Cargando información del consultorio…')).toBeVisible()
   release?.()
-  await expect(page.getByRole('heading', { name: 'Tu consultorio', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Actualizar panel', exact: true })).toBeVisible()
 })
 
 test('mobile menu traps focus, closes with Escape and restores focus', async ({ page }) => {

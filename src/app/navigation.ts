@@ -11,7 +11,7 @@ import {
 export const modules = [
   {
     path: '/',
-    label: 'Inicio',
+    label: 'Panel',
     icon: Home,
     group: 'Consultorio',
     phase: 0,

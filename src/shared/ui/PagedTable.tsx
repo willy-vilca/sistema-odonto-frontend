@@ -3,6 +3,7 @@ import type { usePagedList } from '../data/usePagedList'
 import { Button } from './Button'
 export interface Column<T> {
   label: string
+  className?: string
   render: (row: T) => ReactNode
 }
 export function PagedTable<T>({
@@ -63,7 +64,10 @@ export function PagedTable<T>({
                     <th
                       key={c.label}
                       scope="col"
-                      className="bg-canvas px-5 py-3 text-xs font-semibold text-muted"
+                      className={
+                        'bg-canvas px-5 py-3 text-xs font-semibold text-muted ' +
+                        (c.className || '')
+                      }
                     >
                       {c.label}
                     </th>
@@ -79,7 +83,10 @@ export function PagedTable<T>({
                 {list.data.items.map((row) => (
                   <tr key={keyFor(row)} className="border-t border-line">
                     {columns.map((c) => (
-                      <td key={c.label} className="max-w-80 px-5 py-4 break-words">
+                      <td
+                        key={c.label}
+                        className={'max-w-80 px-5 py-4 break-words ' + (c.className || '')}
+                      >
                         {c.render(row)}
                       </td>
                     ))}
