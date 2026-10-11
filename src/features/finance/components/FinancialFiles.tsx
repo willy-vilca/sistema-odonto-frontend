@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState, useEffect } from 'react'
 import { usePagedList } from '../../../shared/data/usePagedList'
@@ -115,8 +116,9 @@ function SupportForm({
           onChange={(e) => setDescription(e.target.value)}
         />
         <label className="field-label">
-          Imagen o PDF
+          <FieldLabel label={'Imagen o PDF'} required={true} />
           <input
+            aria-label={'Imagen o PDF'}
             className="field"
             type="file"
             accept=".jpg,.jpeg,.png,.webp,.pdf"

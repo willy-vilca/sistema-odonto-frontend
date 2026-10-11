@@ -75,6 +75,7 @@ export function DocumentUpload({
         />
         <EntityPicker
           label="Categoría documental"
+          required
           source={{
             endpoint: '/api/v1/documents/categories',
             labelKey: 'name',

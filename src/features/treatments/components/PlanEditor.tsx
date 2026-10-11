@@ -101,6 +101,7 @@ export function PlanEditor({
             />
             <EntityPicker
               label="Profesional del plan"
+              required
               source={{
                 endpoint: '/api/v1/dentists',
                 labelKey: 'fullName',

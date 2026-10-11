@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useState } from 'react'
 import { useQueryData } from '../../../shared/data/useQueryData'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
@@ -103,9 +104,11 @@ export function EncounterCheckout({
                     onChange={(e) => setDate(e.target.value)}
                   />
                   <label className="field-label">
-                    Medio de pago
+                    <FieldLabel label="Medio de pago" required />
                     <select
                       className="field"
+                      required
+                      aria-label="Medio de pago"
                       value={method}
                       onChange={(e) => setMethod(e.target.value)}
                     >

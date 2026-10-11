@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { usePagedList } from '../data/usePagedList'
 import { Button } from './Button'
+import { FieldLabel } from './FieldLabel'
 export interface PickedEntity {
   id: string
   label: string
@@ -17,6 +18,7 @@ export function EntityPicker({
   onChange,
   multiple = false,
   disabled = false,
+  required = false,
 }: {
   label: string
   source: PickerSource
@@ -24,11 +26,14 @@ export function EntityPicker({
   onChange: (selected: PickedEntity[]) => void
   multiple?: boolean
   disabled?: boolean
+  required?: boolean
 }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">{label}</p>
+      <p className="text-sm font-medium">
+        <FieldLabel label={label} required={required} />
+      </p>
       {selected.length ? (
         <div className="flex flex-wrap gap-2">
           {selected.map((item) => (

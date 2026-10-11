@@ -246,21 +246,23 @@ test('audit essential actions, filters and references at three sizes', async ({ 
     method: 'TRANSFER',
     reference: 'Auditoría de cobro',
   })
+  const closedCharges = await (
+    await page.request.get('/api/v1/finance/charges?closed=true&patientId=' + data.patient.id)
+  ).json()
+  const chargeId = closedCharges.items[0].id
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1024 })
     await page.goto('/configuracion/auditoria')
     await page.getByLabel('Módulo').selectOption('CHARGE')
-    await page.getByLabel('Buscar', { exact: true }).fill('Cierre por cobro completo de atención')
-    await expect(
-      page.getByText('Cargo finalizado', { exact: true }).filter({ visible: true }),
-    ).toBeVisible()
+    await page.getByLabel('Buscar', { exact: true }).fill(chargeId)
+    const record = page
+      .locator('tr, article')
+      .filter({ hasText: 'Cargo finalizado' })
+      .filter({ hasText: chargeId })
+      .filter({ visible: true })
+    await expect(record).toHaveCount(1)
     await expect(page.getByText('CHARGE_CLOSED', { exact: true })).toHaveCount(0)
-    await expect
-      .poll(() =>
-        page.getByText('Ver referencia', { exact: true }).filter({ visible: true }).count(),
-      )
-      .toBe(1)
-    await page.getByText('Ver referencia', { exact: true }).filter({ visible: true }).click()
+    await record.getByText('Ver referencia', { exact: true }).click()
     await accessible(page, 'audit', width)
   }
 })

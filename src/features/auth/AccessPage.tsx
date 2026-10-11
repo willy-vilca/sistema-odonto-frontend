@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../shared/ui/FieldLabel'
 import { useErrorNotification } from '../../shared/notifications/useErrorNotification'
 import { useState, type FormEvent } from 'react'
 import { useAuth } from './hooks/useAuth'
@@ -59,8 +60,9 @@ export function AccessPage() {
           <form onSubmit={submit} className="mt-7 space-y-5">
             {setup && (
               <label className="field-label">
-                Nombre completo
+                <FieldLabel label={'Nombre completo'} required={true} />
                 <input
+                  aria-label={'Nombre completo'}
                   name="displayName"
                   required
                   maxLength={120}
@@ -70,7 +72,7 @@ export function AccessPage() {
               </label>
             )}
             <label className="field-label">
-              Usuario
+              <FieldLabel label={'Usuario'} required={true} />
               <input
                 name="username"
                 aria-label="Usuario"
@@ -85,7 +87,7 @@ export function AccessPage() {
               <span className="field-help">Letras, números, puntos, guiones y guion bajo.</span>
             </label>
             <label className="field-label">
-              Contraseña
+              <FieldLabel label={'Contraseña'} required={true} />
               <input
                 name="password"
                 aria-label="Contraseña"

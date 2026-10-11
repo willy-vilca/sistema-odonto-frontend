@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useState } from 'react'
 import { notifyPaidCharges } from '../services/paymentFeedback'
 import type { OpenCharge } from '../model/payments'
@@ -91,8 +92,14 @@ export function PaymentForm({
           />
         </div>
         <label className="field-label">
-          Medio de pago
-          <select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>
+          <FieldLabel label="Medio de pago" required />
+          <select
+            className="field"
+            required
+            aria-label="Medio de pago"
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+          >
             {Object.entries(methods).map(([v, label]) => (
               <option key={v} value={v}>
                 {label}

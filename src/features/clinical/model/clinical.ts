@@ -71,12 +71,6 @@ export interface EncounterRevision {
   correctionReason: string
   createdAt: string
 }
-export interface ClinicalTemplate {
-  id: string
-  name: string
-  kind: string
-  content: string
-}
 export const emptyContent: EncounterContent = {
   anamnesis: '',
   evolution: '',

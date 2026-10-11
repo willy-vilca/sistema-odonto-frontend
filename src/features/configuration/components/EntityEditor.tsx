@@ -2,6 +2,7 @@ import { useErrorNotification } from '../../../shared/notifications/useErrorNoti
 import { useState, type FormEvent } from 'react'
 import { ApiError, errorMessage, saveJson } from '../../../shared/api/http'
 import { Button } from '../../../shared/ui/Button'
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { Modal } from '../../../shared/ui/Modal'
 import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
 import {
@@ -120,6 +121,7 @@ function EditorField({
     return (
       <EntityPicker
         label={f.label}
+        required={f.required}
         source={f.source!}
         selected={selected}
         multiple={f.multiple}
@@ -142,7 +144,9 @@ function EditorField({
   if (f.type === 'multi')
     return (
       <fieldset>
-        <legend className="mb-3 text-sm font-medium">{f.label}</legend>
+        <legend className="mb-3 text-sm font-medium">
+          <FieldLabel label={f.label} required={f.required} />
+        </legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {f.options?.map((option) => (
             <label key={option.value} className="flex min-h-11 items-center gap-3 text-sm">
@@ -167,7 +171,7 @@ function EditorField({
     )
   return (
     <label className="field-label">
-      {f.label}
+      <FieldLabel label={f.label} required={f.required} />
       {f.type === 'select' ? (
         <select
           aria-label={f.label}
@@ -185,6 +189,7 @@ function EditorField({
         </select>
       ) : f.type === 'textarea' ? (
         <textarea
+          aria-label={f.label}
           className="field min-h-24"
           required={f.required}
           value={String(value ?? '')}

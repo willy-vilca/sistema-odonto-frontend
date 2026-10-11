@@ -404,19 +404,10 @@ test('recepción y caja no pueden abrir el expediente ni descargar por URL', asy
   }
 })
 
-test('configuración clínica y aplicación de plantilla desde la interfaz', async ({ page }) => {
+test('configuración documental sin plantillas visibles', async ({ page }) => {
   const f = await seed(page)
-  await page.goto('/configuracion/plantillas')
-  await page.getByRole('button', { name: 'Añadir plantilla clínica' }).click()
-  await page.getByLabel('Nombre de la plantilla', { exact: true }).fill('Plantilla ' + f.suffix)
-  await page.getByRole('combobox', { name: 'Uso de la plantilla' }).selectOption('ENCOUNTER')
-  await page
-    .getByLabel('Contenido de la plantilla', { exact: true })
-    .fill('Texto clínico configurable')
-  await page.getByRole('button', { name: 'Guardar cambios', exact: true }).click()
-  await expect(
-    page.getByText('Plantilla ' + f.suffix, { exact: true }).filter({ visible: true }),
-  ).toBeVisible()
+  await page.goto('/configuracion/consultorio')
+  await expect(page.getByRole('link', { name: 'Plantillas clínicas', exact: true })).toHaveCount(0)
   await page.goto('/configuracion/categorias-documentales')
   await page.getByRole('button', { name: 'Añadir categoría documental' }).click()
   await page
@@ -437,11 +428,11 @@ test('configuración clínica y aplicación de plantilla desde la interfaz', asy
   await page.goto('/clinica?patientId=' + f.patient.id)
   await selectDoctor(page, f.doctor.fullName)
   await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
-  await page.getByRole('button', { name: 'Seleccionar plantilla', exact: true }).click()
-  await page.getByLabel('Buscar opciones').fill('Plantilla ' + f.suffix)
-  await page.getByRole('button', { name: 'Plantilla ' + f.suffix, exact: true }).click()
-  await page.getByRole('button', { name: 'Añadir texto de plantilla' }).click()
-  await expect(page.getByRole('textbox', { name: 'Anamnesis', exact: true })).toHaveValue(
-    'Texto clínico configurable',
+  await expect(page.getByRole('button', { name: /plantilla/i })).toHaveCount(0)
+  await page
+    .getByLabel('Anamnesis', { exact: true })
+    .fill('Texto clínico registrado por el profesional')
+  await expect(page.getByLabel('Anamnesis', { exact: true })).toHaveValue(
+    'Texto clínico registrado por el profesional',
   )
 })

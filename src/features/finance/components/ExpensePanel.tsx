@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useState } from 'react'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { Modal } from '../../../shared/ui/Modal'
@@ -101,6 +102,7 @@ function ExpenseForm({
       >
         <EntityPicker
           label="categoría del egreso"
+          required
           source={{
             endpoint: '/api/v1/finance/expense-categories',
             labelKey: 'name',
@@ -130,8 +132,14 @@ function ExpenseForm({
           />
         </div>
         <label className="field-label">
-          Medio del egreso
-          <select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>
+          <FieldLabel label="Medio del egreso" required />
+          <select
+            className="field"
+            required
+            aria-label="Medio del egreso"
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+          >
             {Object.entries(methods).map(([v, label]) => (
               <option key={v} value={v}>
                 {label}

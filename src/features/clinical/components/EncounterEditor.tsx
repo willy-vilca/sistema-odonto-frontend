@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import type { EncounterDefaults } from '../model/encounterWorkflow'
-import { useAuth } from '../../auth/hooks/useAuth'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { clinicToday } from '../../../shared/data/dateFormat'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
 import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
-import { TemplatePicker } from './TemplatePicker'
 import { ProcedureEditor } from './ProcedureEditor'
 import { saveEncounter, correctEncounter } from '../services/clinicalService'
 import { emptyContent, type Encounter, type EncounterContent } from '../model/clinical'
@@ -30,8 +28,7 @@ export function EncounterEditor({
   onClose: () => void
   onSaved: (record: Encounter) => void
 }) {
-  const auth = useAuth(),
-    form = useSaveForm(),
+  const form = useSaveForm(),
     [date, setDate] = useState(
       encounter?.attendedOn ?? defaults?.attendedOn ?? clinicToday(timeZone),
     ),
@@ -117,27 +114,26 @@ export function EncounterEditor({
             />
           </>
         )}
+        <p id="encounter-finalization-requirements" className="text-sm text-muted">
+          Los campos con asterisco son obligatorios. Evolución y diagnósticos se requieren para
+          finalizar; puedes guardar un borrador sin completarlos.
+        </p>
         {(['anamnesis', 'evolution', 'diagnoses', 'indications'] as const).map((key, index) => (
           <TextAreaField
             key={key}
             label={['Anamnesis', 'Evolución', 'Diagnósticos', 'Indicaciones'][index]}
             required={correcting && ['evolution', 'diagnoses'].includes(key)}
+            requiredIndicator={['evolution', 'diagnoses'].includes(key)}
+            aria-describedby={
+              ['evolution', 'diagnoses'].includes(key)
+                ? 'encounter-finalization-requirements'
+                : undefined
+            }
             maxLength={8000}
             value={content[key]}
             onChange={(e) => setContent({ ...content, [key]: e.target.value })}
           />
         ))}
-        {auth.can('CLINICAL_CONFIG_READ') && (
-          <TemplatePicker
-            kind="ENCOUNTER"
-            onApply={(text) =>
-              setContent({
-                ...content,
-                anamnesis: [content.anamnesis, text].filter(Boolean).join('\n\n'),
-              })
-            }
-          />
-        )}
         <ProcedureEditor
           patientId={patientId}
           dentistId={professionalId ?? ''}

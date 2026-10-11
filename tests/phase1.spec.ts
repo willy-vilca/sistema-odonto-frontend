@@ -154,8 +154,13 @@ test('configuration, two dentists, assigned services, schedules, history and res
     'Evaluación integral',
   )
   await page.goto('/configuracion/auditoria')
-  await page.getByRole('searchbox', { name: 'Buscar', exact: true }).fill('Creó')
-  await expect(page.getByRole('main')).toContainText('SERVICE_CREATED')
+  await page.getByLabel('Módulo').selectOption('SERVICE')
+  await page.getByRole('searchbox', { name: 'Buscar', exact: true }).fill('Creó el servicio')
+  await expect(page.getByRole('main')).toContainText('Creó el servicio')
+  expect(
+    (await (await page.request.get('/api/v1/audit-events?action=SERVICE_CREATED')).json())
+      .totalElements,
+  ).toBeGreaterThan(0)
   await page.getByRole('button', { name: 'Cerrar sesión' }).click()
   await expect(page.getByRole('heading', { name: 'Bienvenido de nuevo' })).toBeVisible()
   await page.getByLabel('Usuario', { exact: true }).fill('recepcionprueba')

@@ -36,7 +36,7 @@ export function PatientEditor({
       type={type}
       value={String(draft[key])}
       maxLength={max}
-      required={key === 'fullName'}
+      required={key === 'fullName' || (key === 'documentNumber' && !!draft.documentType)}
       onChange={(e) =>
         change(key, key === 'emergencyPhone' ? normalizePhone(e.target.value) : e.target.value)
       }
@@ -71,8 +71,15 @@ export function PatientEditor({
             />
             <label className="field-label">
               Tipo de documento
+              {!!draft.documentNumber && (
+                <span aria-hidden="true" className="ml-1 font-semibold text-red-700">
+                  *
+                </span>
+              )}
               <select
                 className="field"
+                aria-label="Tipo de documento"
+                required={!!draft.documentNumber}
                 value={draft.documentType}
                 onChange={(e) => change('documentType', e.target.value)}
               >

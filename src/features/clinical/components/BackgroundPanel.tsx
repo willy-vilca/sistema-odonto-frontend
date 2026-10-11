@@ -8,7 +8,6 @@ import { PagedTable } from '../../../shared/ui/PagedTable'
 import { Button } from '../../../shared/ui/Button'
 import { Modal } from '../../../shared/ui/Modal'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
-import { TemplatePicker } from './TemplatePicker'
 import { saveState } from '../services/clinicalService'
 import { emptyBackground, type Background, type ClinicalState } from '../model/clinical'
 const labels: Record<keyof Background, string> = {
@@ -151,17 +150,6 @@ export function BackgroundPanel({
                 onChange={(e) => setBackground({ ...background, [key]: e.target.value })}
               />
             ))}
-            {auth.can('CLINICAL_CONFIG_READ') && (
-              <TemplatePicker
-                kind="BACKGROUND"
-                onApply={(text) =>
-                  setBackground({
-                    ...background,
-                    anamnesis: [background.anamnesis, text].filter(Boolean).join('\n\n'),
-                  })
-                }
-              />
-            )}
             <TextAreaField
               label="Motivo del registro o actualización"
               required

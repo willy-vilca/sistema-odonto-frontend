@@ -12,7 +12,6 @@ import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker
 import type { Patient } from '../../patients/model/patient'
 import type { Consent } from '../model/documents'
 import { createConsent, contentUrl } from '../services/documentService'
-import { TemplatePicker } from '../../clinical/components/TemplatePicker'
 export function ConsentsPanel({
   patient,
   dateFormat,
@@ -34,7 +33,6 @@ export function ConsentsPanel({
     [relationship, setRelationship] = useState('Paciente'),
     [date, setDate] = useState(clinicToday(timeZone)),
     [documents, setDocuments] = useState<PickedEntity[]>([]),
-    [templateText, setTemplateText] = useState(''),
     setError = useErrorNotification(),
     form = useSaveForm()
   return (
@@ -135,6 +133,7 @@ export function ConsentsPanel({
             />
             <EntityPicker
               label="Copia adjunta"
+              required
               source={{
                 endpoint: '/api/v1/documents',
                 labelKey: 'fileName',
@@ -146,12 +145,6 @@ export function ConsentsPanel({
             <p className="text-xs text-muted">
               Adjunta primero la copia firmada en Archivos y luego selecciónala aquí.
             </p>
-            {auth.can('CLINICAL_CONFIG_READ') && (
-              <TemplatePicker kind="CONSENT" onApply={setTemplateText} />
-            )}
-            {templateText && (
-              <p className="rounded-xl bg-canvas p-4 text-sm whitespace-pre-wrap">{templateText}</p>
-            )}
             <Button disabled={form.busy}>Guardar consentimiento</Button>
           </form>
         </Modal>

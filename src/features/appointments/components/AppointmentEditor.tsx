@@ -61,6 +61,7 @@ export function AppointmentEditor({
         <fieldset disabled={form.busy} className="space-y-5">
           <EntityPicker
             label="Paciente"
+            required
             source={{
               endpoint: '/api/v1/patients',
               labelKey: 'label',
@@ -75,6 +76,7 @@ export function AppointmentEditor({
           />
           <EntityPicker
             label="Odontólogo"
+            required
             source={{
               endpoint: '/api/v1/dentists',
               labelKey: 'fullName',
@@ -128,6 +130,7 @@ export function AppointmentEditor({
             <EntityPicker
               key={dentist[0].id}
               label="Servicio"
+              required
               source={{
                 endpoint: '/api/v1/services',
                 labelKey: 'name',

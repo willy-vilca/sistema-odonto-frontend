@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useRef, useState } from 'react'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
@@ -48,8 +49,9 @@ export function AgentTestDialog({
           propuesta con el código indicado.
         </p>
         <label className="field-label">
-          Teléfono del contacto
+          <FieldLabel label={'Teléfono del contacto'} required={true} />
           <input
+            aria-label={'Teléfono del contacto'}
             className="field"
             type="tel"
             required
@@ -75,8 +77,9 @@ export function AgentTestDialog({
           />
         </label>
         <label className="field-label">
-          Mensaje para el agente
+          <FieldLabel label={'Mensaje para el agente'} required={true} />
           <textarea
+            aria-label={'Mensaje para el agente'}
             className="field min-h-32"
             required
             maxLength={4096}

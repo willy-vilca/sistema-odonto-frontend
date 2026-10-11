@@ -1,23 +1,26 @@
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react'
+import { FieldLabel } from './FieldLabel'
 export function FormField({
   label,
+  requiredIndicator,
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & { label: string }) {
+}: InputHTMLAttributes<HTMLInputElement> & { label: string; requiredIndicator?: boolean }) {
   return (
     <label className="field-label">
-      {label}
-      <input className="field" {...props} />
+      <FieldLabel label={label} required={requiredIndicator ?? props.required} />
+      <input className="field" aria-label={label} {...props} />
     </label>
   )
 }
 export function TextAreaField({
   label,
+  requiredIndicator,
   ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string }) {
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & { label: string; requiredIndicator?: boolean }) {
   return (
     <label className="field-label">
-      {label}
-      <textarea className="field min-h-24" {...props} />
+      <FieldLabel label={label} required={requiredIndicator ?? props.required} />
+      <textarea className="field min-h-24" aria-label={label} {...props} />
     </label>
   )
 }

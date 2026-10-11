@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useId, useState } from 'react'
 import { useQueryData } from '../../../shared/data/useQueryData'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
@@ -69,8 +70,10 @@ function PolicyForm({ initial, onClose }: { initial: AgentPolicy; onClose: () =>
         {policy.schedule.map((p, i) => (
           <div key={i} className="grid grid-cols-2 items-end gap-3 sm:grid-cols-4">
             <label className="field-label">
-              Día {i + 1}
+              <FieldLabel label={'Día ' + (i + 1)} required />
               <select
+                aria-label={'Día ' + (i + 1)}
+                required
                 className="field"
                 value={p.dayOfWeek}
                 onChange={(e) =>
@@ -90,8 +93,9 @@ function PolicyForm({ initial, onClose }: { initial: AgentPolicy; onClose: () =>
               </select>
             </label>
             <label className="field-label">
-              Inicio {i + 1}
+              <FieldLabel label={'Inicio ' + (i + 1)} required={true} />
               <input
+                aria-label={'Inicio ' + (i + 1)}
                 type="time"
                 required
                 className="field"
@@ -107,8 +111,9 @@ function PolicyForm({ initial, onClose }: { initial: AgentPolicy; onClose: () =>
               />
             </label>
             <label className="field-label">
-              Fin {i + 1}
+              <FieldLabel label={'Fin ' + (i + 1)} required={true} />
               <input
+                aria-label={'Fin ' + (i + 1)}
                 type="time"
                 required
                 className="field"
@@ -173,8 +178,9 @@ function PolicyForm({ initial, onClose }: { initial: AgentPolicy; onClose: () =>
         </p>
       )}
       <label className="field-label">
-        Anticipación mínima para cambios (minutos)
+        <FieldLabel label={'Anticipación mínima para cambios (minutos)'} required={true} />
         <input
+          aria-label={'Anticipación mínima para cambios (minutos)'}
           type="number"
           className="field"
           min={0}

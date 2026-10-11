@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../shared/ui/FieldLabel'
 import { notify } from '../../shared/notifications/notifications'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useAuth } from '../auth/hooks/useAuth'
@@ -207,7 +208,18 @@ export function SettingsPage({ onChanged }: { onChanged: () => void }) {
                     key={key}
                     className={'field-label ' + (type === 'textarea' ? 'sm:col-span-2' : '')}
                   >
-                    {label}
+                    <FieldLabel
+                      label={label}
+                      required={
+                        [
+                          'displayName',
+                          'currency',
+                          'timeZone',
+                          'brandColor',
+                          'accentColor',
+                        ].includes(key) || type === 'number'
+                      }
+                    />
                     {type === 'textarea' ? (
                       <textarea
                         className="field min-h-24"

@@ -36,7 +36,7 @@ const modules: Record<string, string> = {
   EXPENSE_CATEGORY: 'Categorías de egresos',
   ENCOUNTER: 'Atenciones',
   CLINICAL_STATE: 'Historia clínica',
-  CLINICAL_TEMPLATE: 'Plantillas clínicas',
+  CLINICAL_TEMPLATE: 'Configuración clínica',
   DOCUMENT: 'Documentos clínicos',
   CONSENT: 'Consentimientos',
   DOCUMENT_CATEGORY: 'Categorías documentales',

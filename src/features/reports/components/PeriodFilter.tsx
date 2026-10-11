@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useState } from 'react'
 import { Button } from '../../../shared/ui/Button'
 import type { Period } from '../model/reports'
@@ -53,8 +54,9 @@ export function PeriodFilter({
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="field-label min-w-0 flex-1 basis-36">
-          Desde
+          <FieldLabel label={'Desde'} required={true} />
           <input
+            aria-label={'Desde'}
             type="date"
             required
             className="field"
@@ -64,8 +66,9 @@ export function PeriodFilter({
           />
         </label>
         <label className="field-label min-w-0 flex-1 basis-36">
-          Hasta
+          <FieldLabel label={'Hasta'} required={true} />
           <input
+            aria-label={'Hasta'}
             type="date"
             required
             className="field"

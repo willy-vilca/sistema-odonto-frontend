@@ -1,3 +1,4 @@
+import { FieldLabel } from '../../../shared/ui/FieldLabel'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { useState } from 'react'
 import { Modal } from '../../../shared/ui/Modal'
@@ -71,12 +72,16 @@ export function PlanAction({
             />
             <label className="flex min-h-11 items-center gap-3 text-sm">
               <input
+                aria-label={'Confirmo la aceptación explícita de importes y condiciones'}
                 type="checkbox"
                 required
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
               />
-              Confirmo la aceptación explícita de importes y condiciones
+              <FieldLabel
+                label={'Confirmo la aceptación explícita de importes y condiciones'}
+                required={true}
+              />
             </label>
           </>
         )}
