@@ -53,13 +53,13 @@ function fixture(sql: string) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-Atc',
         'SELECT current_database()',
       ],
       pg,
     ).trim(),
-  ).toBe('sistema_odontologo_test')
+  ).toBe('sistema_odonto_mini_test')
   execFileSync(
     psql,
     [
@@ -68,7 +68,7 @@ function fixture(sql: string) {
       '-U',
       'postgres',
       '-d',
-      'sistema_odontologo_test',
+      'sistema_odonto_mini_test',
       '-v',
       'ON_ERROR_STOP=1',
       '-c',

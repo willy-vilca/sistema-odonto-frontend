@@ -154,9 +154,7 @@ test('configuration, two dentists, assigned services, schedules, history and res
     'Evaluación integral',
   )
   await page.goto('/configuracion/auditoria')
-  await page.getByLabel('Módulo').selectOption('SERVICE')
-  await page.getByRole('searchbox', { name: 'Buscar', exact: true }).fill('Creó el servicio')
-  await expect(page.getByRole('main')).toContainText('Creó el servicio')
+  await expect(page.getByRole('alert')).toContainText('Esta sección no está disponible')
   expect(
     (await (await page.request.get('/api/v1/audit-events?action=SERVICE_CREATED')).json())
       .totalElements,
@@ -250,7 +248,7 @@ for (const viewport of [
       ).toEqual([])
       await page.keyboard.press('Escape')
       await page.goto('/configuracion/auditoria')
-      await expect(page.getByRole('heading', { name: 'Auditoría de operaciones' })).toBeVisible()
+      await expect(page.getByRole('alert')).toContainText('Esta sección no está disponible')
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       )

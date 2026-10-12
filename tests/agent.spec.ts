@@ -52,13 +52,13 @@ for (const width of [1440, 768, 390]) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-Atc',
         'SELECT current_database()',
       ],
       pgOptions,
     ).trim()
-    expect(database).toBe('sistema_odontologo_test')
+    expect(database).toBe('sistema_odonto_mini_test')
     expect(queued.runId).toMatch(/^[0-9a-f-]{36}$/)
     const steps = Array.from(
       { length: 21 },

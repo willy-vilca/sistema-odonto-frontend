@@ -104,7 +104,7 @@ export function EncountersPanel({
         <div>
           <h2 className="text-xl font-semibold">Atenciones</h2>
           <p className="mt-2 text-sm text-muted">
-            Guarda un borrador y finaliza cuando el registro esté completo.
+            Registra los servicios realizados y elige si deseas cobrarlos ahora o después.
           </p>
         </div>
         {auth.can('CLINICAL_WRITE') && (
@@ -163,7 +163,7 @@ export function EncountersPanel({
           onClose={() => setEditor(undefined)}
           onSaved={(record) => {
             setEditor(undefined)
-            setSelected(appointmentId ? record : undefined)
+            setSelected(record)
             setDefaults(undefined)
             list.reload()
           }}
@@ -237,7 +237,7 @@ export function EncountersPanel({
               auth.can('PAYMENTS_WRITE') &&
               auth.can('FINANCES_READ') && (
                 <Button disabled={form.busy} onClick={() => setCheckout(true)}>
-                  {selected.status === 'DRAFT' ? 'Finalizar y registrar cobro' : 'Cobrar atención'}
+                  {selected.status === 'DRAFT' ? 'Finalizar y cobrar' : 'Cobrar atención'}
                 </Button>
               )}
             {selected.status === 'FINAL' && auth.can('FINANCES_READ') && (
@@ -267,14 +267,16 @@ export function ClinicalContent({ content }: { content: Encounter['content'] }) 
         ['Evolución', content?.evolution],
         ['Diagnósticos', content?.diagnoses],
         ['Indicaciones', content?.indications],
-      ].map(([label, value]) => (
-        <div key={label}>
-          <dt className="text-sm font-semibold">{label}</dt>
-          <dd className="mt-1 text-sm leading-6 break-words whitespace-pre-wrap">
-            {value || 'Sin registrar'}
-          </dd>
-        </div>
-      ))}
+      ]
+        .filter(([, value]) => !!value)
+        .map(([label, value]) => (
+          <div key={label}>
+            <dt className="text-sm font-semibold">{label}</dt>
+            <dd className="mt-1 text-sm leading-6 break-words whitespace-pre-wrap">
+              {value || 'Sin registrar'}
+            </dd>
+          </div>
+        ))}
       <div>
         <dt className="text-sm font-semibold">Procedimientos realizados</dt>
         <dd className="mt-2 space-y-2">

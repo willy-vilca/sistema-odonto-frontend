@@ -78,13 +78,14 @@ async function attend(page: Page, data: Awaited<ReturnType<typeof seed>>) {
     ),
   ).toBeVisible()
   await expect(editor.getByLabel('Precio acordado 1 (opcional)')).toHaveValue('200')
+  await editor.getByText('Notas clínicas (opcionales)', { exact: true }).click()
   await editor
     .getByLabel('Evolución', { exact: true })
     .fill('Se realizó limpieza dental sin incidencias.')
   await editor
     .getByLabel('Diagnósticos', { exact: true })
     .fill('Control preventivo y placa dental.')
-  await editor.getByRole('button', { name: 'Guardar borrador', exact: true }).click()
+  await editor.getByRole('button', { name: 'Guardar atención', exact: true }).click()
   await expect(page.getByRole('dialog', { name: 'Detalle de atención', exact: true })).toBeVisible()
 }
 async function accessible(page: Page, name: string, width: number) {
@@ -105,8 +106,8 @@ for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1024 })
     const data = await seed(page)
     await attend(page, data)
-    await page.getByRole('button', { name: 'Finalizar y registrar cobro', exact: true }).click()
-    const checkout = page.getByRole('dialog', { name: 'Finalizar y registrar cobro', exact: true })
+    await page.getByRole('button', { name: 'Finalizar y cobrar', exact: true }).click()
+    const checkout = page.getByRole('dialog', { name: 'Finalizar y cobrar', exact: true })
     await expect(checkout.getByText(/S\/\s*200[.,]00/)).toBeVisible()
     await checkout.getByLabel('Medio de pago').selectOption('TRANSFER')
     await checkout.getByLabel('Referencia del pago').fill('Operación de prueba')
@@ -191,7 +192,7 @@ for (const width of [1440, 768, 390]) {
     await page.getByRole('button', { name: 'Registrar abono', exact: true }).click()
     const payment = page.getByRole('dialog', { name: 'Registrar abono', exact: true })
     await expect(payment.getByLabel('Importe del abono')).toHaveValue('200.00')
-    await expect(payment.getByLabel('Importe aplicado 1')).toHaveValue('200')
+    await expect(payment.getByLabel('Importe aplicado 1')).toHaveValue('200.00')
     await payment.getByLabel('Medio de pago').selectOption('TRANSFER')
     await accessible(page, 'prefilled-payment', width)
     await payment.getByRole('button', { name: 'Guardar abono' }).click()
@@ -253,16 +254,11 @@ test('audit essential actions, filters and references at three sizes', async ({ 
   for (const width of [1440, 768, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1024 })
     await page.goto('/configuracion/auditoria')
-    await page.getByLabel('Módulo').selectOption('CHARGE')
-    await page.getByLabel('Buscar', { exact: true }).fill(chargeId)
-    const record = page
-      .locator('tr, article')
-      .filter({ hasText: 'Cargo finalizado' })
-      .filter({ hasText: chargeId })
-      .filter({ visible: true })
-    await expect(record).toHaveCount(1)
-    await expect(page.getByText('CHARGE_CLOSED', { exact: true })).toHaveCount(0)
-    await record.getByText('Ver referencia', { exact: true }).click()
+    await expect(page.getByRole('alert')).toContainText('Esta sección no está disponible')
+    const audit = await (await page.request.get('/api/v1/audit-events?search=' + chargeId)).json()
+    expect(
+      audit.items.filter((event: { action: string }) => event.action === 'CHARGE_CLOSED'),
+    ).toHaveLength(1)
     await accessible(page, 'audit', width)
   }
 })

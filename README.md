@@ -1,5 +1,7 @@
 # OdontoCare — frontend
 
+Variante para un odontólogo en `version_sencilla`, base local `sistema_odonto_mini` y pruebas protegidas en `sistema_odonto_mini_test`. [Guía de la versión sencilla](../docs/version-sencilla.md). Las revisiones anteriores describen la versión de registro conservada en main.
+
 Revisión completada del 11/10/2026: plantillas retiradas de la interfaz con backend conservado, PDF institucionales y tabulados y asteriscos rojos en campos obligatorios. [Guía y verificación](../docs/presentacion-pdf-formularios.md). Alcance 1.13 y plan 3.15; 248 comprobaciones backend y 81 escenarios distintos de navegador aprobados en bloques, con muestras PDF y tres tamaños de pantalla. Originales, datos, permisos, cálculos y correlativos conservados. Main; fase 9 y recordatorios pendientes.
 
 Revisión completada del 10/10/2026: cuenta activa con cierre/reapertura de cargos, auditoría esencial y cita → atención → cobro opcional. [Guía de funcionamiento y comprobación](../docs/cargos-auditoria-atencion-rapida.md). Alcance 1.12 y plan 3.14; 245 pruebas backend y 49 escenarios distintos de navegador aprobados en bloques. Main en ambos repositorios; fase 9 y recordatorios siguen pendientes. V24 conserva los libros históricos y bloquea modificaciones de cargos finalizados. Las notas siguientes mantienen el recorrido histórico.

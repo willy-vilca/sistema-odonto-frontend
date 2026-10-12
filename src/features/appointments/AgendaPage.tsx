@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSoleDentist } from '../configuration/hooks/useSoleDentist'
 import { Link, useSearchParams } from 'react-router-dom'
 import { CalendarDays, Plus, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
@@ -25,7 +26,9 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
     linkedPatient || window.matchMedia('(max-width:767px)').matches ? 'list' : 'week',
   )
   const [date, setDate] = useState(() => clinicToday(timeZone))
-  const [dentist, setDentist] = useState<PickedEntity[]>([])
+  const [chosenDentist, setDentist] = useState<PickedEntity[]>([])
+  const sole = useSoleDentist()
+  const dentist = chosenDentist.length ? chosenDentist : sole.selection
   const [status, setStatus] = useState('')
   const [listFrom, setListFrom] = useState('')
   const [listTo, setListTo] = useState('')
@@ -86,12 +89,16 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           </p>
         </div>
         <div className="mt-4 grid items-start gap-4 lg:grid-cols-2">
-          <EntityPicker
-            label="Odontólogo"
-            source={{ endpoint: '/api/v1/dentists', labelKey: 'fullName' }}
-            selected={dentist}
-            onChange={setDentist}
-          />
+          {sole.selection.length === 1 && dentist[0]?.id === sole.selection[0].id ? (
+            <p className="self-center text-sm text-muted">Profesional: {dentist[0].label}</p>
+          ) : (
+            <EntityPicker
+              label="Odontólogo"
+              source={{ endpoint: '/api/v1/dentists', labelKey: 'fullName' }}
+              selected={dentist}
+              onChange={setDentist}
+            />
+          )}
           {view === 'list' ? (
             <div className="grid gap-3 sm:grid-cols-2">
               <FormField

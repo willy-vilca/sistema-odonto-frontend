@@ -21,13 +21,13 @@ for (const width of [1440, 768, 390]) {
           '-U',
           'postgres',
           '-d',
-          'sistema_odontologo_test',
+          'sistema_odonto_mini_test',
           '-Atc',
           'SELECT current_database()',
         ],
         pg,
       ).trim(),
-    ).toBe('sistema_odontologo_test')
+    ).toBe('sistema_odonto_mini_test')
     const phone = '+51999998888',
       number = '123456789012345'
     const incoming = 'wamid.' + randomUUID().replaceAll('-', '') + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ=='
@@ -68,7 +68,7 @@ for (const width of [1440, 768, 390]) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-Atc',
         `SELECT r.id FROM agent_run r JOIN kapso_message m ON m.id=r.message_id WHERE m.provider_sid='${incoming}'`,
       ],
@@ -87,7 +87,7 @@ for (const width of [1440, 768, 390]) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-v',
         'ON_ERROR_STOP=1',
         '-c',
@@ -131,7 +131,7 @@ for (const width of [1440, 768, 390]) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-v',
         'ON_ERROR_STOP=1',
         '-c',

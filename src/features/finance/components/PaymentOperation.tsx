@@ -109,6 +109,7 @@ export function PaymentOperation({
             rows={rows}
             onChange={setRows}
             pendingOnly={action === 'apply'}
+            budget={action === 'apply' ? movement.available : undefined}
             label={action === 'apply' ? 'Aplicación del anticipo' : 'Aplicaciones que se liberan'}
           />
         )}

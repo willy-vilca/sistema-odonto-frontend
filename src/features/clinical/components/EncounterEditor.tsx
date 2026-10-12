@@ -81,7 +81,8 @@ export function EncounterEditor({
               '. Puedes atender sin cita para un ingreso directo.'}
         </p>
         {!correcting && (
-          <>
+          <details className="rounded-xl border border-line p-4 space-y-4">
+            <summary className="cursor-pointer font-medium">Fecha, motivo y cita vinculada</summary>
             <FormField
               label="Fecha de atención"
               type="date"
@@ -92,7 +93,6 @@ export function EncounterEditor({
             />
             <TextAreaField
               label="Motivo de consulta"
-              required
               maxLength={500}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -112,28 +112,8 @@ export function EncounterEditor({
               selected={appointments}
               onChange={setAppointments}
             />
-          </>
+          </details>
         )}
-        <p id="encounter-finalization-requirements" className="text-sm text-muted">
-          Los campos con asterisco son obligatorios. Evolución y diagnósticos se requieren para
-          finalizar; puedes guardar un borrador sin completarlos.
-        </p>
-        {(['anamnesis', 'evolution', 'diagnoses', 'indications'] as const).map((key, index) => (
-          <TextAreaField
-            key={key}
-            label={['Anamnesis', 'Evolución', 'Diagnósticos', 'Indicaciones'][index]}
-            required={correcting && ['evolution', 'diagnoses'].includes(key)}
-            requiredIndicator={['evolution', 'diagnoses'].includes(key)}
-            aria-describedby={
-              ['evolution', 'diagnoses'].includes(key)
-                ? 'encounter-finalization-requirements'
-                : undefined
-            }
-            maxLength={8000}
-            value={content[key]}
-            onChange={(e) => setContent({ ...content, [key]: e.target.value })}
-          />
-        ))}
         <ProcedureEditor
           patientId={patientId}
           dentistId={professionalId ?? ''}
@@ -141,6 +121,25 @@ export function EncounterEditor({
           value={content.procedures}
           onChange={(procedures) => setContent({ ...content, procedures })}
         />
+        <details
+          className="rounded-xl border border-line p-4 space-y-4"
+          open={correcting || undefined}
+        >
+          <summary className="cursor-pointer font-medium">Notas clínicas (opcionales)</summary>
+          <p className="text-sm text-muted">
+            Puedes finalizar y cobrar solo los servicios realizados. Estas notas pueden quedar
+            vacías.
+          </p>
+          {(['evolution', 'diagnoses', 'indications'] as const).map((key, index) => (
+            <TextAreaField
+              key={key}
+              label={['Evolución', 'Diagnósticos', 'Indicaciones'][index]}
+              maxLength={8000}
+              value={content[key]}
+              onChange={(e) => setContent({ ...content, [key]: e.target.value })}
+            />
+          ))}
+        </details>
         {correcting && (
           <TextAreaField
             label="Motivo de la corrección"
@@ -152,7 +151,7 @@ export function EncounterEditor({
         )}
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy || !professionalId}>
-            {correcting ? 'Guardar corrección' : 'Guardar borrador'}
+            {correcting ? 'Guardar corrección' : 'Guardar atención'}
           </Button>
           <Button type="button" variant="secondary" disabled={form.busy} onClick={onClose}>
             Cancelar

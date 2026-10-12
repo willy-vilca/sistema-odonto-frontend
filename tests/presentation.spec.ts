@@ -142,27 +142,29 @@ for (const width of [1440, 768, 390]) {
     await page.goto('/configuracion/consultorio')
     await expect(page.getByRole('link', { name: /plantillas/i })).toHaveCount(0)
     await page.goto('/clinica?patientId=' + data.patient.id)
-    await page
-      .getByRole('button', { name: 'Seleccionar odontólogo responsable', exact: true })
-      .click()
-    await page.getByLabel('Buscar opciones').fill(data.doctor.fullName)
-    await page.getByRole('button', { name: data.doctor.fullName, exact: true }).click()
+    const automatic = page.getByText('Profesional: ' + data.doctor.fullName, { exact: true })
+    const picker = page.getByRole('button', {
+      name: 'Seleccionar odontólogo responsable',
+      exact: true,
+    })
+    await expect(automatic.or(picker)).toBeVisible()
+    if (!(await automatic.isVisible())) {
+      await picker.click()
+      await page.getByLabel('Buscar opciones').fill(data.doctor.fullName)
+      await page.getByRole('button', { name: data.doctor.fullName, exact: true }).click()
+    }
     await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
     const form = page.getByRole('dialog', { name: 'Nueva atención', exact: true })
+    await form.getByText('Notas clínicas (opcionales)', { exact: true }).click()
+    await form.getByText('Fecha, motivo y cita vinculada', { exact: true }).click()
     await expect(form.getByRole('button', { name: /plantilla/i })).toHaveCount(0)
-    for (const name of ['Evolución', 'Diagnósticos']) {
+    await expect(form.getByLabel('Anamnesis', { exact: true })).toHaveCount(0)
+    for (const name of ['Evolución', 'Diagnósticos', 'Indicaciones', 'Motivo de consulta']) {
       const input = form.getByLabel(name, { exact: true })
       expect(await input.evaluate((e) => (e as HTMLTextAreaElement).required)).toBe(false)
-      await expect(input.locator('..').locator('[aria-hidden="true"]')).toHaveText('*')
+      await expect(input.locator('..').locator('[aria-hidden="true"]')).toHaveCount(0)
     }
-    for (const name of ['Anamnesis', 'Indicaciones'])
-      await expect(
-        form.getByLabel(name, { exact: true }).locator('..').locator('[aria-hidden="true"]'),
-      ).toHaveCount(0)
-    const reason = form.getByLabel('Motivo de consulta', { exact: true })
-    expect(await reason.evaluate((e) => (e as HTMLTextAreaElement).required)).toBe(true)
-    await expect(reason.locator('..').locator('[aria-hidden="true"]')).toHaveText('*')
-    await reason.fill('Borrador con campos pendientes ' + width)
+    await form.getByLabel('Motivo de consulta').fill('Borrador con notas opcionales ' + width)
     expect(
       (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
         .violations,
@@ -175,7 +177,7 @@ for (const width of [1440, 768, 390]) {
     const saved = page.waitForResponse(
       (r) => r.url().endsWith('/clinical/encounters') && r.request().method() === 'POST',
     )
-    await form.getByRole('button', { name: 'Guardar borrador' }).click()
+    await form.getByRole('button', { name: 'Guardar atención' }).click()
     const record = await (await saved).json()
     expect(record.status).toBe('DRAFT')
     expect(record.content.evolution).toBe('')

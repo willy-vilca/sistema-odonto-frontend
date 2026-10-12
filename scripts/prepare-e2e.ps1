@@ -1,8 +1,8 @@
 $ErrorActionPreference = 'Stop'
 $psqlExecutable = 'C:\Program Files\PostgreSQL\18\bin\psql.exe'
 $env:PGPASSWORD = 'admin'
-$actualDatabase = & $psqlExecutable -h localhost -U postgres -d sistema_odontologo_test -Atc 'select current_database()'
-if ($LASTEXITCODE -ne 0 -or $actualDatabase.Trim() -ne 'sistema_odontologo_test') { throw 'La preparación solo está autorizada en sistema_odontologo_test.' }
+$actualDatabase = & $psqlExecutable -h localhost -U postgres -d sistema_odonto_mini_test -Atc 'select current_database()'
+if ($LASTEXITCODE -ne 0 -or $actualDatabase.Trim() -ne 'sistema_odonto_mini_test') { throw 'La preparación solo está autorizada en sistema_odonto_mini_test.' }
 $sql = @'
 TRUNCATE agent_appointment_reference,agent_change_proposal,agent_request_context,agent_supervision,kapso_webhook_event,kapso_message,kapso_conversation,agent_proposal,agent_slot,agent_step,agent_run,agent_message_source,agent_conversation_source,whatsapp_delivery_event,whatsapp_message,whatsapp_conversation,financial_content,financial_document,money_application,finance_operation,money_movement,installment,installment_schedule,cash_session,expense_category,charge_state,charge_entry,treatment_session,treatment_operation,treatment_item,treatment_plan,document_consent,document_content,patient_document,document_category,encounter_revision,clinical_encounter,clinical_state,clinical_template,appointment_history,appointment,patient_contact,patient,installation_logo,audit_event,user_role,dentist_service,weekly_period,schedule_exception,dentist,dental_service,service_category,user_account;
 UPDATE installation_profile SET display_name='Mi consultorio',time_zone='America/Lima',currency='PEN',patient_next_number=1,receipt_next_number=1,budget_next_number=1,version=0,logo_revision=0,brand_color='#215e4d',accent_color='#edf2e9',minimum_lead_minutes=0,appointment_gap_minutes=0;
@@ -30,6 +30,6 @@ INSERT INTO role_permission(role_code,permission) VALUES('ADMIN','AGENT_CONTROL_
 INSERT INTO role_permission(role_code,permission) SELECT r,p FROM unnest(ARRAY['ADMIN','DENTIST','RECEPTION','CASHIER']) r CROSS JOIN unnest(ARRAY['REPORTS_READ','REPORTS_EXPORT']) p ON CONFLICT DO NOTHING;
 UPDATE agent_policy SET enabled=true,schedule='[]',version=0,change_lead_minutes=0,allow_reschedule=true,allow_cancel=true;
 '@
-& $psqlExecutable -h localhost -U postgres -d sistema_odontologo_test -v ON_ERROR_STOP=1 -c $sql
+& $psqlExecutable -h localhost -U postgres -d sistema_odonto_mini_test -v ON_ERROR_STOP=1 -c $sql
 if ($LASTEXITCODE -ne 0) { throw 'Falló la preparación de la base de pruebas.' }
 Remove-Item Env:PGPASSWORD

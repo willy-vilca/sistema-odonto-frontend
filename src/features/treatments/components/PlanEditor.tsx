@@ -1,5 +1,6 @@
 import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 import { useState } from 'react'
+import { useSoleDentist } from '../../configuration/hooks/useSoleDentist'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
@@ -29,7 +30,7 @@ export function PlanEditor({
     [title, setTitle] = useState(plan?.title ?? ''),
     [conditions, setConditions] = useState(plan?.conditions ?? ''),
     [reason, setReason] = useState(''),
-    [doctor, setDoctor] = useState<PickedEntity[]>(
+    [chosenDoctor, setDoctor] = useState<PickedEntity[]>(
       plan ? [{ id: plan.dentistId, label: plan.dentistName }] : [],
     ),
     [items, setItems] = useState<ItemInput[]>(
@@ -40,6 +41,8 @@ export function PlanEditor({
           : [{ ...emptyItem }],
     ),
     setError = useErrorNotification()
+  const sole = useSoleDentist()
+  const doctor = chosenDoctor.length ? chosenDoctor : sole.selection
   const busy = form.busy || Object.values(pendingServices).some(Boolean)
   return (
     <Modal
@@ -99,17 +102,25 @@ export function PlanEditor({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
-            <EntityPicker
-              label="Profesional del plan"
-              required
-              source={{
-                endpoint: '/api/v1/dentists',
-                labelKey: 'fullName',
-                filters: { active: 'true' },
-              }}
-              selected={doctor}
-              onChange={setDoctor}
-            />
+            {sole.loading ? (
+              <p role="status" className="text-sm text-muted">
+                Cargando profesional…
+              </p>
+            ) : sole.selection.length === 1 && doctor[0]?.id === sole.selection[0].id ? (
+              <p className="rounded-xl bg-brand-50 p-3 text-sm">Profesional: {doctor[0].label}</p>
+            ) : (
+              <EntityPicker
+                label="Profesional del plan"
+                required
+                source={{
+                  endpoint: '/api/v1/dentists',
+                  labelKey: 'fullName',
+                  filters: { active: 'true' },
+                }}
+                selected={doctor}
+                onChange={setDoctor}
+              />
+            )}
             <TextAreaField
               label="Condiciones acordadas"
               maxLength={4000}

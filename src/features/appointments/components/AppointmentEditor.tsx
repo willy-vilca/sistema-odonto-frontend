@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { PatientSelection } from '../../patients/components/PatientSelection'
+import { useSoleDentist } from '../../configuration/hooks/useSoleDentist'
 import { Modal } from '../../../shared/ui/Modal'
 import { Button } from '../../../shared/ui/Button'
 import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
@@ -20,7 +22,9 @@ export function AppointmentEditor({
   onSaved: () => void
 }) {
   const [patient, setPatient] = useState<PickedEntity[]>([])
-  const [dentist, setDentist] = useState(initialDentist)
+  const [chosenDentist, setDentist] = useState(initialDentist)
+  const sole = useSoleDentist()
+  const dentist = chosenDentist.length ? chosenDentist : sole.selection
   const [service, setService] = useState<PickedEntity[]>([])
   const [administrative, setAdministrative] = useState(false)
   const [reason, setReason] = useState('')
@@ -58,38 +62,45 @@ export function AppointmentEditor({
           Selecciona a la persona que recibirá la atención. El teléfono familiar no identifica por
           sí solo al paciente.
         </p>
+        {sole.error && (
+          <p role="alert" className="error-box">
+            {sole.error}
+          </p>
+        )}
         <fieldset disabled={form.busy} className="space-y-5">
-          <EntityPicker
-            label="Paciente"
+          <PatientSelection
             required
-            source={{
-              endpoint: '/api/v1/patients',
-              labelKey: 'label',
-              filters: { active: 'true' },
-            }}
             selected={patient}
-            onChange={(p) => {
-              setPatient(p)
+            disabled={form.busy}
+            onChange={(items) => {
+              setPatient(items)
               changed()
             }}
-            disabled={form.busy}
           />
-          <EntityPicker
-            label="Odontólogo"
-            required
-            source={{
-              endpoint: '/api/v1/dentists',
-              labelKey: 'fullName',
-              filters: { active: 'true' },
-            }}
-            selected={dentist}
-            onChange={(d) => {
-              setDentist(d)
-              setService([])
-              changed()
-            }}
-            disabled={form.busy}
-          />
+          {sole.loading ? (
+            <p role="status" className="text-sm text-muted">
+              Cargando profesional…
+            </p>
+          ) : sole.selection.length === 1 && dentist[0]?.id === sole.selection[0].id ? (
+            <p className="rounded-xl bg-brand-50 p-3 text-sm">Profesional: {dentist[0].label}</p>
+          ) : (
+            <EntityPicker
+              label="Odontólogo"
+              required
+              source={{
+                endpoint: '/api/v1/dentists',
+                labelKey: 'fullName',
+                filters: { active: 'true' },
+              }}
+              selected={dentist}
+              onChange={(d) => {
+                setDentist(d)
+                setService([])
+                changed()
+              }}
+              disabled={form.busy}
+            />
+          )}
           <label className="flex min-h-11 items-center gap-2 text-sm">
             <input
               type="checkbox"

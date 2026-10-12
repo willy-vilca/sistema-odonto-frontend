@@ -82,6 +82,11 @@ export function PaymentForm({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
           />
+        </div>
+        <details className="rounded-xl border border-line p-4 space-y-4">
+          <summary className="cursor-pointer font-medium">
+            Fecha y datos adicionales del pago
+          </summary>
           <FormField
             label="Fecha del abono"
             type="date"
@@ -90,7 +95,20 @@ export function PaymentForm({
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
-        </div>
+          <FormField
+            label="Referencia del pago"
+            maxLength={160}
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+          />
+          <TextAreaField
+            label="Concepto del abono"
+            required
+            maxLength={300}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </details>
         <label className="field-label">
           <FieldLabel label="Medio de pago" required />
           <select
@@ -107,25 +125,17 @@ export function PaymentForm({
             ))}
           </select>
         </label>
-        <FormField
-          label="Referencia del pago"
-          maxLength={160}
-          value={reference}
-          onChange={(e) => setReference(e.target.value)}
-        />
-        <TextAreaField
-          label="Concepto del abono"
-          required
-          maxLength={300}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
         <AllocationEditor
           patientId={patientId}
           currency={currency}
           rows={rows}
           onChange={setRows}
-          initialSelected={initialCharges.map((c) => ({ id: c.id, label: c.description }))}
+          budget={amount}
+          initialSelected={initialCharges.map((c) => ({
+            id: c.id,
+            label: c.description,
+            data: { pending: c.pending },
+          }))}
         />
         <div className="flex flex-wrap gap-3">
           <Button disabled={form.busy}>Guardar abono</Button>

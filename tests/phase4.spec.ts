@@ -94,6 +94,12 @@ async function debt(page: Page, id: string) {
   )
 }
 async function pick(page: Page, label: string, name: string) {
+  if (label === 'profesional del plan' || label === 'odontólogo responsable') {
+    const automatic = page.getByText('Profesional: ' + name, { exact: true })
+    const picker = page.getByRole('button', { name: 'Seleccionar ' + label, exact: true })
+    await expect(automatic.or(picker)).toBeVisible()
+    if (await automatic.isVisible()) return
+  }
   await page.getByRole('button', { name: 'Seleccionar ' + label, exact: true }).click()
   await page.getByLabel('Buscar opciones').fill(name)
   await page.getByRole('button', { name, exact: true }).click()
@@ -140,6 +146,8 @@ test('sesión clínica incluida muestra avance y conserva la deuda', async ({ pa
   await page.goto('/clinica?patientId=' + data.patient.id)
   await pick(page, 'odontólogo responsable', data.doctor.fullName)
   await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
+  await page.getByText('Fecha, motivo y cita vinculada', { exact: true }).click()
+  await page.getByText('Notas clínicas (opcionales)', { exact: true }).click()
   await page.getByRole('textbox', { name: 'Motivo de consulta' }).fill('Sesión del tratamiento')
   await page
     .getByRole('textbox', { name: 'Evolución', exact: true })
@@ -150,7 +158,9 @@ test('sesión clínica incluida muestra avance y conserva la deuda', async ({ pa
   await page.getByRole('button', { name: 'Añadir procedimiento' }).click()
   const items = await (await page.request.get('/api/v1/plans/items?planId=' + p.id)).json()
   await pick(page, 'plan de tratamiento 1 (opcional)', items.items[0].label)
-  await page.getByRole('button', { name: 'Guardar borrador' }).click()
+  await page.getByRole('button', { name: 'Guardar atención' }).click()
+  await expect(page.getByRole('dialog', { name: 'Detalle de atención', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
   await page
     .getByRole('button', { name: 'Ver atención', exact: true })

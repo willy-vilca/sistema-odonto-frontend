@@ -1,4 +1,5 @@
-import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
+import type { PickedEntity } from '../../../shared/ui/EntityPicker'
+import { PatientSelection } from './PatientSelection'
 import { useQueryData } from '../../../shared/data/useQueryData'
 import type { Patient } from '../model/patient'
 export function PatientPicker({
@@ -11,12 +12,7 @@ export function PatientPicker({
   return patientId ? (
     <LoadedPatientPicker patientId={patientId} onChange={onChange} />
   ) : (
-    <EntityPicker
-      label="Paciente"
-      source={{ endpoint: '/api/v1/patients', labelKey: 'fullName' }}
-      selected={[]}
-      onChange={onChange}
-    />
+    <PatientSelection selected={[]} onChange={onChange} />
   )
 }
 function LoadedPatientPicker({
@@ -34,9 +30,7 @@ function LoadedPatientPicker({
           {state.error}
         </p>
       )}
-      <EntityPicker
-        label="Paciente"
-        source={{ endpoint: '/api/v1/patients', labelKey: 'fullName' }}
+      <PatientSelection
         selected={[
           {
             id: patientId,

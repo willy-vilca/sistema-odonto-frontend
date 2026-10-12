@@ -63,6 +63,13 @@ async function seed(page: Page) {
   return { doctor, patient, category, account, suffix }
 }
 async function selectDoctor(page: Page, name: string) {
+  const automatic = page.getByText('Profesional: ' + name, { exact: true })
+  const picker = page.getByRole('button', {
+    name: 'Seleccionar odontólogo responsable',
+    exact: true,
+  })
+  await expect(automatic.or(picker)).toBeVisible()
+  if (await automatic.isVisible()) return
   await page.getByRole('button', { name: 'Seleccionar odontólogo responsable' }).click()
   await page.getByLabel('Buscar opciones').fill(name)
   await page.getByRole('button', { name, exact: true }).click()
@@ -161,6 +168,8 @@ test('atención: borrador, finalización, corrección y ambas versiones', async 
   await page.goto('/clinica?patientId=' + f.patient.id)
   await selectDoctor(page, f.doctor.fullName)
   await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
+  await page.getByText('Fecha, motivo y cita vinculada', { exact: true }).click()
+  await page.getByText('Notas clínicas (opcionales)', { exact: true }).click()
   const dialog = page.getByRole('dialog')
   await dialog.getByLabel('Motivo de consulta').fill('Control integral')
   await dialog.getByRole('textbox', { name: 'Evolución', exact: true }).fill('Evolución original')
@@ -170,7 +179,9 @@ test('atención: borrador, finalización, corrección y ambas versiones', async 
   await dialog.getByRole('button', { name: 'Añadir procedimiento' }).click()
   await dialog.getByLabel('Descripción del procedimiento 1').fill('Evaluación clínica')
   await dialog.getByLabel('Pieza FDI 1 (opcional)', { exact: true }).fill('11')
-  await dialog.getByRole('button', { name: 'Guardar borrador' }).click()
+  await dialog.getByRole('button', { name: 'Guardar atención' }).click()
+  await expect(page.getByRole('dialog', { name: 'Detalle de atención', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
   await expect(
     page.getByText('Borrador', { exact: true }).filter({ visible: true }).first(),
   ).toBeVisible()
@@ -182,6 +193,8 @@ test('atención: borrador, finalización, corrección y ambas versiones', async 
   await page.getByRole('textbox', { name: 'Evolución', exact: true }).fill('Evolución corregida')
   await page.getByLabel('Motivo de la corrección').fill('Se amplió el registro')
   await page.getByRole('button', { name: 'Guardar corrección' }).click()
+  await expect(page.getByRole('dialog', { name: 'Detalle de atención', exact: true })).toBeVisible()
+  await page.keyboard.press('Escape')
   await page.getByRole('button', { name: 'Ver atención' }).first().click()
   await page.getByRole('button', { name: 'Consultar versión 1' }).first().click()
   await expect(page.getByText('Evolución original', { exact: true })).toBeVisible()
@@ -330,6 +343,8 @@ for (const width of [1440, 768, 390]) {
     })
     await page.getByRole('button', { name: 'Atenciones', exact: true }).click()
     await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
+    await page.getByText('Fecha, motivo y cita vinculada', { exact: true }).click()
+    await page.getByText('Notas clínicas (opcionales)', { exact: true }).click()
     await page.getByLabel('Motivo de consulta').fill('Revisión responsiva')
     await page.getByRole('textbox', { name: 'Evolución', exact: true }).fill('Evolución')
     await page.getByRole('textbox', { name: 'Diagnósticos', exact: true }).fill('Diagnóstico')
@@ -342,7 +357,11 @@ for (const width of [1440, 768, 390]) {
       path: 'docs/verification/phase3/atencion-' + width + '.png',
       fullPage: true,
     })
-    await page.getByRole('button', { name: 'Guardar borrador' }).click()
+    await page.getByRole('button', { name: 'Guardar atención' }).click()
+    await expect(
+      page.getByRole('dialog', { name: 'Detalle de atención', exact: true }),
+    ).toBeVisible()
+    await page.keyboard.press('Escape')
     await expect(
       page.getByText('Borrador', { exact: true }).filter({ visible: true }).first(),
     ).toBeVisible()
@@ -428,11 +447,13 @@ test('configuración documental sin plantillas visibles', async ({ page }) => {
   await page.goto('/clinica?patientId=' + f.patient.id)
   await selectDoctor(page, f.doctor.fullName)
   await page.getByRole('button', { name: 'Nueva atención', exact: true }).click()
+  await page.getByText('Fecha, motivo y cita vinculada', { exact: true }).click()
+  await page.getByText('Notas clínicas (opcionales)', { exact: true }).click()
   await expect(page.getByRole('button', { name: /plantilla/i })).toHaveCount(0)
   await page
-    .getByLabel('Anamnesis', { exact: true })
+    .getByLabel('Evolución', { exact: true })
     .fill('Texto clínico registrado por el profesional')
-  await expect(page.getByLabel('Anamnesis', { exact: true })).toHaveValue(
+  await expect(page.getByLabel('Evolución', { exact: true })).toHaveValue(
     'Texto clínico registrado por el profesional',
   )
 })

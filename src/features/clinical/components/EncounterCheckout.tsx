@@ -35,7 +35,7 @@ export function EncounterCheckout({
     [reference, setReference] = useState('')
   return (
     <Modal
-      title={encounter.status === 'DRAFT' ? 'Finalizar y registrar cobro' : 'Cobrar atención'}
+      title={encounter.status === 'DRAFT' ? 'Finalizar y cobrar' : 'Cobrar atención'}
       busy={form.busy}
       onClose={onClose}
     >

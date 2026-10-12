@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSoleDentist } from '../configuration/hooks/useSoleDentist'
 import { Link } from 'react-router-dom'
 import {
   CalendarDays,
@@ -39,7 +40,9 @@ function DashboardWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFo
   const today = clinicToday(timeZone)
   const [day, setDay] = useState(today)
   const [period, setPeriod] = useState<Period>({ from: today.slice(0, 7) + '-01', to: today })
-  const [dentist, setDentist] = useState<PickedEntity[]>([])
+  const [chosenDentist, setDentist] = useState<PickedEntity[]>([])
+  const sole = useSoleDentist()
+  const dentist = chosenDentist.length ? chosenDentist : sole.selection
   const [revision, setRevision] = useState(0)
   const query = new URLSearchParams({
     ...period,
@@ -64,6 +67,14 @@ function DashboardWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFo
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {auth.can('CLINICAL_WRITE') && (
+            <Link
+              to="/clinica"
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-line bg-white px-4 text-sm font-semibold text-brand-700"
+            >
+              Atender paciente
+            </Link>
+          )}
           {auth.can('APPOINTMENTS_READ') && (
             <Link
               to="/agenda"
@@ -100,12 +111,16 @@ function DashboardWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFo
           </Button>
           {auth.can('DENTISTS_READ') && (
             <div className="min-w-0 flex-1 basis-60">
-              <EntityPicker
-                label="Profesional de la agenda"
-                source={{ endpoint: '/api/v1/dentists', labelKey: 'fullName' }}
-                selected={dentist}
-                onChange={setDentist}
-              />
+              {sole.selection.length === 1 && dentist[0]?.id === sole.selection[0].id ? (
+                <p className="text-sm text-muted">Profesional: {dentist[0].label}</p>
+              ) : (
+                <EntityPicker
+                  label="Profesional de la agenda"
+                  source={{ endpoint: '/api/v1/dentists', labelKey: 'fullName' }}
+                  selected={dentist}
+                  onChange={setDentist}
+                />
+              )}
             </div>
           )}
         </section>

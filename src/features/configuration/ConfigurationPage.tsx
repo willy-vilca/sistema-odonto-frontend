@@ -1,9 +1,10 @@
 import { documentCategoriesResource } from './resources/clinical'
 import { DocumentPolicyPage } from './DocumentPolicyPage'
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { useState } from 'react'
+import { Button } from '../../shared/ui/Button'
+import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/hooks/useAuth'
 import { SettingsPage } from './SettingsPage'
-import { AuditPage } from './AuditPage'
 import { ResourcePage } from './components/ResourcePage'
 import { usersResource, rolesResource } from './resources/users'
 import { categoriesResource, servicesResource } from './resources/catalog'
@@ -12,7 +13,6 @@ import { periodsResource, exceptionsResource } from './resources/schedules'
 export function ConfigurationPage({
   onChanged,
   currency,
-  timeZone,
   dateFormat,
 }: {
   onChanged: () => void
@@ -20,6 +20,19 @@ export function ConfigurationPage({
   dateFormat: string
   timeZone: string
 }) {
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const advancedPaths = [
+    'usuarios',
+    'roles',
+    'categorias',
+    'bloqueos',
+    'categorias-documentales',
+    'almacenamiento',
+  ]
+  const advancedVisible =
+    showAdvanced || advancedPaths.some((path) => location.pathname.endsWith('/' + path))
   const auth = useAuth(),
     tabs = [
       {
@@ -82,12 +95,6 @@ export function ConfigurationPage({
         permission: 'CLINICAL_CONFIG_READ',
         element: <DocumentPolicyPage />,
       },
-      {
-        path: 'auditoria',
-        label: 'Auditoría',
-        permission: 'AUDIT_READ',
-        element: <AuditPage timeZone={timeZone} dateFormat={dateFormat} />,
-      },
     ].filter((tab) => auth.can(tab.permission))
   return (
     <div className="space-y-6">
@@ -97,22 +104,42 @@ export function ConfigurationPage({
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[28px]">Configuración</h1>
       </div>
+      <Button
+        variant="quiet"
+        aria-expanded={advancedVisible}
+        onClick={() => {
+          setShowAdvanced(!advancedVisible)
+          if (
+            advancedVisible &&
+            advancedPaths.some((path) => location.pathname.endsWith('/' + path))
+          ) {
+            const primary = tabs.find((tab) => !advancedPaths.includes(tab.path))
+            if (primary) navigate('/configuracion/' + primary.path)
+          }
+        }}
+      >
+        {advancedVisible ? 'Ocultar opciones adicionales' : 'Opciones adicionales'}
+      </Button>
       <nav
         aria-label="Secciones de configuración"
         className="flex gap-1 overflow-x-auto rounded-xl border border-line bg-white p-1"
       >
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.path}
-            to={'/configuracion/' + tab.path}
-            className={({ isActive }) =>
-              'flex min-h-11 shrink-0 items-center rounded-lg px-4 text-sm ' +
-              (isActive ? 'bg-brand-50 font-semibold text-brand-700' : 'text-muted hover:bg-canvas')
-            }
-          >
-            {tab.label}
-          </NavLink>
-        ))}
+        {tabs
+          .filter((tab) => advancedVisible || !advancedPaths.includes(tab.path))
+          .map((tab) => (
+            <NavLink
+              key={tab.path}
+              to={'/configuracion/' + tab.path}
+              className={({ isActive }) =>
+                'flex min-h-11 shrink-0 items-center rounded-lg px-4 text-sm ' +
+                (isActive
+                  ? 'bg-brand-50 font-semibold text-brand-700'
+                  : 'text-muted hover:bg-canvas')
+              }
+            >
+              {tab.label}
+            </NavLink>
+          ))}
       </nav>
       <Routes>
         <Route

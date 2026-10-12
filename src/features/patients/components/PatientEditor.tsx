@@ -64,7 +64,6 @@ export function PatientEditor({
             <FormField
               label="Fecha de nacimiento"
               type="date"
-              required={!draft.provisional}
               max={today}
               value={draft.birthDate ?? ''}
               onChange={(e) => change('birthDate', e.target.value || null)}
@@ -118,8 +117,8 @@ export function PatientEditor({
               Paciente activo
             </label>
             <p className="w-full text-xs text-muted">
-              La ficha provisional permite reservar con datos básicos y completar la fecha de
-              nacimiento después.
+              Una ficha con datos básicos permite atender, cobrar y gestionar todos los módulos.
+              Completar los datos es opcional.
             </p>
           </div>
           <section className="space-y-4">

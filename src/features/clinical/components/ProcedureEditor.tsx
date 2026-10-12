@@ -89,7 +89,13 @@ export function ProcedureEditor({
             onChange={(items) =>
               update(index, {
                 serviceId: items[0]?.id ?? null,
-                ...(items[0] ? { description: items[0].label } : {}),
+                ...(items[0]
+                  ? {
+                      description: items[0].label,
+                      unitPrice:
+                        items[0].data?.price !== undefined ? String(items[0].data.price) : null,
+                    }
+                  : {}),
               })
             }
           />

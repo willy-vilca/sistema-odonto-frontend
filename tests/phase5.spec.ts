@@ -88,6 +88,12 @@ async function plan(page: Page, data: Awaited<ReturnType<typeof seed>>, accept =
   return record
 }
 async function pick(page: Page, label: string, name: string) {
+  if (label === 'profesional del plan') {
+    const automatic = page.getByText('Profesional: ' + name, { exact: true })
+    const picker = page.getByRole('button', { name: 'Seleccionar ' + label, exact: true })
+    await expect(automatic.or(picker)).toBeVisible()
+    if (await automatic.isVisible()) return
+  }
   await page.getByRole('button', { name: 'Seleccionar ' + label, exact: true }).click()
   await page.getByLabel('Buscar opciones').fill(name)
   await page.getByRole('button', { name, exact: true }).click()
@@ -132,7 +138,9 @@ for (const viewport of [
     await page.getByRole('button', { name: 'Registrar abono', exact: true }).tap()
     await page.getByLabel('Importe del abono', { exact: true }).fill('300')
     await page.getByLabel('Importe del abono', { exact: true }).press('Tab')
-    await expect(page.getByLabel('Fecha del abono', { exact: true })).toBeFocused()
+    await expect(
+      page.getByText('Fecha y datos adicionales del pago', { exact: true }),
+    ).toBeFocused()
     await page
       .getByRole('combobox', { name: 'Medio de pago', exact: true })
       .selectOption('TRANSFER')

@@ -7,6 +7,7 @@ import { PagedTable, StatusBadge } from '../../shared/ui/PagedTable'
 import { Button } from '../../shared/ui/Button'
 import { formatLocalDate } from '../../shared/data/dateFormat'
 import { PatientEditor } from './components/PatientEditor'
+import { QuickPatientEditor } from './components/QuickPatientEditor'
 import { PatientDetail } from './components/PatientDetail'
 import { PatientById } from './components/PatientById'
 import { AppointmentDetail } from '../appointments/components/AppointmentDetail'
@@ -28,6 +29,7 @@ export function PatientsPage({ dateFormat, timeZone }: { dateFormat: string; tim
     ...(provisional ? { provisional } : {}),
   })
   const [editor, setEditor] = useState<{ patient?: Patient } | null>(null)
+  const [quickCreate, setQuickCreate] = useState(false)
   const [selected, setSelected] = useState<Patient>()
   const [appointment, setAppointment] = useState<Appointment>()
   if (!auth.can('PATIENTS_READ'))
@@ -47,7 +49,7 @@ export function PatientsPage({ dateFormat, timeZone }: { dateFormat: string; tim
           </p>
         </div>
         {auth.can('PATIENTS_WRITE') && (
-          <Button onClick={() => setEditor({})}>
+          <Button onClick={() => setQuickCreate(true)}>
             <Plus size={17} aria-hidden="true" />
             Nuevo paciente
           </Button>
@@ -137,6 +139,16 @@ export function PatientsPage({ dateFormat, timeZone }: { dateFormat: string; tim
           onClose={() => setEditor(null)}
           onSaved={() => {
             setEditor(null)
+            list.reload()
+          }}
+        />
+      )}
+      {quickCreate && (
+        <QuickPatientEditor
+          onClose={() => setQuickCreate(false)}
+          onSaved={(patient) => {
+            setQuickCreate(false)
+            setSelected(patient)
             list.reload()
           }}
         />

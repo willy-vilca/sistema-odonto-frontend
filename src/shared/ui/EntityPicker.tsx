@@ -5,6 +5,7 @@ import { FieldLabel } from './FieldLabel'
 export interface PickedEntity {
   id: string
   label: string
+  data?: Record<string, unknown>
 }
 export interface PickerSource {
   endpoint: string
@@ -120,7 +121,9 @@ function PickerResults({
               variant="secondary"
               className="w-full justify-start text-left"
               disabled={selected.some((s) => s.id === item.id)}
-              onClick={() => onPick({ id: String(item.id), label: String(item[source.labelKey]) })}
+              onClick={() =>
+                onPick({ id: String(item.id), label: String(item[source.labelKey]), data: item })
+              }
             >
               {String(item[source.labelKey])}
             </Button>

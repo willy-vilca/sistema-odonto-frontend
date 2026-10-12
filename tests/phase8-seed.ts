@@ -35,13 +35,13 @@ export function phase8Sql(sql: string) {
         '-U',
         'postgres',
         '-d',
-        'sistema_odontologo_test',
+        'sistema_odonto_mini_test',
         '-Atc',
         'SELECT current_database()',
       ],
       options,
     ).trim(),
-  ).toBe('sistema_odontologo_test')
+  ).toBe('sistema_odonto_mini_test')
   return execFileSync(
     psql,
     [
@@ -50,7 +50,7 @@ export function phase8Sql(sql: string) {
       '-U',
       'postgres',
       '-d',
-      'sistema_odontologo_test',
+      'sistema_odonto_mini_test',
       '-v',
       'ON_ERROR_STOP=1',
       '-At',

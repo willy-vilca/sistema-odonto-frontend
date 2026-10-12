@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { PatientSelection } from '../patients/components/PatientSelection'
+import { useSoleDentist } from '../configuration/hooks/useSoleDentist'
 import { useSearchParams } from 'react-router-dom'
 import { ClipboardPlus, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../auth/hooks/useAuth'
@@ -34,9 +36,7 @@ export function ClinicalPage({ dateFormat, timeZone }: { dateFormat: string; tim
       </header>
       {!selected[0] && !linked && (
         <section className="rounded-2xl border border-line bg-white p-5">
-          <EntityPicker
-            label="Paciente"
-            source={{ endpoint: '/api/v1/patients', labelKey: 'label' }}
+          <PatientSelection
             selected={selected}
             onChange={(items) => {
               setSelected(items)
@@ -102,7 +102,9 @@ function ClinicalWorkspace({
 }) {
   const auth = useAuth(),
     patient = useQueryData<Patient>('/api/v1/patients/' + patientId)
-  const [dentists, setDentists] = useState<PickedEntity[]>([])
+  const [chosenDentists, setDentists] = useState<PickedEntity[]>([])
+  const sole = useSoleDentist()
+  const dentists = chosenDentists.length ? chosenDentists : sole.selection
   const tabs = [
     ...(auth.can('CLINICAL_READ')
       ? [
@@ -130,9 +132,7 @@ function ClinicalWorkspace({
   return (
     <div className="space-y-5">
       <section className="rounded-2xl border border-line bg-white p-5">
-        <EntityPicker
-          label="Paciente"
-          source={{ endpoint: '/api/v1/patients', labelKey: 'label' }}
+        <PatientSelection
           selected={[{ id: patientId, label: patient.data.label }]}
           onChange={onPatientChange}
         />
@@ -140,7 +140,7 @@ function ClinicalWorkspace({
       <section className="rounded-2xl border border-line bg-brand-50 p-5 sm:p-6">
         <p className="text-xs font-medium text-brand-700">
           {patient.data.code}
-          {patient.data.provisional ? ' · Ficha provisional' : ''}
+          {patient.data.provisional ? ' · Datos básicos' : ''}
         </p>
         <h2 className="mt-1 text-2xl font-semibold">{patient.data.fullName}</h2>
         <p className="mt-2 text-sm text-muted">
@@ -150,20 +150,35 @@ function ClinicalWorkspace({
       <PatientNavigation patientId={patientId} />
       {auth.can('CLINICAL_WRITE') && (
         <section className="rounded-xl border border-line bg-white p-4">
-          <EntityPicker
-            label="Odontólogo responsable"
-            source={{
-              endpoint: '/api/v1/dentists',
-              labelKey: 'fullName',
-              filters: { active: 'true' },
-            }}
-            selected={dentists}
-            onChange={setDentists}
-          />
-          <p className="mt-2 text-xs text-muted">
-            Selecciona tu registro profesional. Un administrador puede elegir al profesional
-            responsable.
-          </p>
+          {sole.loading ? (
+            <p role="status" className="text-sm text-muted">
+              Cargando profesional…
+            </p>
+          ) : sole.selection.length === 1 && dentists[0]?.id === sole.selection[0].id ? (
+            <p className="text-sm">Profesional: {dentists[0].label}</p>
+          ) : (
+            <>
+              <EntityPicker
+                label="Odontólogo responsable"
+                source={{
+                  endpoint: '/api/v1/dentists',
+                  labelKey: 'fullName',
+                  filters: { active: 'true' },
+                }}
+                selected={dentists}
+                onChange={setDentists}
+              />
+              <p className="mt-2 text-xs text-muted">
+                Selecciona tu registro profesional. Un administrador puede elegir al profesional
+                responsable.
+              </p>
+            </>
+          )}
+          {sole.error && (
+            <p role="alert" className="error-box">
+              {sole.error}
+            </p>
+          )}
         </section>
       )}
       <nav
