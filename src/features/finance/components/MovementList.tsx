@@ -13,6 +13,7 @@ import { FinancialFiles } from './FinancialFiles'
 import { downloadDocument, receipt } from '../services/paymentService'
 export function MovementList({
   patientId,
+  chargeId,
   dateFormat = 'DMY',
   timeZone = 'America/Lima',
   expense = false,
@@ -21,6 +22,7 @@ export function MovementList({
   onChanged,
 }: {
   patientId?: string
+  chargeId?: string
   dateFormat?: string
   timeZone?: string
   expense?: boolean
@@ -29,7 +31,7 @@ export function MovementList({
   onChanged: () => void
 }) {
   const auth = useAuth(),
-    [kind, setKind] = useState(expense ? 'EXPENSE' : ''),
+    [kind, setKind] = useState(chargeId ? 'PAYMENT' : expense ? 'EXPENSE' : ''),
     [method, setMethod] = useState(''),
     [from, setFrom] = useState(''),
     [to, setTo] = useState(''),
@@ -40,6 +42,7 @@ export function MovementList({
       '/api/v1/finance/movements',
       {
         patientId: patientId ?? '',
+        chargeId: chargeId ?? '',
         cashSessionId: cashSessionId ?? '',
         kind,
         method,
@@ -62,25 +65,27 @@ export function MovementList({
         keyFor={(m) => m.id}
         filters={
           <>
-            <label className="field-label">
-              Movimiento
-              <select className="field" value={kind} onChange={(e) => setKind(e.target.value)}>
-                {!expense && <option value="">Todos</option>}
-                {Object.entries(movementKinds)
-                  .filter(([k]) =>
-                    cashSessionId
-                      ? true
-                      : expense
-                        ? k.startsWith('EXPENSE')
-                        : !k.startsWith('EXPENSE'),
-                  )
-                  .map(([v, label]) => (
-                    <option key={v} value={v}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            {!chargeId && (
+              <label className="field-label">
+                Movimiento
+                <select className="field" value={kind} onChange={(e) => setKind(e.target.value)}>
+                  {!expense && <option value="">Todos</option>}
+                  {Object.entries(movementKinds)
+                    .filter(([k]) =>
+                      cashSessionId
+                        ? true
+                        : expense
+                          ? k.startsWith('EXPENSE')
+                          : !k.startsWith('EXPENSE'),
+                    )
+                    .map(([v, label]) => (
+                      <option key={v} value={v}>
+                        {label}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            )}
             <label className="field-label">
               Medio
               <select className="field" value={method} onChange={(e) => setMethod(e.target.value)}>
@@ -134,6 +139,11 @@ export function MovementList({
                   <p className="mt-1 text-xs text-muted">
                     Aplicado {money(m.applied, m.currency)} · Disponible{' '}
                     {money(m.available, m.currency)}
+                  </p>
+                )}
+                {chargeId && m.chargeApplied !== null && (
+                  <p className="mt-2 text-sm font-semibold">
+                    Aplicado a este cargo: {money(m.chargeApplied, m.currency)}
                   </p>
                 )}
                 {m.originalId === null && m.effectiveAmount !== m.amount && (
@@ -197,10 +207,29 @@ export function MovementList({
                 {selected.actorName} · {formatLocalDate(selected.occurredOn, dateFormat)} ·{' '}
                 {methods[selected.method]}
               </p>
+              <p className="mt-2">Referencia: {selected.reference || 'Sin referencia'}</p>
+              {selected.receiptCode && <p>Constancia: {selected.receiptCode}</p>}
+              {chargeId && selected.chargeApplied !== null && (
+                <p className="mt-2 font-semibold">
+                  Aplicado a este cargo: {money(selected.chargeApplied, selected.currency)}
+                </p>
+              )}
               {selected.originalId && (
                 <p className="mt-2 break-all text-xs">Referencia original: {selected.originalId}</p>
               )}
             </div>
+            {selected.receiptCode && (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  void receipt(selected)
+                    .then(downloadDocument)
+                    .catch((e) => setError(String(e.message)))
+                }
+              >
+                Constancia PDF
+              </Button>
+            )}
             {selected.kind === 'PAYMENT' && (
               <Applications
                 timeZone={timeZone}

@@ -7,6 +7,7 @@ export interface AccountSummary {
   advance: number
 }
 export interface Movement {
+  chargeApplied: number | null
   id: string
   patientId: string | null
   originalId: string | null

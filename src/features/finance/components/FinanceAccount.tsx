@@ -200,6 +200,7 @@ export function FinanceAccount({
         {tab === 'Cargos' && (
           <DebtWorkspace
             patientId={patientId}
+            dateFormat={dateFormat}
             timeZone={timeZone}
             today={today}
             onChanged={changed}

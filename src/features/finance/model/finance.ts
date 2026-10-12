@@ -1,4 +1,7 @@
 export interface Charge {
+  debt: number | null
+  applied: number | null
+  paymentStatus: 'UNPAID' | 'PARTIAL' | 'PAID' | 'NO_BALANCE' | null
   closed: boolean
   pending: number | null
   id: string
@@ -16,6 +19,12 @@ export interface Charge {
   reason: string
   actorName: string
   createdAt: string
+}
+export const chargePaymentStates = {
+  UNPAID: 'Sin pagar',
+  PARTIAL: 'Pago parcial',
+  PAID: 'Pagado por completo',
+  NO_BALANCE: 'Sin deuda',
 }
 export interface DebtSummary {
   currency: string

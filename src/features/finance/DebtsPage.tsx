@@ -6,18 +6,22 @@ import { usePagedList } from '../../shared/data/usePagedList'
 import { useQueryData } from '../../shared/data/useQueryData'
 import { PagedTable } from '../../shared/ui/PagedTable'
 import { Button } from '../../shared/ui/Button'
+import { Modal } from '../../shared/ui/Modal'
 import { chargeKinds, type Charge, type DebtSummary } from './model/finance'
-import { money } from '../treatments/model/treatments'
 import { ChargeFinanceForm } from './components/ChargeFinanceForm'
 import { ChargeAdjustment } from './components/ChargeAdjustment'
+import { ChargePaymentSummary } from './components/ChargePaymentSummary'
+import { MovementList } from './components/MovementList'
 export function DebtWorkspace({
   patientId,
   timeZone,
+  dateFormat = 'DMY',
   today,
   onChanged,
 }: {
   patientId: string
   timeZone: string
+  dateFormat?: string
   today: string
   onChanged: () => void
 }) {
@@ -34,11 +38,13 @@ export function DebtWorkspace({
     ),
     summary = useQueryData<DebtSummary[]>('/api/v1/charges/summary?patientId=' + patientId),
     [selected, setSelected] = useState<Charge>(),
+    [payments, setPayments] = useState<Charge>(),
     [operation, setOperation] = useState<{
       id: string
       action: 'installments' | 'discount' | 'void'
     }>()
   function saved() {
+    setPayments(undefined)
     setLifecycle(undefined)
     setSelected(undefined)
     setOperation(undefined)
@@ -64,7 +70,7 @@ export function DebtWorkspace({
             Ver todos los movimientos
           </Button>
         ) : (
-          <h2 className="text-xl font-semibold">Movimientos</h2>
+          <h2 className="text-xl font-semibold">Cargos del paciente</h2>
         )}
         {auth.can('PLANS_READ') && (
           <Link
@@ -125,7 +131,7 @@ export function DebtWorkspace({
                   {c.closed
                     ? 'Finalizado'
                     : c.pending === 0
-                      ? 'Sin saldo · Listo para finalizar'
+                      ? 'Activo · Listo para finalizar'
                       : 'Activo'}
                 </p>
                 {c.encounterId && auth.can('CLINICAL_READ') && (
@@ -140,17 +146,8 @@ export function DebtWorkspace({
             ),
           },
           {
-            label: 'Movimiento',
-            render: (c) => (
-              <>
-                {money(c.amount, c.currency)}
-                {c.unitPrice !== null && (
-                  <p className="mt-1 text-xs text-muted">
-                    {c.quantity} × {money(c.unitPrice, c.currency)}
-                  </p>
-                )}
-              </>
-            ),
+            label: 'Estado del pago e importes',
+            render: (c) => <ChargePaymentSummary charge={c} />,
           },
           {
             label: 'Motivo y responsable',
@@ -173,6 +170,9 @@ export function DebtWorkspace({
         ]}
         actions={(c) => (
           <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={() => setPayments(c)}>
+              Ver pagos
+            </Button>
             {!c.originalId &&
               ((!c.closed && c.pending === 0 && auth.can('PAYMENTS_WRITE')) ||
                 (c.closed && auth.can('FINANCES_ADJUST'))) && (
@@ -222,6 +222,26 @@ export function DebtWorkspace({
           </div>
         )}
       />
+      {payments && (
+        <Modal title="Pagos del cargo" onClose={() => setPayments(undefined)}>
+          <div className="space-y-5">
+            <p className="font-semibold">{payments.description}</p>
+            {!payments.originalId && <ChargePaymentSummary charge={payments} />}
+            <p className="text-sm text-muted">
+              Abonos vinculados a este cargo. La aplicación actual descuenta liberaciones y
+              devoluciones; los pagos anteriores se conservan para consultar su historial.
+            </p>
+            <MovementList
+              chargeId={payments.originalId ?? payments.id}
+              patientId={patientId}
+              dateFormat={dateFormat}
+              timeZone={timeZone}
+              today={today}
+              onChanged={saved}
+            />
+          </div>
+        </Modal>
+      )}
       {lifecycle && (
         <ChargeLifecycleForm
           {...lifecycle}
