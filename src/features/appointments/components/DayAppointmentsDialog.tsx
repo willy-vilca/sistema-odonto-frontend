@@ -4,6 +4,8 @@ import { Button } from '../../../shared/ui/Button'
 import { formatLocalDate } from '../../../shared/data/dateFormat'
 import { AppointmentList } from './AppointmentList'
 import { statusLabels, type Appointment } from '../model/appointment'
+import { PendingSessionsPanel } from '../../treatments/components/PendingSessionsPanel'
+import type { ScheduledSession } from '../../treatments/model/treatments'
 
 export function DayAppointmentsDialog({
   date,
@@ -14,6 +16,7 @@ export function DayAppointmentsDialog({
   revision,
   onOpen,
   onClose,
+  onOpenSession,
 }: {
   date: string
   dentistId?: string
@@ -23,6 +26,7 @@ export function DayAppointmentsDialog({
   revision: number
   onOpen: (appointment: Appointment) => void
   onClose: () => void
+  onOpenSession?: (session: ScheduledSession) => void
 }) {
   const [status, setStatus] = useState('')
   return (
@@ -58,6 +62,15 @@ export function DayAppointmentsDialog({
         <Button type="button" variant="secondary" onClick={onClose}>
           Volver al calendario
         </Button>
+        <PendingSessionsPanel
+          from={date}
+          to={date}
+          patientId={patientId}
+          dentistId={dentistId}
+          dateFormat={dateFormat}
+          revision={revision}
+          onOpen={onOpenSession}
+        />
       </div>
     </Modal>
   )

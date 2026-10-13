@@ -12,18 +12,20 @@ export function PagedTable<T>({
   keyFor,
   actions,
   filters,
+  searchLabel = 'Buscar',
 }: {
   list: ReturnType<typeof usePagedList<T>>
   columns: Column<T>[]
   keyFor: (row: T) => string
   actions?: (row: T) => ReactNode
   filters?: ReactNode
+  searchLabel?: string
 }) {
   return (
     <section className="rounded-2xl border border-line bg-white">
       <div className="flex flex-wrap items-end gap-3 border-b border-line p-4 sm:p-5">
         <label className="field-label min-w-0 flex-1 basis-52">
-          Buscar
+          {searchLabel}
           <input
             type="search"
             className="field"

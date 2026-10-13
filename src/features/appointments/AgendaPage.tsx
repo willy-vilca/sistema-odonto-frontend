@@ -17,10 +17,14 @@ import { clinicToday, dateRange, dateAdd, monthAdd, type CalendarView } from './
 import { statusLabels, type CalendarResponse, type Appointment } from './model/appointment'
 import { formatLocalDate } from '../../shared/data/dateFormat'
 import { PatientContextBanner } from '../patients/components/PatientContextBanner'
+import { ScheduledSessionById } from './components/ScheduledSessionDetail'
+import { PendingSessionsPanel } from '../treatments/components/PendingSessionsPanel'
+import type { ScheduledSession } from '../treatments/model/treatments'
 export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFormat: string }) {
   const auth = useAuth()
   const [params, setParams] = useSearchParams()
   const linkedAppointment = params.get('appointment')
+  const linkedSession = params.get('session')
   const linkedPatient = params.get('patientId')
   const [view, setView] = useState<CalendarView>(() =>
     linkedPatient || window.matchMedia('(max-width:767px)').matches ? 'list' : 'week',
@@ -34,6 +38,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
   const [listTo, setListTo] = useState('')
   const [editor, setEditor] = useState(false)
   const [selected, setSelected] = useState<Appointment>()
+  const [selectedSession, setSelectedSession] = useState<ScheduledSession>()
   const [revision, setRevision] = useState(0)
   const [expandedDay, setExpandedDay] = useState<string>()
   if (!auth.can('APPOINTMENTS_READ'))
@@ -204,8 +209,19 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           }}
           onOpen={setSelected}
           onOpenDay={setExpandedDay}
+          onOpenSession={setSelectedSession}
         />
       )}
+      <PendingSessionsPanel
+        patientId={linkedPatient || undefined}
+        dentistId={dentist[0]?.id}
+        revision={revision}
+        timeZone={timeZone}
+        dateFormat={dateFormat}
+        from={view === 'list' ? listFrom || undefined : dateRange(date, view).from}
+        to={view === 'list' ? listTo || undefined : dateRange(date, view).to}
+        onOpen={setSelectedSession}
+      />
       <p className="text-xs text-muted">
         La agenda utiliza la duración guardada en cada cita. Los cambios del catálogo no modifican
         reservas existentes.
@@ -236,6 +252,7 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           revision={revision}
           onOpen={setSelected}
           onClose={() => setExpandedDay(undefined)}
+          onOpenSession={setSelectedSession}
         />
       )}
       {selected && (
@@ -245,6 +262,24 @@ export function AgendaPage({ timeZone, dateFormat }: { timeZone: string; dateFor
           dateFormat={dateFormat}
           onClose={() => setSelected(undefined)}
           onChanged={() => setRevision((n) => n + 1)}
+        />
+      )}
+      {(selectedSession || linkedSession) && (
+        <ScheduledSessionById
+          key={selectedSession?.id || linkedSession!}
+          id={selectedSession?.id || linkedSession!}
+          timeZone={timeZone}
+          dateFormat={dateFormat}
+          onChanged={() => setRevision((n) => n + 1)}
+          onAssigned={setSelected}
+          onClose={() => {
+            setSelectedSession(undefined)
+            if (linkedSession) {
+              const next = new URLSearchParams(params)
+              next.delete('session')
+              setParams(next, { replace: true })
+            }
+          }}
         />
       )}
       {linkedAppointment && (
@@ -273,6 +308,7 @@ function CalendarSection({
   onDay,
   onOpen,
   onOpenDay,
+  onOpenSession,
 }: {
   date: string
   view: CalendarView
@@ -282,6 +318,7 @@ function CalendarSection({
   onDay: (date: string) => void
   onOpen: (a: Appointment) => void
   onOpenDay: (date: string) => void
+  onOpenSession: (session: ScheduledSession) => void
 }) {
   const range = dateRange(date, view)
   const url =
@@ -323,6 +360,8 @@ function CalendarSection({
           onDay={onDay}
           onOpen={onOpen}
           onOpenDay={onOpenDay}
+          pendingSessions={result.data?.pendingSessions ?? []}
+          onOpenSession={onOpenSession}
         />
       )}
     </div>

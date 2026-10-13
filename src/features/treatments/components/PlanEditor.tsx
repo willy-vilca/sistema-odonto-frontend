@@ -7,6 +7,8 @@ import { FormField, TextAreaField } from '../../../shared/ui/FormField'
 import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { ItemEditor } from './ItemEditor'
+import { PaymentAgreementEditor } from './PaymentAgreementEditor'
+import type { AgreementInput } from '../model/treatments'
 import { emptyItem, type ItemInput, type Plan, type PlanItem } from '../model/treatments'
 import { savePlan, addPlanItem } from '../services/treatmentService'
 export function PlanEditor({
@@ -29,6 +31,13 @@ export function PlanEditor({
     [key] = useState(() => crypto.randomUUID()),
     [title, setTitle] = useState(plan?.title ?? ''),
     [conditions, setConditions] = useState(plan?.conditions ?? ''),
+    [agreement, setAgreement] = useState<AgreementInput>({
+      initialAmount: (plan?.paymentAgreement?.initialAmount ?? 0).toFixed(2),
+      installments: (plan?.paymentAgreement?.installments ?? []).map((d) => ({
+        dueOn: d.dueOn,
+        amount: d.amount.toFixed(2),
+      })),
+    }),
     [reason, setReason] = useState(''),
     [chosenDoctor, setDoctor] = useState<PickedEntity[]>(
       plan ? [{ id: plan.dentistId, label: plan.dentistName }] : [],
@@ -81,6 +90,7 @@ export function PlanEditor({
                     title,
                     conditions,
                     items,
+                    paymentAgreement: agreement,
                     version: plan?.version ?? 0,
                     requestKey: key,
                   }),
@@ -164,6 +174,16 @@ export function PlanEditor({
           >
             Añadir tratamiento
           </Button>
+        )}
+        {!additional && (
+          <PaymentAgreementEditor
+            value={agreement}
+            totalCents={items.reduce(
+              (sum, i) => sum + Math.round(Number(i.unitPrice || 0) * 100) * i.quantity,
+              0,
+            )}
+            onChange={setAgreement}
+          />
         )}
         {additional && (
           <TextAreaField

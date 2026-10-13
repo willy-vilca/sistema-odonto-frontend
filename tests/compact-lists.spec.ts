@@ -211,13 +211,13 @@ for (const width of [1440, 768, 390]) {
     })
     await opener.click()
     const dayDialog = page.getByRole('dialog', { name: 'Citas del 07/01/2030', exact: true })
-    await expect(dayDialog.locator('footer').getByRole('status')).toContainText(
+    await expect(dayDialog.locator('footer').first().getByRole('status')).toContainText(
       count + ' registros',
     )
     if (count > 20) {
-      await dayDialog.getByRole('button', { name: 'Siguiente', exact: true }).click()
+      await dayDialog.getByRole('button', { name: 'Siguiente', exact: true }).first().click()
       await expect(dayDialog.getByRole('button', { name: 'Ver cita', exact: true })).toHaveCount(1)
-      await dayDialog.getByRole('button', { name: 'Anterior', exact: true }).click()
+      await dayDialog.getByRole('button', { name: 'Anterior', exact: true }).first().click()
     }
     await dayDialog.getByLabel('Buscar', { exact: true }).fill(f.patient.fullName)
     await dayDialog.getByRole('button', { name: 'Ver cita', exact: true }).first().click()
@@ -238,7 +238,9 @@ for (const width of [1440, 768, 390]) {
       .toBe(true)
     await expect(dayDialog.getByLabel('Buscar', { exact: true })).toHaveValue(f.patient.fullName)
     await dayDialog.getByLabel('Estado de la cita').selectOption('CONFIRMED')
-    await expect(dayDialog.locator('footer').getByRole('status')).toContainText('1 registros')
+    await expect(dayDialog.locator('footer').first().getByRole('status')).toContainText(
+      '1 registros',
+    )
     await noOverflow(page)
     await page.screenshot({
       path: `docs/verification/compact-lists/day-dialog-${width}.png`,

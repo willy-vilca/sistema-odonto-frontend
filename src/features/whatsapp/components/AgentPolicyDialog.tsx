@@ -191,6 +191,23 @@ function PolicyForm({ initial, onClose }: { initial: AgentPolicy; onClose: () =>
         />
       </label>
       <div className="flex flex-wrap gap-4">
+        <label className="field-label w-full">
+          <FieldLabel label="Máximo de servicios con precio por secuencia" required />
+          <input
+            aria-label="Máximo de servicios con precio por secuencia"
+            className="field"
+            type="number"
+            required
+            min={1}
+            max={20}
+            value={policy.maxPriceServices ?? 3}
+            onChange={(e) => set('maxPriceServices', Number(e.target.value))}
+          />
+          <span className="text-xs font-normal text-muted">
+            Se reinicia al preparar una reserva verificada o después de 30 minutos sin consultar
+            precios. Un saludo no reinicia el límite.
+          </span>
+        </label>
         <label className="flex min-h-11 items-center gap-2">
           <input
             type="checkbox"

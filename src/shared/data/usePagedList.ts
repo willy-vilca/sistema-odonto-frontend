@@ -45,6 +45,7 @@ export function usePagedList<T>(
     return () => clearTimeout(timer)
   }, [search])
   useEffect(() => {
+    if (!endpoint) return
     const controller = new AbortController()
     void request<PageData<T>>(url, { signal: controller.signal })
       .then((data) => {
@@ -55,10 +56,10 @@ export function usePagedList<T>(
           setResult({ key: requestKey, data: null, error: errorMessage(e) })
       })
     return () => controller.abort()
-  }, [url, requestKey])
+  }, [endpoint, url, requestKey])
   return {
     data: result.data,
-    loading: result.key !== requestKey,
+    loading: !!endpoint && result.key !== requestKey,
     error: result.key === requestKey ? result.error : '',
     search,
     setSearch,

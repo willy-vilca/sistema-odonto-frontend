@@ -9,6 +9,7 @@ export interface AgentPolicy {
   schedule: AgentPeriod[]
   changeLeadMinutes: number
   allowReschedule: boolean
+  maxPriceServices: number
   allowCancel: boolean
   handoffText: string
   clinicalText: string

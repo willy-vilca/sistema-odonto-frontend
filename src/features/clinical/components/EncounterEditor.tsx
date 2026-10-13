@@ -7,6 +7,7 @@ import { Button } from '../../../shared/ui/Button'
 import { FormField, TextAreaField } from '../../../shared/ui/FormField'
 import { EntityPicker, type PickedEntity } from '../../../shared/ui/EntityPicker'
 import { ProcedureEditor } from './ProcedureEditor'
+import { PreviousEncounter } from './PreviousEncounter'
 import { saveEncounter, correctEncounter } from '../services/clinicalService'
 import { emptyContent, type Encounter, type EncounterContent } from '../model/clinical'
 export function EncounterEditor({
@@ -80,6 +81,13 @@ export function EncounterEditor({
               (encounter?.dentistName ?? dentist?.label ?? 'Profesional de la atención') +
               '. Puedes atender sin cita para un ingreso directo.'}
         </p>
+        {!correcting && (
+          <PreviousEncounter
+            patientId={patientId}
+            dentistId={professionalId}
+            exclude={encounter?.id}
+          />
+        )}
         {!correcting && (
           <details className="rounded-xl border border-line p-4 space-y-4">
             <summary className="cursor-pointer font-medium">Fecha, motivo y cita vinculada</summary>

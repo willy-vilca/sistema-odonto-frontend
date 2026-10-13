@@ -16,6 +16,8 @@ export interface Plan {
   completedSessions: number
   totalSessions: number
   version: number
+  paymentAgreement: PaymentAgreement
+  initialPaymentId: string | null
 }
 export interface PlanItem {
   id: string
@@ -31,6 +33,8 @@ export interface PlanItem {
   completedSessions: number
   currentDebt: number
   label: string
+  durationMinutes: number
+  scheduling: SessionScheduling
 }
 export interface ItemInput {
   serviceId: string | null
@@ -39,6 +43,45 @@ export interface ItemInput {
   quantity: number
   sessions: number
   unitPrice: string
+  durationMinutes?: number
+  scheduling?: SessionScheduling
+}
+export interface SessionScheduling {
+  mode: 'NONE' | 'DATES' | 'FREQUENCY'
+  dates: (string | null)[]
+  firstDate?: string | null
+  interval?: number | null
+  unit?: 'DAYS' | 'WEEKS' | 'MONTHS' | null
+}
+export interface PaymentAgreement {
+  initialAmount: number
+  installments: { dueOn: string; amount: number }[]
+}
+export interface AgreementInput {
+  initialAmount: string
+  installments: { dueOn: string; amount: string }[]
+}
+export interface ScheduledSession {
+  id: string
+  planId: string
+  planCode: string
+  planTitle: string
+  itemId: string
+  description: string
+  tooth: number | null
+  serviceId: string | null
+  patientId: string
+  patientName: string
+  dentistId: string
+  dentistName: string
+  sessionNumber: number
+  totalSessions: number
+  plannedOn: string | null
+  durationMinutes: number
+  status: string
+  appointmentId: string | null
+  version: number
+  label: string
 }
 export interface PlanOperation {
   id: string
@@ -63,6 +106,8 @@ export const emptyItem: ItemInput = {
   quantity: 1,
   sessions: 1,
   unitPrice: '0.00',
+  durationMinutes: 30,
+  scheduling: { mode: 'NONE', dates: [] },
 }
 export function money(value: number, currency: string) {
   return new Intl.NumberFormat('es-PE', { style: 'currency', currency }).format(value)

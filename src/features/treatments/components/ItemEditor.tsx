@@ -5,6 +5,7 @@ import type { ItemInput } from '../model/treatments'
 import { getServicePrice } from '../services/treatmentService'
 import { useState } from 'react'
 import { errorMessage } from '../../../shared/api/http'
+import { SessionSchedulingEditor } from './SessionSchedulingEditor'
 export function ItemEditor({
   item,
   onChange,
@@ -44,6 +45,7 @@ export function ItemEditor({
                 serviceId: selected[0].id,
                 description: service.name,
                 unitPrice: service.price.toFixed(2),
+                durationMinutes: service.durationMinutes,
               }),
             )
             .catch((e) => setError(errorMessage(e)))
@@ -87,7 +89,19 @@ export function ItemEditor({
           min={1}
           max={100}
           value={item.sessions}
-          onChange={(e) => onChange({ sessions: Number(e.target.value) })}
+          onChange={(e) =>
+            onChange({
+              sessions: Number(e.target.value),
+              ...(item.scheduling
+                ? {
+                    scheduling: {
+                      ...item.scheduling,
+                      dates: item.scheduling.dates.slice(0, Math.max(0, Number(e.target.value))),
+                    },
+                  }
+                : {}),
+            })
+          }
         />
         <FormField
           label={'Pieza del tratamiento ' + index + ' (opcional)'}
@@ -101,6 +115,14 @@ export function ItemEditor({
       <p className="text-xs text-muted">
         Las unidades definen el importe; las sesiones definen el avance clínico.
       </p>
+      <SessionSchedulingEditor
+        value={item.scheduling}
+        sessions={item.sessions}
+        duration={item.durationMinutes ?? 30}
+        index={index}
+        onChange={(scheduling) => onChange({ scheduling })}
+        onDuration={(durationMinutes) => onChange({ durationMinutes })}
+      />
     </fieldset>
   )
 }

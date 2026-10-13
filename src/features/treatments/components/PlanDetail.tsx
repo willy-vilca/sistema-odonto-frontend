@@ -5,6 +5,8 @@ import { Button } from '../../../shared/ui/Button'
 import { PagedTable } from '../../../shared/ui/PagedTable'
 import { usePagedList } from '../../../shared/data/usePagedList'
 import { useAuth } from '../../auth/hooks/useAuth'
+import { PlanProformas } from './PlanProformas'
+import { PendingSessionsPanel } from './PendingSessionsPanel'
 import {
   money,
   planStates,
@@ -53,6 +55,7 @@ export function PlanDetail({
           </p>
           {plan.acceptedBy && <p className="mt-3 text-sm">Aceptado por {plan.acceptedBy}</p>}
         </section>
+        <PlanProformas planId={plan.id} />
         <div className="flex flex-wrap gap-2">
           {auth.can('PLANS_WRITE') && (
             <>
@@ -96,6 +99,9 @@ export function PlanDetail({
             ['items', 'Tratamientos y avance'],
             ['history', 'Historial'],
             ['sessions', 'Sesiones realizadas'],
+            ...(auth.can('APPOINTMENTS_READ') && plan.acceptedAt
+              ? [['planned', 'Sesiones por coordinar']]
+              : []),
           ].map(([key, label]) => (
             <Button
               key={key}
@@ -112,6 +118,8 @@ export function PlanDetail({
           <PlanItems plan={plan} />
         ) : tab === 'sessions' ? (
           <CompletedSessions plan={plan} />
+        ) : tab === 'planned' ? (
+          <PendingSessionsPanel planId={plan.id} />
         ) : (
           <PlanHistory id={plan.id} />
         )}

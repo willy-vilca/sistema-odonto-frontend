@@ -11,6 +11,7 @@ import { formatLocalDate, dateLocale } from '../../../shared/data/dateFormat'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { AppointmentBadge } from './AppointmentList'
 import { AvailabilityPicker } from './AvailabilityPicker'
+import { AppointmentContacts } from './AppointmentContacts'
 import { changeAppointmentStatus, rescheduleAppointment } from '../services/appointmentService'
 import {
   localTime,
@@ -153,7 +154,15 @@ export function AppointmentDetail({
             · Zona horaria: {timeZone}
           </p>
           {current.notes && <p className="mt-3 text-sm whitespace-pre-wrap">{current.notes}</p>}
+          {current.planItemId && (
+            <p className="mt-3 rounded-lg bg-white/70 p-3 text-sm">
+              <strong>Sesión {current.treatmentSessionNumber} de tratamiento</strong>
+              <br />
+              {current.treatmentLabel}. Incluida en el precio del plan.
+            </p>
+          )}
         </div>
+        <AppointmentContacts appointmentId={current.id} patientId={current.patientId} />
         {auth.can('CLINICAL_WRITE') && !['CANCELLED', 'NO_SHOW'].includes(current.status) && (
           <Link
             className="inline-flex min-h-11 items-center rounded-xl bg-brand-700 px-4 text-sm font-semibold text-white"

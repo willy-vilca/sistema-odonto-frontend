@@ -43,6 +43,8 @@ function WhatsAppWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFor
     managed ? '/api/v1/whatsapp/agent/inbox' : '/api/v1/whatsapp/conversations',
     { direction: 'desc', ...(managed ? { mode, state: requestState } : {}) },
     'lastMessageAt',
+    0,
+    { search: params.get('phone') || '' },
   )
   useEffect(() => {
     if (selected || conversations.loading || !returnFocus.current) return

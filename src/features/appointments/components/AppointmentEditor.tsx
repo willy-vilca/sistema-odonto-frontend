@@ -8,6 +8,9 @@ import { FormField, TextAreaField } from '../../../shared/ui/FormField'
 import { useSaveForm } from '../../../shared/data/useSaveForm'
 import { createAppointment } from '../services/appointmentService'
 import { AvailabilityPicker } from './AvailabilityPicker'
+import type { ScheduledSession } from '../../treatments/model/treatments'
+import { request } from '../../../shared/api/http'
+import { useErrorNotification } from '../../../shared/notifications/useErrorNotification'
 export function AppointmentEditor({
   date,
   timeZone,
@@ -27,6 +30,12 @@ export function AppointmentEditor({
   const dentist = chosenDentist.length ? chosenDentist : sole.selection
   const [service, setService] = useState<PickedEntity[]>([])
   const [administrative, setAdministrative] = useState(false)
+  const [kind, setKind] = useState('catalog'),
+    [planSelection, setPlanSelection] = useState<PickedEntity[]>([])
+  const [planned, setPlanned] = useState<ScheduledSession>(),
+    [loadingPlan, setLoadingPlan] = useState(false)
+  const [price, setPrice] = useState(''),
+    setError = useErrorNotification()
   const [reason, setReason] = useState('')
   const [duration, setDuration] = useState(30)
   const [start, setStart] = useState(date + 'T09:00')
@@ -37,7 +46,7 @@ export function AppointmentEditor({
     setRequestKey(crypto.randomUUID())
   }
   return (
-    <Modal title="Nueva cita" onClose={onClose} busy={form.busy}>
+    <Modal title="Nueva cita" onClose={onClose} busy={form.busy || loadingPlan}>
       <form
         className="space-y-5"
         onSubmit={(e) => {
@@ -47,9 +56,29 @@ export function AppointmentEditor({
               createAppointment({
                 patientId: patient[0]?.id ?? '',
                 dentistId: dentist[0]?.id ?? '',
-                serviceId: administrative ? null : (service[0]?.id ?? null),
-                reason,
-                durationMinutes: administrative ? duration : null,
+                serviceId:
+                  administrative || kind === 'custom'
+                    ? null
+                    : kind === 'plan'
+                      ? (planned?.serviceId ?? null)
+                      : (service[0]?.id ?? null),
+                reason:
+                  !administrative && kind === 'plan'
+                    ? (planned?.description.slice(0, 160) ?? '')
+                    : reason,
+                durationMinutes:
+                  administrative || kind === 'custom'
+                    ? duration
+                    : kind === 'plan'
+                      ? (planned?.durationMinutes ?? 30)
+                      : null,
+                administrative,
+                planItemId: kind === 'plan' && !administrative ? (planned?.itemId ?? null) : null,
+                scheduledSessionId:
+                  kind === 'plan' && !administrative ? (planned?.id ?? null) : null,
+                scheduledSessionVersion:
+                  kind === 'plan' && !administrative ? (planned?.version ?? null) : null,
+                agreedPrice: kind === 'custom' && !administrative && price ? price : null,
                 localStart: start,
                 notes,
                 requestKey,
@@ -67,13 +96,15 @@ export function AppointmentEditor({
             {sole.error}
           </p>
         )}
-        <fieldset disabled={form.busy} className="space-y-5">
+        <fieldset disabled={form.busy || loadingPlan} className="space-y-5">
           <PatientSelection
             required
             selected={patient}
             disabled={form.busy}
             onChange={(items) => {
               setPatient(items)
+              setPlanSelection([])
+              setPlanned(undefined)
               changed()
             }}
           />
@@ -96,6 +127,8 @@ export function AppointmentEditor({
               onChange={(d) => {
                 setDentist(d)
                 setService([])
+                setPlanSelection([])
+                setPlanned(undefined)
                 changed()
               }}
               disabled={form.busy}
@@ -112,6 +145,27 @@ export function AppointmentEditor({
             />
             Cita por motivo administrativo
           </label>
+          {!administrative && (
+            <label className="field-label">
+              Tipo de servicio
+              <select
+                aria-label="Tipo de servicio"
+                className="field"
+                value={kind}
+                onChange={(e) => {
+                  setKind(e.target.value)
+                  setService([])
+                  setPlanned(undefined)
+                  setPlanSelection([])
+                  changed()
+                }}
+              >
+                <option value="catalog">Servicio del catálogo</option>
+                <option value="custom">Servicio propio (sin catálogo)</option>
+                <option value="plan">Sesión de un tratamiento activo</option>
+              </select>
+            </label>
+          )}
           {administrative ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -136,6 +190,94 @@ export function AppointmentEditor({
                   changed()
                 }}
               />
+            </div>
+          ) : kind === 'custom' ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <FormField
+                label="Descripción del servicio propio"
+                required
+                maxLength={160}
+                value={reason}
+                onChange={(e) => {
+                  setReason(e.target.value)
+                  changed()
+                }}
+              />
+              <FormField
+                label="Duración del servicio propio (minutos)"
+                type="number"
+                required
+                min={1}
+                max={1440}
+                value={duration}
+                onChange={(e) => {
+                  setDuration(Number(e.target.value))
+                  changed()
+                }}
+              />
+              <FormField
+                label="Precio acordado (opcional)"
+                type="number"
+                min="0"
+                max="99999999.99"
+                step="0.01"
+                value={price}
+                onChange={(e) => {
+                  setPrice(e.target.value)
+                  changed()
+                }}
+              />
+            </div>
+          ) : kind === 'plan' ? (
+            <div className="space-y-3">
+              {patient[0] && dentist[0] ? (
+                <EntityPicker
+                  key={patient[0].id + '-' + dentist[0].id}
+                  label="Sesión del tratamiento"
+                  required
+                  source={{
+                    endpoint: '/api/v1/treatment-sessions',
+                    labelKey: 'label',
+                    filters: {
+                      patientId: patient[0].id,
+                      dentistId: dentist[0].id,
+                      status: 'PENDING',
+                    },
+                  }}
+                  selected={planSelection}
+                  onChange={(rows) => {
+                    setPlanSelection(rows)
+                    setPlanned(undefined)
+                    changed()
+                    if (rows[0]) {
+                      setLoadingPlan(true)
+                      void request<ScheduledSession>('/api/v1/treatment-sessions/' + rows[0].id)
+                        .then((data) => {
+                          setPlanned(data)
+                          if (data.plannedOn) setStart(data.plannedOn + 'T09:00')
+                        })
+                        .catch((error) =>
+                          setError(
+                            error instanceof Error
+                              ? error.message
+                              : 'No se pudo consultar la sesión.',
+                          ),
+                        )
+                        .finally(() => setLoadingPlan(false))
+                    }
+                  }}
+                />
+              ) : (
+                <p className="text-sm text-muted">
+                  Selecciona el paciente y profesional para ver sus sesiones pendientes.
+                </p>
+              )}
+              {planned && (
+                <p className="rounded-xl bg-amber-50 p-3 text-sm">
+                  {planned.planTitle} · Sesión {planned.sessionNumber} de {planned.totalSessions} ·{' '}
+                  {planned.durationMinutes} minutos. Ya incluida en el precio del plan.
+                </p>
+              )}
             </div>
           ) : dentist.length > 0 ? (
             <EntityPicker
@@ -171,12 +313,19 @@ export function AppointmentEditor({
             Horario del consultorio: {timeZone}. El fin se calcula con la duración del servicio.
           </p>
           {dentist.length > 0 &&
-            ((administrative && duration > 0) || service.length > 0) &&
+            ((administrative && duration > 0) ||
+              (kind === 'custom' && duration > 0) ||
+              (kind === 'plan' && !!planned) ||
+              service.length > 0) &&
             start && (
               <AvailabilityPicker
                 dentistId={dentist[0].id}
-                serviceId={administrative ? null : service[0].id}
-                duration={duration}
+                serviceId={administrative || kind !== 'catalog' ? null : (service[0]?.id ?? null)}
+                duration={
+                  !administrative && kind === 'plan'
+                    ? (planned?.durationMinutes ?? duration)
+                    : duration
+                }
                 date={start.slice(0, 10)}
                 onSelect={(local) => {
                   setStart(local.slice(0, 16))
@@ -203,7 +352,11 @@ export function AppointmentEditor({
               form.busy ||
               !patient.length ||
               !dentist.length ||
-              (!administrative && !service.length)
+              loadingPlan ||
+              (!administrative &&
+                ((kind === 'catalog' && !service.length) ||
+                  (kind === 'plan' && !planned) ||
+                  (kind === 'custom' && !reason.trim())))
             }
           >
             {form.busy ? 'Reservando…' : 'Reservar cita'}

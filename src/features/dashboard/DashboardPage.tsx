@@ -24,6 +24,7 @@ import type { Dashboard } from './model/dashboard'
 import { MetricCard } from './components/MetricCard'
 import { DailyAppointments } from './components/DailyAppointments'
 import { FinancialOverview } from './components/FinancialOverview'
+import { PendingSessionsPanel } from '../treatments/components/PendingSessionsPanel'
 
 export function DashboardPage({ state, reload }: { state: InstallationState; reload: () => void }) {
   return state.status === 'ready' ? (
@@ -248,6 +249,15 @@ function DashboardWorkspace({ timeZone, dateFormat }: { timeZone: string; dateFo
             <FinancialOverview data={data.data} dateFormat={dateFormat} />
           )}
         </>
+      )}
+      {auth.can('APPOINTMENTS_READ') && (
+        <PendingSessionsPanel
+          dashboard
+          dentistId={dentist[0]?.id}
+          timeZone={timeZone}
+          dateFormat={dateFormat}
+          revision={revision}
+        />
       )}
       {data.data && (
         <p className="text-xs text-muted">

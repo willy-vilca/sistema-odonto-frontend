@@ -17,6 +17,12 @@ export interface Appointment {
   origin: string
   notes: string
   version: number
+  planItemId: string | null
+  scheduledSessionId: string | null
+  agreedPrice: number | null
+  administrative: boolean
+  treatmentLabel: string | null
+  treatmentSessionNumber: number | null
 }
 export interface AppointmentDraft {
   patientId: string
@@ -27,12 +33,18 @@ export interface AppointmentDraft {
   localStart: string
   notes: string
   requestKey: string
+  administrative?: boolean
+  planItemId?: string | null
+  scheduledSessionId?: string | null
+  scheduledSessionVersion?: number | null
+  agreedPrice?: string | null
 }
 export interface CalendarResponse {
   items: Appointment[]
   timeZone: string
   from: string
   to: string
+  pendingSessions: import('../../treatments/model/treatments').ScheduledSession[]
 }
 export interface Slot {
   startsAt: string

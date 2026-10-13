@@ -6,7 +6,7 @@ export const getPlanItems = (id: string) =>
   request<PageData<PlanItem>>('/api/v1/plans/items?planId=' + id + '&size=100&sort=position')
 export const getPlanItem = (id: string) => request<PlanItem>('/api/v1/plans/items/' + id)
 export const getServicePrice = (id: string) =>
-  request<{ price: number; name: string }>('/api/v1/services/' + id)
+  request<{ price: number; name: string; durationMinutes: number }>('/api/v1/services/' + id)
 export const savePlan = (id: string | undefined, body: unknown) =>
   request<Plan>('/api/v1/plans' + (id ? '/' + id : ''), {
     method: id ? 'PUT' : 'POST',
